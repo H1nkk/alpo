@@ -9,18 +9,18 @@ public:
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
 	virtual ~Table() = 0 {};
-
 };
 
 class LinearArrTable: Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
 	virtual ~LinearArrTable() {};
-
 };
 
 class LinearListTable : Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
@@ -28,6 +28,7 @@ class LinearListTable : Table {
 };
 
 class OrderedTable : Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
@@ -35,6 +36,7 @@ class OrderedTable : Table {
 };
 
 class TreeTable : Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
@@ -42,6 +44,7 @@ class TreeTable : Table {
 };
 
 class OpenAdressHashTable : Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
@@ -49,6 +52,7 @@ class OpenAdressHashTable : Table {
 };
 
 class SeparateChainingHashTable : Table {
+public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	virtual void addPolynomial(const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
