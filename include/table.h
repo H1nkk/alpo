@@ -72,4 +72,5 @@ public:
 	polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	void addPolynomial(const polynomial& pol);
 	void delPolynomial(const std::string& polName);
+	~Aggregator();
 };
