@@ -10,8 +10,8 @@ set(target ${MP2_APP})
 #find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 
 #file(GLOB ui "${CMAKE_CURRENT_SOURcE_DIR}/ui/*.ui")
-file(GLOB hdrs "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*" "${MP2_INCLUDE}/*.h*")
-file(GLOB srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE hdrs "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*" "${MP2_INCLUDE}/*.h*")
+file(GLOB_RECURSE srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(${target} ${hdrs} ${srcs})
 target_link_libraries(${target} PUBLIC ${MP2_LIBRARY}) #Qt5::Core Qt5::Gui Qt5::Widgets)
