@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "stack.h"
 
 TEST(StackTest, can_create_with_default_constructor)
