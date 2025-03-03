@@ -6,9 +6,9 @@
 class Table {
 
 public:
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
-	virtual void delPolynomial(const std::string& polName) override;
+	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
+	virtual void addPolynomial(const polynomial& pol);
+	virtual void delPolynomial(const std::string& polName);
 	virtual ~Table() = 0 {};
 };
 
