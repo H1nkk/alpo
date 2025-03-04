@@ -7,7 +7,7 @@ class Table {
 
 public:
 	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol);
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol);
 	virtual void delPolynomial(const std::string& polName);
 	virtual ~Table() = 0 {};
 };
@@ -15,7 +15,7 @@ public:
 class LinearArrTable: Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~LinearArrTable() {};
 };
@@ -23,7 +23,7 @@ public:
 class LinearListTable : Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~LinearListTable() {};
 };
@@ -31,7 +31,7 @@ public:
 class OrderedTable : Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~OrderedTable() {};
 };
@@ -39,7 +39,7 @@ public:
 class TreeTable : Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~TreeTable() {};
 };
@@ -47,7 +47,7 @@ public:
 class OpenAdressHashTable : Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~OpenAdressHashTable() {};
 };
@@ -55,7 +55,7 @@ public:
 class SeparateChainingHashTable : Table {
 public:
 	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const polynomial& pol) override;
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual ~SeparateChainingHashTable() {};
 };
@@ -70,7 +70,7 @@ public:
 													//							 tables[4] - opha (short for open adress hash table - contains OpenAdressHashTable object)
 													//							 tables[5] - seha (short for separate chaining hash table - contains SeparateChainingHashTable object)
 	polynomial findPolynomial(const std::string& polName); // find polynomial named polName
-	void addPolynomial(const polynomial& pol);
+	void addPolynomial(const std::string& polName, const polynomial& pol);
 	void delPolynomial(const std::string& polName);
 	~Aggregator();
 };
