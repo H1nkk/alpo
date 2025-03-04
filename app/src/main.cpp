@@ -1,15 +1,18 @@
 #include <iostream>
 #include <qapplication>
 #include <qpushbutton>
+#include "ui_main_window.h"
 #include "test.h"
 
 int main(int argc, char* argv[]) {
 
     QApplication app(argc, argv);
 
-    QPushButton button("Click");
-    button.resize(200, 500);
-    button.show();
+    QMainWindow window;
 
+    Ui::MainWindow ui;
+    ui.setupUi(&window);
+
+    window.show();
     return app.exec();
 }

@@ -4,8 +4,6 @@ set(target ${MP2_APP})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
-# Create code from a list of Qt designer ui files
-set(CMAKE_AUTOUIC ON)
 
 set(ZLIB_USE_STATIC_LIBS "ON")
 set(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../libs/zlib")
@@ -18,11 +16,14 @@ set(QT_PLUGIN_PATH "${QT_PATH}/plugins")  # Путь к плагинам
 set(Qt6_DIR "${QT_PATH}/lib/cmake/Qt6")
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
-file(GLOB_RECURSE ui "${CMAKE_CURRENT_SOURcE_DIR}/ui/*.ui")
+
+file(GLOB_RECURSE ui "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui")
 file(GLOB_RECURSE hdrs "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*" "${MP2_INCLUDE}/*.h*")
 file(GLOB_RECURSE srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_executable(${target} ${hdrs} ${srcs})
+qt6_wrap_ui(GENERATED_UI_HEADERS ${ui})
+
+qt_add_executable(${target} ${hdrs} ${srcs} ${GENERATED_UI_HEADERS})
 target_link_libraries(${target} PUBLIC ${MP2_LIBRARY} Qt6::Core Qt6::Gui Qt6::Widgets ${ZLIB_LIBRARIES})
 
 
