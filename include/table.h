@@ -6,9 +6,9 @@
 class Table {
 
 public:
-	virtual polynomial findPolynomial(const std::string& polName); // find polynomial named polName
-	virtual void addPolynomial(const std::string& polName, const polynomial& pol);
-	virtual void delPolynomial(const std::string& polName);
+	virtual polynomial findPolynomial(const std::string& polName) = 0; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) = 0;
+	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual ~Table() = 0 {};
 };
 
