@@ -11,88 +11,90 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) = 0;
 	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual unsigned int size() = 0;
-	virtual bool empty() = 0; //		TODO								ƒŒ¡¿¬»“‹ ¬≈«ƒ≈ ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
+	virtual bool empty() = 0;
 
-
-	virtual ~Table() = 0 {};
+	virtual ~Table() = 0; // removed {}, may be its bad
 };
 
 class LinearArrTable: public Table {
 
 public:
-	LinearArrTable() {};
+	LinearArrTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override { return polynomial{}; }; // find polynomial named polName
-	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override {};
-	virtual void delPolynomial(const std::string& polName) override {};
-	virtual unsigned int size() override { return 0; };
-	virtual bool empty() { return size() == 0; }; 
-
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty(); 
 
 	virtual ~LinearArrTable() {};
 };
 
 
+class LinearListTable : public Table {
+public:
+	LinearListTable();
 
-//class LinearListTable : public Table {
-//public:
-//	LinearListTable();
-//
-//	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-//	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-//	virtual void delPolynomial(const std::string& polName) override;
-//	virtual unsigned int size() override;
-//
-//	virtual ~LinearListTable() {};
-//};
-//
-//class OrderedTable : public Table {
-//public:
-//	OrderedTable();
-//
-//	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-//	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-//	virtual void delPolynomial(const std::string& polName) override;
-//	virtual unsigned int size() override;
-//
-//	virtual ~OrderedTable() {};
-//};
-//
-//class TreeTable : public Table {
-//public:
-//	TreeTable();
-//
-//	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-//	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-//	virtual void delPolynomial(const std::string& polName) override;
-//	virtual unsigned int size() override;
-//
-//	virtual ~TreeTable() {};
-//};
-//
-//class OpenAdressHashTable : public Table {
-//public:
-//	OpenAdressHashTable();
-//
-//	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-//	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-//	virtual void delPolynomial(const std::string& polName) override;
-//	virtual unsigned int size() override;
-//
-//	virtual ~OpenAdressHashTable() {};
-//};
-//
-//class SeparateChainingHashTable : public Table {
-//public:
-//	SeparateChainingHashTable();
-//
-//	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-//	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-//	virtual void delPolynomial(const std::string& polName) override;
-//	virtual unsigned int size() override;
-//
-//	virtual ~SeparateChainingHashTable() {};
-//};
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty() override;
+
+	virtual ~LinearListTable() {};
+};
+
+class OrderedTable : public Table {
+public:
+	OrderedTable();
+
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty() override;
+
+	virtual ~OrderedTable() {};
+};
+
+class TreeTable : public Table {
+public:
+	TreeTable();
+
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty() override;
+
+	virtual ~TreeTable() {};
+};
+
+class OpenAdressHashTable : public Table {
+public:
+	OpenAdressHashTable();
+
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty() override;
+
+	virtual ~OpenAdressHashTable() {};
+};
+
+class SeparateChainingHashTable : public Table {
+public:
+	SeparateChainingHashTable();
+
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual void delPolynomial(const std::string& polName) override;
+	virtual unsigned int size() override;
+	virtual bool empty() override;
+
+	virtual ~SeparateChainingHashTable() {};
+};
 
 class Aggregator {
 	std::vector<Table*> tables;
@@ -101,11 +103,11 @@ public:
 	Aggregator() {
 		tables.resize(6, nullptr);
 		tables[0] = new LinearArrTable();
-		//tables[1] = new LinearListTable();
-		//tables[2] = new OrderedTable();
-		//tables[3] = new TreeTable();
-		//tables[4] = new OpenAdressHashTable();
-		//tables[5] = new SeparateChainingHashTable();
+		tables[1] = new LinearListTable();
+		tables[2] = new OrderedTable();
+		tables[3] = new TreeTable();
+		tables[4] = new OpenAdressHashTable();
+		tables[5] = new SeparateChainingHashTable();
 		currentTable = 0;
 	}
 

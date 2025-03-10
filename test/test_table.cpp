@@ -7,7 +7,7 @@ protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<LinearArrTable/*, LinearListTable, OrderedTable, TreeTable, OpenAdressHashTable, SeparateChainingHashTable*/>;
+using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, TreeTable, OpenAdressHashTable, SeparateChainingHashTable>;
 TYPED_TEST_SUITE(TableTest, TableTypes);
 
 
