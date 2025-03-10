@@ -11,6 +11,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) = 0;
 	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual unsigned int size() = 0;
+	virtual bool empty() = 0;
 
 	virtual ~Table() = 0 {};
 };
@@ -18,15 +19,17 @@ public:
 class LinearArrTable: public Table {
 
 public:
-	LinearArrTable();
+	LinearArrTable() {};
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
-	virtual void delPolynomial(const std::string& polName) override;
-	virtual unsigned int size() override;
+	virtual polynomial findPolynomial(const std::string& polName) override { return polynomial{}; }; // find polynomial named polName
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override {};
+	virtual void delPolynomial(const std::string& polName) override {};
+	virtual unsigned int size() override { return 0; };
+	virtual bool empty() { return size() == 0; }; 
 
 	virtual ~LinearArrTable() {};
 };
+
 
 class LinearListTable : public Table {
 public:
@@ -36,6 +39,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
+	virtual bool empty() override;
 
 	virtual ~LinearListTable() {};
 };
@@ -48,6 +52,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
+	virtual bool empty() override;
 
 	virtual ~OrderedTable() {};
 };
@@ -60,6 +65,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
+	virtual bool empty() override;
 
 	virtual ~TreeTable() {};
 };
@@ -72,6 +78,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
+	virtual bool empty() override;
 
 	virtual ~OpenAdressHashTable() {};
 };
@@ -84,6 +91,7 @@ public:
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
+	virtual bool empty() override;
 
 	virtual ~SeparateChainingHashTable() {};
 };
@@ -95,11 +103,11 @@ public:
 	Aggregator() {
 		tables.resize(6, nullptr);
 		tables[0] = new LinearArrTable();
-		tables[1] = new LinearListTable();
-		tables[2] = new OrderedTable();
-		tables[3] = new TreeTable();
-		tables[4] = new OpenAdressHashTable();
-		tables[5] = new SeparateChainingHashTable();
+		//tables[1] = new LinearListTable();
+		//tables[2] = new OrderedTable();
+		//tables[3] = new TreeTable();
+		//tables[4] = new OpenAdressHashTable();
+		//tables[5] = new SeparateChainingHashTable();
 		currentTable = 0;
 	}
 
@@ -112,6 +120,8 @@ public:
 	polynomial findPolynomial(const std::string& polName); // find polynomial named polName
 	void addPolynomial(const std::string& polName, const polynomial& pol);
 	void delPolynomial(const std::string& polName);
+	unsigned int size();
 
 	~Aggregator();
 };
+
