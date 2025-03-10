@@ -1,51 +1,59 @@
 set(target ${MP2_APP})
 
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed
-set(CMAKE_AUTOMOC ON)
+option(BUILD_APP_MODULE "Include app_alpo in project? (YES/NO)" YES)
 
-set(ZLIB_USE_STATIC_LIBS "ON")
-set(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../libs/zlib")
-find_package(ZLIB REQUIRED)
+if (BUILD_APP_MODULE)
 
-# Указать путь к папке с DLL
-set(QT_PATH "C:/Qt/6.8.2/msvc2022_64")
-set(QT_DLL_PATH "${QT_PATH}/bin")  # Путь к DLL
-set(QT_PLUGIN_PATH "${QT_PATH}/plugins")  # Путь к плагинам
-set(Qt6_DIR "${QT_PATH}/lib/cmake/Qt6")
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
+    # Find includes in corresponding build directories
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+    # Instruct CMake to run moc automatically when needed
+    set(CMAKE_AUTOMOC ON)
 
+    set(ZLIB_USE_STATIC_LIBS "ON")
+    set(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../libs/zlib")
+    find_package(ZLIB REQUIRED)
 
-file(GLOB_RECURSE ui "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui")
-file(GLOB_RECURSE hdrs "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*" "${MP2_INCLUDE}/*.h*")
-file(GLOB_RECURSE srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-
-qt6_wrap_ui(GENERATED_UI_HEADERS ${ui})
-
-qt_add_executable(${target} ${hdrs} ${srcs} ${GENERATED_UI_HEADERS})
-target_link_libraries(${target} PUBLIC ${MP2_LIBRARY} Qt6::Core Qt6::Gui Qt6::Widgets ${ZLIB_LIBRARIES})
+    # Указать путь к папке с DLL
+    if (NOT DEFINED QT_PATH)
+        set(QT_PATH "C:/Qt/6.8.2/msvc2022_64")
+    endif()
+    set(QT_DLL_PATH "${QT_PATH}/bin")  # Путь к DLL
+    set(QT_PLUGIN_PATH "${QT_PATH}/plugins")  # Путь к плагинам
+    set(Qt6_DIR "${QT_PATH}/lib/cmake/Qt6")
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
 
-# Список нужных DLL
-set(QT_DLLS
-    "Qt6Cored.dll"
-    "Qt6Guid.dll"
-    "Qt6Widgetsd.dll"
-)
+    file(GLOB_RECURSE ui "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui")
+    file(GLOB_RECURSE hdrs "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*" "${MP2_INCLUDE}/*.h*")
+    file(GLOB_RECURSE srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-# Копирование DLL в папку с exe
-foreach(DLL ${QT_DLLS})
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${QT_DLL_PATH}/${DLL}" 
-        "$<TARGET_FILE_DIR:${target}>"
+    qt6_wrap_ui(GENERATED_UI_HEADERS ${ui})
+
+    qt_add_executable(${target} ${hdrs} ${srcs} ${GENERATED_UI_HEADERS})
+    target_link_libraries(${target} PUBLIC ${MP2_LIBRARY} Qt6::Core Qt6::Gui Qt6::Widgets ${ZLIB_LIBRARIES})
+
+
+    # Список нужных DLL
+    set(QT_DLLS
+        "Qt6Cored.dll"
+        "Qt6Guid.dll"
+        "Qt6Widgetsd.dll"
     )
-endforeach()
 
-# Копирование всей папки с плагинами
-add_custom_command(TARGET ${target} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${QT_PLUGIN_PATH}/platforms"
-    "$<TARGET_FILE_DIR:${target}>/platforms"
-)
+    # Копирование DLL в папку с exe
+    foreach(DLL ${QT_DLLS})
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${QT_DLL_PATH}/${DLL}" 
+            "$<TARGET_FILE_DIR:${target}>"
+        )
+    endforeach()
+
+    # Копирование всей папки с плагинами
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${QT_PLUGIN_PATH}/platforms"
+        "$<TARGET_FILE_DIR:${target}>/platforms"
+    )
+
+endif()
