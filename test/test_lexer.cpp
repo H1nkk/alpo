@@ -26,7 +26,7 @@ TEST(LexerTest, can_parse_identifiers)
     ADD_FAILURE();
 }
 
-TEST(LexerTest, can_perform_lexical_analysis)
+TEST(LexerTest, can_parse_expressions_stress_test)
 {
     ADD_FAILURE();
 }
