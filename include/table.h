@@ -2,6 +2,7 @@
 #include "polynomial.h"
 #include <string>
 #include <vector>
+constexpr int sz_ar = 30;
 
 class Table {
 
@@ -17,12 +18,20 @@ public:
 };
 
 class LinearArrTable: public Table {
+	struct Pol
+	{
+		std::string key;
+		polynomial value;
+	};
+	Pol* table;
+	size_t size_array;
+	size_t current_ind_array = 0;
 
 public:
-	LinearArrTable();
+	LinearArrTable(size_t size = sz_ar); // creates array of polynomials of user size, or size of sz_arr
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
-	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
+	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName | return polynomial found by key, or zero polynomial
+	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;  
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty(); 
