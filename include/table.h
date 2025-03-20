@@ -4,11 +4,8 @@
 #include <vector>
 #include <optional>
 
-constexpr int defaultArraySize = 30;
-
 class Table 
 {
-
 public:
 
 	virtual std::optional<polynomial> findPolynomial(const std::string& polName) = 0; // find polynomial named polName
@@ -52,6 +49,7 @@ class LinearListTable : public Table
 	};
 	TNode* pFirst;
 	size_t tableSize;
+
 public:
 	LinearListTable();
 
@@ -129,6 +127,7 @@ class Aggregator
 {
 	std::vector<Table*> tables;
 	int currentTable;
+
 public:
 	Aggregator() {
 		tables.resize(6, nullptr);
