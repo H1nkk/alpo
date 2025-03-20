@@ -2,19 +2,21 @@
 #include "polynomial.h"
 #include <string>
 #include <vector>
+#include <optional>
+
 constexpr int sz_ar = 30;
 
 class Table {
 
 public:
 
-	virtual polynomial findPolynomial(const std::string& polName) = 0; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) = 0; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) = 0;
 	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual unsigned int size() = 0;
 	virtual bool empty() = 0;
 
-	virtual ~Table() = 0; // removed {}, may be its bad
+	virtual ~Table() = 0 {}; // removed {}, may be its bad
 };
 
 class LinearArrTable: public Table {
@@ -23,14 +25,12 @@ class LinearArrTable: public Table {
 		std::string key;
 		polynomial value;
 	};
-	Pol* table;
-	size_t size_array;
-	size_t current_ind_array = 0;
+	std::vector<Pol> table;
 
 public:
 	LinearArrTable(size_t size = sz_ar); // creates array of polynomials of user size, or size of sz_arr
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName | return polynomial found by key, or zero polynomial
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName | return polynomial found by key, or zero polynomial
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;  
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -44,7 +44,7 @@ class LinearListTable : public Table {
 public:
 	LinearListTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -57,7 +57,7 @@ class OrderedTable : public Table {
 public:
 	OrderedTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -70,7 +70,7 @@ class TreeTable : public Table {
 public:
 	TreeTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -83,7 +83,7 @@ class OpenAdressHashTable : public Table {
 public:
 	OpenAdressHashTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -96,7 +96,7 @@ class SeparateChainingHashTable : public Table {
 public:
 	SeparateChainingHashTable();
 
-	virtual polynomial findPolynomial(const std::string& polName) override; // find polynomial named polName
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -126,7 +126,7 @@ public:
 													 //							  tables[3] - tree (short for tree table - contains TreeTable object)
 													 //							  tables[4] - opha (short for open adress hash table - contains OpenAdressHashTable object)
 													 //							  tables[5] - seha (short for separate chaining hash table - contains SeparateChainingHashTable object)
-	polynomial findPolynomial(const std::string& polName); // find polynomial named polName
+	std::optional<polynomial> findPolynomial(const std::string& polName); // find polynomial named polName
 	void addPolynomial(const std::string& polName, const polynomial& pol);
 	void delPolynomial(const std::string& polName);
 	unsigned int size();
