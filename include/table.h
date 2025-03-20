@@ -93,10 +93,10 @@ public:
 };
 
 
-class OpenAdressHashTable : public Table 
+class OpenAddressHashTable : public Table 
 {
 public:
-	OpenAdressHashTable();
+	OpenAddressHashTable();
 
 	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;
@@ -104,7 +104,7 @@ public:
 	virtual unsigned int size() override;
 	virtual bool empty() override;
 
-	virtual ~OpenAdressHashTable() {};
+	virtual ~OpenAddressHashTable() {};
 };
 
 
@@ -135,7 +135,7 @@ public:
 		tables[1] = new LinearListTable();
 		tables[2] = new OrderedTable();
 		tables[3] = new TreeTable();
-		tables[4] = new OpenAdressHashTable();
+		tables[4] = new OpenAddressHashTable();
 		tables[5] = new SeparateChainingHashTable();
 		currentTable = 0;
 	}
@@ -144,7 +144,7 @@ public:
 													 //			 				  tables[1] - lili (short for linear list table - contains LinearListTable object)
 													 //		 					  tables[2] - ordr (short for ordered array table - contains OrderedTable object)
 													 //							  tables[3] - tree (short for tree table - contains TreeTable object)
-													 //							  tables[4] - opha (short for open adress hash table - contains OpenAdressHashTable object)
+													 //							  tables[4] - opha (short for open Address hash table - contains OpenAddressHashTable object)
 													 //							  tables[5] - seha (short for separate chaining hash table - contains SeparateChainingHashTable object)
 	std::optional<polynomial> findPolynomial(const std::string& polName); // find polynomial named polName
 	void addPolynomial(const std::string& polName, const polynomial& pol);
