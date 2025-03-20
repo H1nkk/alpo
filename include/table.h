@@ -4,9 +4,10 @@
 #include <vector>
 #include <optional>
 
-constexpr int sz_ar = 30;
+constexpr int defaultArraySize = 30;
 
-class Table {
+class Table 
+{
 
 public:
 
@@ -19,7 +20,8 @@ public:
 	virtual ~Table() = 0 {}; // removed {}, may be its bad
 };
 
-class LinearArrTable: public Table {
+class LinearArrTable: public Table 
+{
 	struct Pol
 	{
 		std::string key;
@@ -28,9 +30,9 @@ class LinearArrTable: public Table {
 	std::vector<Pol> table;
 
 public:
-	LinearArrTable(size_t size = sz_ar); // creates array of polynomials of user size, or size of sz_arr
+	LinearArrTable();
 
-	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName | return polynomial found by key, or zero polynomial
+	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
 	virtual void addPolynomial(const std::string& polName, const polynomial& pol) override;  
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
@@ -40,7 +42,16 @@ public:
 };
 
 
-class LinearListTable : public Table {
+class LinearListTable : public Table 
+{
+	struct TNode
+	{
+		std::string key;
+		polynomial value;
+		TNode* pNext;
+	};
+	TNode* pFirst;
+	size_t tableSize;
 public:
 	LinearListTable();
 
@@ -50,10 +61,12 @@ public:
 	virtual unsigned int size() override;
 	virtual bool empty() override;
 
-	virtual ~LinearListTable() {};
+	virtual ~LinearListTable();
 };
 
-class OrderedTable : public Table {
+
+class OrderedTable : public Table 
+{
 public:
 	OrderedTable();
 
@@ -66,7 +79,9 @@ public:
 	virtual ~OrderedTable() {};
 };
 
-class TreeTable : public Table {
+
+class TreeTable : public Table 
+{
 public:
 	TreeTable();
 
@@ -79,7 +94,9 @@ public:
 	virtual ~TreeTable() {};
 };
 
-class OpenAdressHashTable : public Table {
+
+class OpenAdressHashTable : public Table 
+{
 public:
 	OpenAdressHashTable();
 
@@ -92,7 +109,9 @@ public:
 	virtual ~OpenAdressHashTable() {};
 };
 
-class SeparateChainingHashTable : public Table {
+
+class SeparateChainingHashTable : public Table 
+{
 public:
 	SeparateChainingHashTable();
 
@@ -105,7 +124,9 @@ public:
 	virtual ~SeparateChainingHashTable() {};
 };
 
-class Aggregator {
+
+class Aggregator 
+{
 	std::vector<Table*> tables;
 	int currentTable;
 public:
