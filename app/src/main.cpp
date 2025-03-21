@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include "ui_main_window.h"
+#include "ui_info_widget.h"
 #include "test.h"
 #include "table.h"
 
@@ -190,9 +191,12 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     QMainWindow window;
+    QMainWindow infoWindow;
 
     Ui::MainWindow ui;
+    Ui::infoWidget infoUi;
     ui.setupUi(&window);
+    infoUi.setupUi(&infoWindow);
 
     QLineEdit* inputField = ui.inputFieldObject;
     QTableWidget* tableWidget = ui.tableWidget;
@@ -200,11 +204,12 @@ int main(int argc, char* argv[])
     QPushButton* clearButton = ui.clearButton;
     QTextEdit* outputField = ui.outputField;
     QComboBox* comboBox = ui.comboBox;
+    QPushButton* helpButton = ui.helpButton;
     QString inputText;
 
     Aggregator* aggregator = new Aggregator();
 
-    tableWidget->setWindowTitle("Polynomials");
+    infoWindow.setWindowTitle("Help");
 
     QObject::connect(inputField, &QLineEdit::returnPressed, [&inputText, inputField, tableWidget, outputField]()
         {
@@ -262,7 +267,8 @@ int main(int argc, char* argv[])
             tableWidgetUpdate(tableWidget);
         });
 
-    QPushButton::connect(clearButton, &QPushButton::clicked, [tableWidget]() {
+    QPushButton::connect(clearButton, &QPushButton::clicked, [tableWidget]() 
+        {
         clearAction(tableWidget);
         });
 
@@ -270,6 +276,14 @@ int main(int argc, char* argv[])
         std::string s = text.toUtf8().constData();
         changeTable(aggregator, s);
         qDebug() << "Table changed to" << text;
+        });
+
+    QComboBox::connect(helpButton, &QPushButton::clicked, [&]()
+        {
+            if (infoWindow.isVisible())
+                infoWindow.hide();
+            else
+                infoWindow.show();
         });
 
     window.show();
