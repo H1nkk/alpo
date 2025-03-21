@@ -4,6 +4,7 @@
 #include <string>
 #include "ui_main_window.h"
 #include "test.h"
+#include "table.h"
 
 // TODO test stuff, delete
 std::vector<std::string> v;

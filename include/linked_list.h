@@ -42,7 +42,7 @@ public:
 
         iterator operator++(int)
         {
-            Iterator temp = *this;
+            iterator temp = *this;
             ++(*this);
             return temp;
         }
