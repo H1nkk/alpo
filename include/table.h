@@ -129,18 +129,9 @@ class Aggregator
 	int currentTable;
 
 public:
-	Aggregator() {
-		tables.resize(6, nullptr);
-		tables[0] = new LinearArrTable();
-		tables[1] = new LinearListTable();
-		tables[2] = new OrderedTable();
-		tables[3] = new TreeTable();
-		tables[4] = new OpenAddressHashTable();
-		tables[5] = new SeparateChainingHashTable();
-		currentTable = 0;
-	}
+	Aggregator();
 
-	void selectTable(const std::string& tableName) ; // select table by its name: tables[0] - liar (short for linear array table - contains LinearArrTable object)
+	void selectTable(const std::string& tableName); // select table by its name: tables[0] - liar (short for linear array table - contains LinearArrTable object)
 													 //			 				  tables[1] - lili (short for linear list table - contains LinearListTable object)
 													 //		 					  tables[2] - ordr (short for ordered array table - contains OrderedTable object)
 													 //							  tables[3] - tree (short for tree table - contains TreeTable object)
