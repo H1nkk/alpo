@@ -5,10 +5,12 @@ namespace Lexer {
     enum class TokenType
     {
         NONE,
-        NUM, INT, 
-        ID, X, y, Z, w,
+        FLOAT, INT, 
+        ID, X, Y, Z, W,
         LPAR, RPAR,
         PLUS, MINUS, MULT, CARET, ASSIGN,
+        CALC, DERX, DERY, DERZ, DERW,
+        INTX, INTY, INTZ, INTW,
         INVALID,
         ENDOFFILE
     };
@@ -32,4 +34,6 @@ namespace Lexer {
         std::string mValue;
         size_t mStart, mEnd;
     };
+
+    bool operator==(const Token& l, const Token& r);
 }
