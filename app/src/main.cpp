@@ -10,7 +10,7 @@
 // TODO test stuff, delete
 std::vector<std::string> v;
 int zavtraCount = 0;
-void foo(QTextEdit* outputField) { outputField->setHtml(QString::fromStdString(std::string("To a future of grief #") + std::to_string(++zavtraCount))); }
+void foo(QTextEdit* outputField) { outputField->setHtml(QString::fromStdString(std::string("To a future of grief #") + std::toString(++zavtraCount))); }
 // end of test stuff
 
 std::vector<std::string> polNames;
@@ -54,8 +54,8 @@ std::vector<std::string> tokenize(const std::string& originalExpression) {
             {
                 throw "Mismatch of opening and closing parenthesis";
             }
-            std::string token = expression.substr(funcStart, funcEnd - funcStart + 1);
-            tokens.push_back(token);
+            std::string Token = expression.substr(funcStart, funcEnd - funcStart + 1);
+            tokens.push_back(Token);
             end = funcEnd + 1;
             continue;
         }
@@ -113,7 +113,7 @@ void inputHandle(std::string inp)
     for (auto x : tokens)
         qDebug() << x;
 
-    for (auto token : tokens) {
+    for (auto Token : tokens) {
     }
 
 

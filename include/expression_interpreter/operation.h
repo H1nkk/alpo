@@ -14,5 +14,5 @@ namespace intr {
     // Код операции/полином/идентификатор/число
     using op = std::variant<opcode, polynomial, std::string, double>;
 
-    std::string to_string(opcode opcode);
+    std::string toString(opcode opcode);
 }
