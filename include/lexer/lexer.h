@@ -2,14 +2,18 @@
 #include <string>
 #include "lexer_token.h"
 
-namespace lexer {
-    class lexer final
+namespace Lexer {
+    class Lexer final
     {
+    private:
+        std::string mText;
+        size_t mPos;
+        
     public:
         /// @param str Выражение для токенизации
-        lexer(const std::string& str);
+        Lexer(const std::string& str) : mText(str), mPos(0) {}
 
         /// @brief Получить следующий токен из строки
-        token NextToken();
+        Token NextToken();
     };
 }
