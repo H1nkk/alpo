@@ -1,0 +1,6 @@
+{ Lexer::TokenType::NONE, Lexer::TokenType::FLOAT },
+{ Lexer::TokenType::Y, Lexer::TokenType::W },
+{ Lexer::TokenType::Z, Lexer::TokenType::DERY },
+{ Lexer::TokenType::CALC, Lexer::TokenType::MINUS },
+{ Lexer::TokenType::DERW, Lexer::TokenType::INTY },
+{ Lexer::TokenType::INTZ, Lexer::TokenType::ASSIGN },
