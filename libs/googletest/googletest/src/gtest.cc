@@ -610,7 +610,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
     if (ignored.find(testcase.first) != ignored.end()) continue;
 
     std::string message =
-        "Type parameterized test suite " + testcase.first +
+        "type parameterized test suite " + testcase.first +
         " is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated "
         "via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run."
         "\n\n"

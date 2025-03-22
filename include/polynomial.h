@@ -34,14 +34,14 @@ private:
 
     linked_list<monomial> mMonomials;
 
-    static std::variant<monomial, syntax_error> parse_monomial(const std::string& str, size_t& offset);
-    static std::variant<polynomial, syntax_error> parse_polynomial(const std::string& str);
+    static std::variant<monomial, SyntaxError> parse_monomial(const std::string& str, size_t& offset);
+    static std::variant<polynomial, SyntaxError> parse_polynomial(const std::string& str);
 
     explicit polynomial(const std::string& strRepr) {}
 public:
     polynomial() {}
 
-    static std::variant<polynomial, syntax_error> from_string(const std::string& str)
+    static std::variant<polynomial, SyntaxError> from_string(const std::string& str)
     {
         return parse_polynomial(str);
     }

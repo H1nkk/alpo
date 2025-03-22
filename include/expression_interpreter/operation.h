@@ -5,14 +5,14 @@
 
 namespace intr {
     enum class opcode {
-        LOAD, SAVE, 
+        ASSIGN,
         ADD, SUBTRACT, MULT, POWER,
         CALC, DERX, DERY, DERZ, DERW,
         INTX, INTY, INTZ, INTW
     };
 
     // Код операции/полином/идентификатор/число
-    using op = std::variant<opcode, polynomial, std::string, double>;
+    using op = std::variant<opcode, polynomial, std::string, double, unsigned int>;
 
     std::string toString(opcode opcode);
 }

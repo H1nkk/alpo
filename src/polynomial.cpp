@@ -249,12 +249,12 @@ polynomial polynomial::derivative_z() const
     return res;
 }
 
-std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(const std::string& str, size_t& offset)
+std::variant<polynomial::monomial, SyntaxError> polynomial::parse_monomial(const std::string& str, size_t& offset)
 {
     std::string valid = "+-.1234567890wxyz";
     if (valid.find(str[offset]) == std::string::npos)
     {
-        return syntax_error{ offset, "Unexpected symbol" };
+        return SyntaxError{ offset, "Unexpected symbol" };
     }
 
     std::string coefficient;
@@ -272,7 +272,7 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
     {
         size_t coefl = 0;
         coefd = std::stod(coefficient, &coefl);
-        if (coefl != coefficient.size()) return syntax_error{ offset, "Invalid coefficient!" };
+        if (coefl != coefficient.size()) return SyntaxError{ offset, "Invalid coefficient!" };
     }
 
     uint8_t powers[4]{};
@@ -282,7 +282,7 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
         uint8_t& p = powers[str[offset] - 'w'];
         if (p != 0)
         {
-            return syntax_error{ offset,"Variables in monomes should be mentioned no more than once." };
+            return SyntaxError{ offset,"Variables in monomes should be mentioned no more than once." };
         }
 
         p = 1;
@@ -304,7 +304,7 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
         if (power.size())
         {
             int32_t poweri = std::stoi(power);
-            if (poweri > 255) return syntax_error{ offset, "Too big power! Maximum supported power is 255" };
+            if (poweri > 255) return SyntaxError{ offset, "Too big power! Maximum supported power is 255" };
             p = poweri;
         }
     }
@@ -312,7 +312,7 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
     return monomial(coefd, powers[0], powers[1], powers[2], powers[3]);
 }
 
-std::variant<polynomial, syntax_error> polynomial::parse_polynomial(const std::string& str)
+std::variant<polynomial, SyntaxError> polynomial::parse_polynomial(const std::string& str)
 {
     std::string nospaces;
     std::vector<size_t> originalIndices;
@@ -334,7 +334,7 @@ std::variant<polynomial, syntax_error> polynomial::parse_polynomial(const std::s
         auto res = parse_monomial(nospaces, offset);
         if (res.index())
         {
-            syntax_error err = std::get<syntax_error>(res);
+            SyntaxError err = std::get<SyntaxError>(res);
             err.pos = originalIndices[err.pos];
             return err;
         }
@@ -344,7 +344,7 @@ std::variant<polynomial, syntax_error> polynomial::parse_polynomial(const std::s
 
         if (monomials.count(m.degree()))
         {
-            return syntax_error{ originalIndices[offset], "A polynomial must contain no more than one monomial of each degree." };
+            return SyntaxError{ originalIndices[offset], "A polynomial must contain no more than one monomial of each degree." };
         }
 
         monomials[m.degree()] = m;

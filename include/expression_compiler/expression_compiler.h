@@ -6,12 +6,12 @@
 #include "polynomial.h"
 #include "syntax_error.h"
 
-namespace compiler {
-    class expression_compiler final {
+namespace Compiler {
+    class ExpressionCompiler final {
     public:
         /// @brief Преобразовать последовательность токенов в программу для интерпретации
         /// @param tokens Последовательность токенов, которую нужно скомпилировать
         /// @return Программа или синтаксическая ошибка
-        std::variant<intr::program, syntax_error> compile_expression(const std::vector<Lexer::Token>& tokens);
+        std::variant<intr::program, SyntaxError> compileExpression(const std::vector<Lexer::Token>& tokens);
     };
 }

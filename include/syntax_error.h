@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-struct syntax_error {
+struct SyntaxError {
     size_t pos;
     std::string message;
 };
