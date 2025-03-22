@@ -29,6 +29,7 @@ namespace Lexer {
         case TokenType::MINUS: return "TokenType::MINUS";
         case TokenType::MULT: return "TokenType::MULT";
         case TokenType::CARET: return "TokenType::CARET";
+        case TokenType::COMMA: return "TokenType::COMMA";
         case TokenType::INVALID: return "TokenType::INVALID";
         case TokenType::ASSIGN: return "TokenType::ASSIGN";
         case TokenType::ENDOFFILE: return "TokenType::ENDOFFILE";

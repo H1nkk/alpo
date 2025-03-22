@@ -13,6 +13,7 @@ namespace Lexer {
         { '(', TokenType::LPAR },
         { ')', TokenType::RPAR },
         { '=', TokenType::ASSIGN },
+        { ',', TokenType::COMMA }
     };
 
     static const std::unordered_map<std::string, TokenType> functionNames = {
@@ -74,7 +75,7 @@ namespace Lexer {
                     if (funcIter != functionNames.end())
                         type = funcIter->second;
 
-                    mTokens.push_back(Token(TokenType::ID, id, index - id.size(), index));
+                    mTokens.push_back(Token(type, id, index - id.size(), index));
                 }
                 else
                 {
