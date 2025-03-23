@@ -79,6 +79,24 @@ TEST(LexerTest, can_parse_identifiers)
     EXPECT_EQ(l.getAllTokens()[2], Lexer::Token(Lexer::TokenType::ENDOFFILE, "", 9, 9));
 }
 
+TEST(LexerTest, can_parse_monomials)
+{
+    Lexer::Lexer l("12.12x^39yz12w1 ");
+
+    EXPECT_EQ(l.hasError(), false);
+    EXPECT_EQ(l.getTokensCount(), 10);
+    EXPECT_EQ(l.getAllTokens()[0], Lexer::Token(Lexer::TokenType::FLOAT, "12.12", 0, 5));
+    EXPECT_EQ(l.getAllTokens()[1], Lexer::Token(Lexer::TokenType::X, "x", 5, 6));
+    EXPECT_EQ(l.getAllTokens()[2], Lexer::Token(Lexer::TokenType::CARET, "^", 6, 7));
+    EXPECT_EQ(l.getAllTokens()[3], Lexer::Token(Lexer::TokenType::INT, "39", 7, 9));
+    EXPECT_EQ(l.getAllTokens()[4], Lexer::Token(Lexer::TokenType::Y, "y", 9, 10));
+    EXPECT_EQ(l.getAllTokens()[5], Lexer::Token(Lexer::TokenType::Z, "z", 10, 11));
+    EXPECT_EQ(l.getAllTokens()[6], Lexer::Token(Lexer::TokenType::INT, "12", 11, 13));
+    EXPECT_EQ(l.getAllTokens()[7], Lexer::Token(Lexer::TokenType::W, "w", 13, 14));
+    EXPECT_EQ(l.getAllTokens()[8], Lexer::Token(Lexer::TokenType::INT, "1", 14, 15));
+    EXPECT_EQ(l.getAllTokens()[9], Lexer::Token(Lexer::TokenType::ENDOFFILE, "", 16, 16));
+}
+
 TEST(LexerTest, can_parse_variables)
 {
     Lexer::Lexer l("xYz W xyzPol");
@@ -97,16 +115,16 @@ TEST(LexerTest, can_parse_functions)
 {
     Lexer::Lexer l("calc(derx(10x+1) * dery(5.1y+1) + derz(z) - derw(w2) * intx(1.2) + (inty(12 + x) - 30*intz(22) * intw(2)), 10,2,3,4)");
 
-    EXPECT_EQ(l.getTokensCount(), 63);
+    EXPECT_EQ(l.getTokensCount(), 64);
     EXPECT_EQ(l.getAllTokens()[0], Lexer::Token(Lexer::TokenType::CALC, "calc", 0, 4));
     EXPECT_EQ(l.getAllTokens()[2], Lexer::Token(Lexer::TokenType::DERX, "derx", 5, 9));
     EXPECT_EQ(l.getAllTokens()[10], Lexer::Token(Lexer::TokenType::DERY, "dery", 19, 23));
     EXPECT_EQ(l.getAllTokens()[18], Lexer::Token(Lexer::TokenType::DERZ, "derz", 34, 38));
     EXPECT_EQ(l.getAllTokens()[23], Lexer::Token(Lexer::TokenType::DERW, "derw", 44, 48));
-    EXPECT_EQ(l.getAllTokens()[28], Lexer::Token(Lexer::TokenType::INTX, "intx", 55, 59));
-    EXPECT_EQ(l.getAllTokens()[34], Lexer::Token(Lexer::TokenType::INTY, "inty", 68, 72));
-    EXPECT_EQ(l.getAllTokens()[43], Lexer::Token(Lexer::TokenType::INTZ, "intz", 86, 90));
-    EXPECT_EQ(l.getAllTokens()[48], Lexer::Token(Lexer::TokenType::INTW, "intw", 97, 101));
+    EXPECT_EQ(l.getAllTokens()[29], Lexer::Token(Lexer::TokenType::INTX, "intx", 55, 59));
+    EXPECT_EQ(l.getAllTokens()[35], Lexer::Token(Lexer::TokenType::INTY, "inty", 68, 72));
+    EXPECT_EQ(l.getAllTokens()[44], Lexer::Token(Lexer::TokenType::INTZ, "intz", 86, 90));
+    EXPECT_EQ(l.getAllTokens()[49], Lexer::Token(Lexer::TokenType::INTW, "intw", 97, 101));
 }
 
 TEST(LexerTest, can_parse_expressions_stress_test)

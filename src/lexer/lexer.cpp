@@ -66,7 +66,7 @@ namespace Lexer {
                 if (!std::all_of(id.begin(), id.end(), [](char c)
                     {
                         char lc = tolower(c);
-                        return lc == 'x' || lc == 'y' || lc == 'z' || lc == 'w';
+                        return lc == 'x' || lc == 'y' || lc == 'z' || lc == 'w' || isdigit(lc);
                     }))
                 {
                     // Идентификатор - название полинома или функции
@@ -83,24 +83,25 @@ namespace Lexer {
                     size_t start = index - id.size();
                     for (size_t i = 0; i < id.size(); i++)
                     {
-                        switch (tolower(id[i]))
-                        {
-                        case 'x':
+                        char lc = tolower(id[i]);
+                        if (lc == 'x')
                             mTokens.push_back(Token(TokenType::X, std::string(1, id[i]),
                                 start + i, start + i + 1));
-                            break;
-                        case 'y':
+                        else if (lc == 'y')
                             mTokens.push_back(Token(TokenType::Y, std::string(1, id[i]),
                                 start + i, start + i + 1));
-                            break;
-                        case 'z':
+                        else if (lc == 'z')
                             mTokens.push_back(Token(TokenType::Z, std::string(1, id[i]),
                                 start + i, start + i + 1));
-                            break;
-                        case 'w':
+                        else if (lc == 'w')
                             mTokens.push_back(Token(TokenType::W, std::string(1, id[i]),
                                 start + i, start + i + 1));
-                            break;
+                        else if (isdigit(lc))
+                        {
+                            size_t len = 0;
+                            for (; i + len < id.size() && isdigit(id[i + len]); ++len);
+                            mTokens.push_back(Token(TokenType::INT, id.substr(i, len), start + i, start + i + len));
+                            i += len - 1;
                         }
                     }
                 }

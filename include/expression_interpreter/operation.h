@@ -6,7 +6,7 @@
 namespace intr {
     enum class opcode {
         ASSIGN,
-        ADD, SUBTRACT, MULT, POWER,
+        ADD, SUBTRACT, MULT, POWER, UMINUS,
         CALC, DERX, DERY, DERZ, DERW,
         INTX, INTY, INTZ, INTW
     };

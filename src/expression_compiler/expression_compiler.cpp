@@ -308,7 +308,7 @@ namespace Compiler {
     {
         switch (type)
         {
-        case TokenType::CALC: return 3;
+        case TokenType::CALC: return 4;
         case TokenType::DERX: return 0;
         case TokenType::DERY: return 0;
         case TokenType::DERZ: return 0;
@@ -341,6 +341,7 @@ namespace Compiler {
         case TokenType::INTZ:
         case TokenType::INTW: return PostfixMember(token, 0, true);
         case TokenType::LPAR: return PostfixMember(token);
+        case TokenType::ID: return PostfixMember(token);
         default: throw std::invalid_argument(__FUNCTION__ ": Unknown operation provided");
         }
     }
@@ -361,13 +362,16 @@ namespace Compiler {
         OpInfo(intr::opcode opc, PostfixType res, const std::vector<int>& args) : opcode(opc), resType(res), argFlags(args) {}
     };
 
-    const static std::unordered_map<TokenType, OpInfo> ops{
-        { TokenType::CALC, OpInfo(intr::opcode::CALC, PostfixType::FLOAT, { (int)PostfixType::ANY, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT})},
+    const static std::vector<std::pair<TokenType, OpInfo>> ops{
         { TokenType::ASSIGN, OpInfo(intr::opcode::ASSIGN, PostfixType::POLYNOMIAL, { (int)PostfixType::ID, (int)PostfixType::ANY })},
         { TokenType::PLUS, OpInfo(intr::opcode::ADD, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
         { TokenType::MINUS, OpInfo(intr::opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
-        { TokenType::CARET, OpInfo(intr::opcode::POWER, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
-        { TokenType::MULT, OpInfo(intr::opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::CARET, OpInfo(intr::opcode::POWER, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::INT })},
+        { TokenType::MULT, OpInfo(intr::opcode::MULT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+    };
+
+    const static std::vector<std::pair<TokenType, OpInfo>> prefixOps{
+        { TokenType::CALC, OpInfo(intr::opcode::CALC, PostfixType::FLOAT, { (int)PostfixType::ANY, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT})},
         { TokenType::DERX, OpInfo(intr::opcode::DERX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
         { TokenType::DERY, OpInfo(intr::opcode::DERY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
         { TokenType::DERZ, OpInfo(intr::opcode::DERZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
@@ -376,6 +380,9 @@ namespace Compiler {
         { TokenType::INTY, OpInfo(intr::opcode::INTY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
         { TokenType::INTZ, OpInfo(intr::opcode::INTZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
         { TokenType::INTW, OpInfo(intr::opcode::INTW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::FLOAT, })},
+        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::INT, })},
+        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::POLYNOMIAL, { (int)PostfixType::POLYNOMIAL, })},
     };
 
     class CompilationContext
@@ -399,25 +406,45 @@ namespace Compiler {
                 return member.token().value();
             }
 
-            const OpInfo& op = ops.at(member.type());
+            const std::vector<std::pair<TokenType, OpInfo>>& funcs = member.isPrefixOp() ? prefixOps : ops;
 
-            if (types.Size() < op.argFlags.size())
+            for (const auto& row : funcs)
             {
-                throw std::runtime_error(__FUNCTION__ ": compilation error occurred.");
+                if (row.first != member.type()) continue;
+                
+                const auto& op = row.second;
+
+                if (types.Size() < op.argFlags.size()) continue;
+
+                bool valid = true;
+
+                Stack<PostfixType> tmp;
+                for (int i = op.argFlags.size() - 1; i >= 0; --i)
+                {
+                    PostfixType type = types.Top();
+                    if (((int)type & op.argFlags[i]) == 0)
+                        valid = false;
+
+                    tmp.Push(type);
+                    types.Pop();
+                }
+
+                if (!valid)
+                {
+                    while (tmp.Size())
+                    {
+                        types.Push(tmp.Top());
+                        tmp.Pop();
+                    }
+                    continue;
+                }
+                
+
+                types.Push(op.resType);
+                return op.opcode;
             }
 
-            for (int i = op.argFlags.size() - 1; i >= 0; --i)
-            {
-                int type = (int)types.Top();
-                if ((type & op.argFlags[i]) == 0)
-                    throw SyntaxError{ member.token().startPos(), "Invalid argument types" };
-
-                types.Pop();
-            }
-
-            types.Push(op.resType);
-
-            return op.opcode;
+            throw std::runtime_error(__FUNCTION__ ": compilation error occurred.");
         }
 
         void compileToTok(const std::vector<TokenType>& types, bool popFound)
@@ -448,7 +475,7 @@ namespace Compiler {
         }
 
         TokenType curType() const { return tok.type(); }
-        TokenType prevType() const { return tok.type(); }
+        TokenType prevType() const { return prev.type(); }
 
         const intr::program& getProgram() const { return prog; }
 
@@ -568,49 +595,59 @@ namespace Compiler {
 
         void compileMonomial()
         {
-            std::unordered_set<TokenType> monomialTokens = {
+            const std::unordered_set<TokenType> monomialTokens = {
                 TokenType::INT, TokenType::FLOAT,
                 TokenType::X, TokenType::Y, TokenType::Z, TokenType::W,
                 TokenType::CARET
             };
             
-            if (!monomialTokens.count(tokens[tokIndex].type()))
+            if (!monomialTokens.count(tok.type()))
                 throw SyntaxError{ tok.startPos(), "Expected polynomial" };
 
             size_t startIndex = tok.startPos();
             size_t count = 0;
             std::stringstream monomialStr;
             
-            for (; monomialTokens.count(tokens[tokIndex].type()); ++tokIndex)
+            size_t tmpIndex = tokIndex;
+            Token tmpPrev = prev;
+            Token tmpTok = tok;
+
+            for (; monomialTokens.count(tmpTok.type()); tmpPrev = tmpTok, tmpTok = tokens[tmpIndex++])
             {
-                monomialStr << tokens[tokIndex].value();
+                monomialStr << tmpTok.value();
 
-                prev = tok;
-                tok = tokens[tokIndex];
-
+                prev = tmpPrev;
+                tok = tmpTok;
+                tokIndex = tmpIndex;
                 ++count;
             }
-            --tokIndex;
 
             if (count == 1 && (isTok(TokenType::INT) || isTok(TokenType::FLOAT)))
             {
                 if (isTok(TokenType::INT))
                 {
-                    size_t processed;
-                    unsigned long val = std::stoul(tok.value(), &processed);
-                    if (processed != tok.value().size()) throw SyntaxError{ tok.startPos(), "Too big integer" };
-                    
-                    types.Push(PostfixType::INT);
-                    prog.push_back(val);
+                    try
+                    {
+                        unsigned long val = std::stoul(tok.value());
+                        types.Push(PostfixType::INT);
+                        prog.push_back(val);
+                    } catch(std::out_of_range) 
+                    {
+                        throw SyntaxError{ tok.startPos(), "Too big integer" };
+                    }
                 }
                 else
                 {
-                    size_t processed;
-                    double val = std::stod(tok.value(), &processed);
-                    if (processed != tok.value().size()) throw SyntaxError{ tok.startPos(), "Too big float" };
-
-                    types.Push(PostfixType::INT);
-                    prog.push_back(val);
+                    try
+                    {
+                        double val = std::stod(tok.value());
+                        types.Push(PostfixType::INT);
+                        prog.push_back(val);
+                    }
+                    catch (std::out_of_range)
+                    {
+                        throw SyntaxError{ tok.startPos(), "Too big float" };
+                    }
                 }
             }
             else
@@ -670,6 +707,7 @@ namespace Compiler {
                     ctx.compileId();
 
                 } 
+                else
                 {
                     ctx.compileMonomial();
                 }
