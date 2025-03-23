@@ -109,6 +109,7 @@
 { Lexer::TokenType::LPAR, Lexer::TokenType::INTY },
 { Lexer::TokenType::LPAR, Lexer::TokenType::INTZ },
 { Lexer::TokenType::LPAR, Lexer::TokenType::INTW },
+{ Lexer::TokenType::RPAR, Lexer::TokenType::RPAR },
 { Lexer::TokenType::RPAR, Lexer::TokenType::PLUS },
 { Lexer::TokenType::RPAR, Lexer::TokenType::MINUS },
 { Lexer::TokenType::RPAR, Lexer::TokenType::MULT },
