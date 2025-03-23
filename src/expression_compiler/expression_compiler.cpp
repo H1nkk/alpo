@@ -3,15 +3,22 @@
 #include "lexer/lexer_token.h"
 #include "stack.h"
 #include <unordered_set>
+#include <unordered_map>
+#include <string>
+#include <sstream>
 
 namespace Compiler {
     
     using Lexer::TokenType;
     using Lexer::Token;
 
-    enum class PostfixType
+    enum class PostfixType : int
     {
-        INT, ID, POLYNOMIAL
+        INT = 1,
+        FLOAT = 2,
+        ID  = 4,
+        POLYNOMIAL = 8,
+        ANY = 15
     };
 
     struct TokenTypePairHasher
@@ -258,11 +265,20 @@ namespace Compiler {
         }
     }
 
-    bool isUnaryOperator(const Token& token)
+    bool isPrefixOperator(const Token& token)
     {
         switch (token.type())
         {
         case TokenType::MINUS:
+        case TokenType::CALC:
+        case TokenType::DERX:
+        case TokenType::DERY:
+        case TokenType::DERZ:
+        case TokenType::DERW:
+        case TokenType::INTX:
+        case TokenType::INTY:
+        case TokenType::INTZ:
+        case TokenType::INTW:
             return true;
         default:
             return false;
@@ -288,19 +304,19 @@ namespace Compiler {
         }
     }
 
-    int getFuncArgCount(TokenType type)
+    int getFuncCommaCount(TokenType type)
     {
         switch (type)
         {
-        case TokenType::CALC: return 4;
-        case TokenType::DERX: return 1;
-        case TokenType::DERY: return 1;
-        case TokenType::DERZ: return 1;
-        case TokenType::DERW: return 1;
-        case TokenType::INTX: return 1;
-        case TokenType::INTY: return 1;
-        case TokenType::INTZ: return 1;
-        case TokenType::INTW: return 1;
+        case TokenType::CALC: return 3;
+        case TokenType::DERX: return 0;
+        case TokenType::DERY: return 0;
+        case TokenType::DERZ: return 0;
+        case TokenType::DERW: return 0;
+        case TokenType::INTX: return 0;
+        case TokenType::INTY: return 0;
+        case TokenType::INTZ: return 0;
+        case TokenType::INTW: return 0;
         default:
             throw std::invalid_argument(__FUNCTION__ ": Unknown operation provided");
         }
@@ -314,6 +330,7 @@ namespace Compiler {
         case TokenType::MINUS: return PostfixMember(token, 2, unary);
         case TokenType::MULT: return PostfixMember(token, 3);
         case TokenType::CARET: return PostfixMember(token, 4);
+        case TokenType::ASSIGN: return PostfixMember(token, 0, false, PostfixMember::RIGHTTOLEFT);
         case TokenType::CALC:
         case TokenType::DERX:
         case TokenType::DERY:
@@ -328,12 +345,289 @@ namespace Compiler {
         }
     }
 
-    intr::op CompileOperation(const PostfixMember& member)
+    struct CompilationBlock
     {
-        // check types and compile
+        TokenType startTokenType;
+        // «десь хран€тс€ количества аргументов функций - 1 (по количеству зап€тых)
+        int commaCount;
+    };
 
-        return (unsigned int)0;
-    }
+    struct OpInfo
+    {
+        intr::opcode opcode;
+        PostfixType resType;
+        std::vector<int> argFlags;
+        
+        OpInfo(intr::opcode opc, PostfixType res, const std::vector<int>& args) : opcode(opc), resType(res), argFlags(args) {}
+    };
+
+    const static std::unordered_map<TokenType, OpInfo> ops{
+        { TokenType::CALC, OpInfo(intr::opcode::CALC, PostfixType::FLOAT, { (int)PostfixType::ANY, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT})},
+        { TokenType::ASSIGN, OpInfo(intr::opcode::ASSIGN, PostfixType::POLYNOMIAL, { (int)PostfixType::ID, (int)PostfixType::ANY })},
+        { TokenType::PLUS, OpInfo(intr::opcode::ADD, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::MINUS, OpInfo(intr::opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::CARET, OpInfo(intr::opcode::POWER, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::MULT, OpInfo(intr::opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::DERX, OpInfo(intr::opcode::DERX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::DERY, OpInfo(intr::opcode::DERY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::DERZ, OpInfo(intr::opcode::DERZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::DERW, OpInfo(intr::opcode::DERW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::INTX, OpInfo(intr::opcode::INTX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::INTY, OpInfo(intr::opcode::INTY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::INTZ, OpInfo(intr::opcode::INTZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::INTW, OpInfo(intr::opcode::INTW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+    };
+
+    class CompilationContext
+    {
+    private:
+        std::vector<Token> tokens;
+        intr::program prog;
+        Stack<PostfixMember> stack;
+        Stack<CompilationBlock> blocks;
+        Stack<PostfixType> types;
+
+        size_t tokIndex;
+        Token prev;
+        Token tok;
+
+        intr::op CompileOperation(const PostfixMember& member)
+        {
+            if (member.type() == TokenType::ID)
+            {
+                types.Push(PostfixType::ID);
+                return member.token().value();
+            }
+
+            const OpInfo& op = ops.at(member.type());
+
+            if (types.Size() < op.argFlags.size())
+            {
+                throw std::runtime_error(__FUNCTION__ ": compilation error occurred.");
+            }
+
+            for (int i = op.argFlags.size() - 1; i >= 0; --i)
+            {
+                int type = (int)types.Top();
+                if ((type & op.argFlags[i]) == 0)
+                    throw SyntaxError{ member.token().startPos(), "Invalid argument types" };
+
+                types.Pop();
+            }
+
+            types.Push(op.resType);
+
+            return op.opcode;
+        }
+
+        void compileToTok(const std::vector<TokenType>& types, bool popFound)
+        {
+            while (stack.Size() && std::find(types.begin(), types.end(), stack.Top().type()) == types.end())
+            {
+                prog.push_back(CompileOperation(stack.Top()));
+                stack.Pop();
+            }
+
+            if (stack.Size() > 0 && popFound) stack.Pop();
+        }
+
+        void compilePrefixOps()
+        {
+            while (stack.Size() && stack.Top().isPrefixOp())
+            {
+                prog.push_back(CompileOperation(stack.Top()));
+                stack.Pop();
+            }
+        }
+    public:
+        CompilationContext(const std::vector<Token>& toks)
+        {
+            tokens = toks;
+            tokIndex = 0;
+            prev = tok = Token(TokenType::NONE);
+        }
+
+        TokenType curType() const { return tok.type(); }
+        TokenType prevType() const { return tok.type(); }
+
+        const intr::program& getProgram() const { return prog; }
+
+        void nextTok()
+        {
+            prev = tok;
+            tok = tokens[tokIndex++];
+
+            if (!validateToken(prevType(), curType()))
+                throw SyntaxError{ tok.startPos(), "Unexpected token" };
+        }
+
+        bool isTok(TokenType type)
+        {
+            return curType() == type;
+        }
+
+        bool isPrefixOp()
+        {
+            return isPrefixOperator(tok) && (prevType() == TokenType::NONE || prevType() == TokenType::LPAR || prevType() == TokenType::COMMA || isBinaryOperator(prev));
+        }
+
+        bool isBinaryOp()
+        {
+            return isBinaryOperator(tok);
+        }
+
+        void openNewBlock()
+        {
+            if (isTok(TokenType::LPAR))
+            {
+                int commaCount = 0;
+                if (stack.Size() && isFunction(stack.Top().type()))
+                    commaCount = getFuncCommaCount(stack.Top().type());
+
+                blocks.Push({ TokenType::LPAR, commaCount });
+                stack.Push(toMember(TokenType::LPAR));
+            }
+            else if (isTok(TokenType::NONE))
+            {
+                blocks.Push({ TokenType::NONE, 0 });
+            }
+        }
+
+        void closeBlock()
+        {
+            if (blocks.Top().commaCount > 0)
+                throw SyntaxError{ tok.startPos(), "Not enough arguments" };
+
+            if (isTok(TokenType::RPAR))
+            {
+                if (blocks.Top().startTokenType != TokenType::LPAR)
+                    throw SyntaxError{ tok.startPos(), "Unexpected right parenthesis" };
+
+                blocks.Pop();
+
+                compileToTok({ TokenType::LPAR, }, true);
+                compilePrefixOps();
+            }
+            else if (isTok(TokenType::ENDOFFILE))
+            {
+                if (blocks.Size() != 1 || blocks.Top().startTokenType != TokenType::NONE)
+                    throw SyntaxError{ tok.startPos(), "Unclosed parenthesis" };
+
+                blocks.Pop();
+
+                compileToTok({}, false);
+            }
+        }
+
+        void applyComma()
+        {
+            CompilationBlock val = blocks.Top();
+
+            if (val.commaCount == 0)
+                throw SyntaxError{ tok.startPos(), "Too many arguments" };
+
+            compileToTok({ TokenType::LPAR, }, false);
+            
+            blocks.Pop();
+            val.commaCount--;
+            blocks.Push(val);
+        }
+
+        void compilePrefixOp()
+        {
+            stack.Push(toMember(tok, true));
+        }
+
+        void compileBinaryOp()
+        {
+            PostfixMember member = toMember(tok);
+            // ѕрошлые с таким же приоритетом выполн€ютс€ при левой ассоциативности, но не выполн€ютс€ при правой
+            if (member.associativity() == PostfixMember::LEFTTORIGHT)
+            {
+                while (stack.Size() && member.precedence() <= stack.Top().precedence())
+                {
+                    prog.push_back(CompileOperation(stack.Top()));
+                    stack.Pop();
+                }
+            } else
+            {
+                while (stack.Size() && member.precedence() < stack.Top().precedence())
+                {
+                    prog.push_back(CompileOperation(stack.Top()));
+                    stack.Pop();
+                }
+            }
+
+            stack.Push(member);
+        }
+
+        void compileId()
+        {
+            prog.push_back(CompileOperation(toMember(tok)));
+        }
+
+        void compileMonomial()
+        {
+            std::unordered_set<TokenType> monomialTokens = {
+                TokenType::INT, TokenType::FLOAT,
+                TokenType::X, TokenType::Y, TokenType::Z, TokenType::W,
+                TokenType::CARET
+            };
+            
+            if (!monomialTokens.count(tokens[tokIndex].type()))
+                throw SyntaxError{ tok.startPos(), "Expected polynomial" };
+
+            size_t startIndex = tok.startPos();
+            size_t count = 0;
+            std::stringstream monomialStr;
+            
+            for (; monomialTokens.count(tokens[tokIndex].type()); ++tokIndex)
+            {
+                monomialStr << tokens[tokIndex].value();
+
+                prev = tok;
+                tok = tokens[tokIndex];
+
+                ++count;
+            }
+            --tokIndex;
+
+            if (count == 1 && (isTok(TokenType::INT) || isTok(TokenType::FLOAT)))
+            {
+                if (isTok(TokenType::INT))
+                {
+                    size_t processed;
+                    unsigned long val = std::stoul(tok.value(), &processed);
+                    if (processed != tok.value().size()) throw SyntaxError{ tok.startPos(), "Too big integer" };
+                    
+                    types.Push(PostfixType::INT);
+                    prog.push_back(val);
+                }
+                else
+                {
+                    size_t processed;
+                    double val = std::stod(tok.value(), &processed);
+                    if (processed != tok.value().size()) throw SyntaxError{ tok.startPos(), "Too big float" };
+
+                    types.Push(PostfixType::INT);
+                    prog.push_back(val);
+                }
+            }
+            else
+            {
+                std::variant<polynomial, SyntaxError> res = polynomial::from_string(monomialStr.str());
+                if (std::holds_alternative<SyntaxError>(res))
+                {
+                    SyntaxError err = std::get<SyntaxError>(res);
+                    err.pos = startIndex + err.pos;
+                    throw err;
+                }
+
+                types.Push(PostfixType::POLYNOMIAL);
+                prog.push_back(std::get<polynomial>(res));
+            }
+        }
+    };
 
     std::variant<intr::program, SyntaxError> ExpressionCompiler::compileExpression(
         const std::vector<Lexer::Token>& tokens)
@@ -341,120 +635,52 @@ namespace Compiler {
         if (tokens.size() == 0 || tokens.back().type() != TokenType::ENDOFFILE)
             throw std::invalid_argument(__FUNCTION__ ": invalid token sequence");
 
-        intr::program prog;
-        Stack<PostfixMember> stack;
-        Stack<int> argCounts;
-        Stack<PostfixType> types;
-        
-        int parentheses = 0;
-        size_t tokIndex = 0;
-        Token prev = Token(TokenType::NONE);
-        Token tok = prev;
-        argCounts.Push(0);
+        CompilationContext ctx(tokens);
 
-        do
+        try
         {
-            prev = tok;
-            tok = tokens[tokIndex++];
+            ctx.openNewBlock();
 
-            TokenType prevType = prev.type();
-            TokenType curType = tok.type();
-
-            if (!validateToken(prevType, curType))
-                return SyntaxError{ tok.startPos(), "Unexpected token" };
-
-            if (curType == TokenType::LPAR) parentheses++;
-            else if (curType == TokenType::RPAR) parentheses--;
-            if (parentheses < 0)
-                return SyntaxError{ tok.startPos(), "Unexpected right parenthesis" };
-
-            if (curType == TokenType::LPAR)
+            do
             {
-                int argCount = 1;
-                if (stack.Size() && isFunction(stack.Top().type()))
-                    argCount = getFuncArgCount(stack.Top().type());
+                ctx.nextTok();
 
-                argCounts.Push(argCount);
-                stack.Push(toMember(tok));
-            }
-            else if (curType == TokenType::COMMA)
-            {
-                int argc = argCounts.Top() - 1;
-                if (argc < 0) return SyntaxError{ tok.startPos(), "Too many arguments" };
-                argCounts.Pop();
-                argCounts.Push(argc);
-
-                while (stack.Size() && stack.Top().type() != TokenType::LPAR)
+                if (ctx.isTok(TokenType::LPAR))
                 {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-            }
-            else if (curType == TokenType::RPAR)
-            {
-                int argc = argCounts.Top() - 1;
-                if (argc < 0) return SyntaxError{ tok.startPos(), "Too many arguments" };
-                if (argc > 0) return SyntaxError{ tok.startPos(), "Not enough arguments" };
+                    ctx.openNewBlock();
 
-                while (stack.Top().type() != TokenType::LPAR)
+                } else if (ctx.isTok(TokenType::COMMA))
                 {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-                stack.Pop();
+                    ctx.applyComma();
 
-                while (stack.Size() && stack.Top().isPrefixOp())
+                } else if (ctx.isTok(TokenType::RPAR) || ctx.isTok(TokenType::ENDOFFILE))
                 {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-            }
-            else if (curType == TokenType::ENDOFFILE)
-            {
-                if (parentheses != 0) return SyntaxError{ tok.startPos(), "Unclosed parenthesis" };
+                    ctx.closeBlock();
 
-                while (stack.Size())
+                } else if (ctx.isPrefixOp())
                 {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-            }
-            else if (isUnaryOperator(tok) && (prevType == TokenType::NONE || prevType == TokenType::LPAR || isBinaryOperator(prev)))
-            {
-                stack.Push(toMember(tok, true));
-            }
-            else if (isFunction(tok))
-            {
-                stack.Push(toMember(tok));
-            }
-            else if (isBinaryOperator(tok))
-            {
-                PostfixMember member = toMember(tok);
-                // todo: associativity
-                while (stack.Size() && member.precedence() <= stack.Top().precedence())
-                {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-                stack.Push(member);
-            }
-            else if (curType == TokenType::ID)
-            {
-                prog.push_back(CompileOperation(toMember(tok)));
-                
-                while (stack.Size() && stack.Top().isPrefixOp())
-                {
-                    prog.push_back(CompileOperation(stack.Top()));
-                    stack.Pop();
-                }
-            }
-            else
-            {
-                // TODO: Compile monomial
-            }
+                    ctx.compilePrefixOp();
 
-        } while (tok.type() != TokenType::ENDOFFILE);
+                } else if (ctx.isBinaryOp())
+                {
+                    ctx.compileBinaryOp();
 
-        return prog;
+                } else if (ctx.isTok(TokenType::ID))
+                {
+                    ctx.compileId();
+
+                } 
+                {
+                    ctx.compileMonomial();
+                }
+
+            } while (!ctx.isTok(TokenType::ENDOFFILE));
+        }
+        catch (SyntaxError e)
+        {
+            return e;
+        }
+
+        return ctx.getProgram();
     }
 }

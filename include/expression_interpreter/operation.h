@@ -12,7 +12,7 @@ namespace intr {
     };
 
     // Код операции/полином/идентификатор/число
-    using op = std::variant<opcode, polynomial, std::string, double, unsigned int>;
+    using op = std::variant<opcode, polynomial, std::string, double, unsigned long>;
 
     std::string toString(opcode opcode);
 }
