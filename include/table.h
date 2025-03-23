@@ -85,7 +85,7 @@ public:
 	virtual unsigned int size() override;
 	virtual bool empty() override;
 
-	virtual ~OrderedTable() {};
+	virtual ~OrderedTable();
 };
 
 

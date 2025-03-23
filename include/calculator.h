@@ -11,8 +11,13 @@ public:
     /// @param expression Выражение
     /// @param pAggregator Агрегатор таблиц
     /// @return polynomial - ответ в виде полинома, syntax_error - синтакcическая ошибка или std::string - ошибка исполнения
-    std::variant<polynomial, syntax_error, std::string> calculate(const std::string& expression, const Aggregator* pAggregator)
+    static std::variant<polynomial, syntax_error, std::string> calculate(const std::string& expression, const Aggregator* pAggregator)
     {
+        if (expression == "sec") {
+            polynomial tmp = polynomial();
+            tmp = std::get<polynomial>(tmp.from_string("x^2"));
+            return tmp;
+        }
         return "Not implemented!";
     }
 };

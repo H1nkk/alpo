@@ -377,11 +377,13 @@ std::optional<polynomial> Aggregator::findPolynomial(const std::string& polName)
 }
 
 void Aggregator::addPolynomial(const std::string& polName, const polynomial& pol) {
-	tables[currentTable]->addPolynomial(polName, pol);
+	for (int i = 0; i < 5; i++)
+		tables[i]->addPolynomial(polName, pol);
 }
 
 void Aggregator::delPolynomial(const std::string& polName) {
-	tables[currentTable]->delPolynomial(polName);
+	for (int i = 0; i < 5; i++)
+		tables[i]->delPolynomial(polName);
 }
 
 unsigned int Aggregator::size() {
