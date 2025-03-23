@@ -24,7 +24,8 @@ class LinearArrTable: public Table
 		std::string key;
 		polynomial value;
 	};
-	std::vector<Pol> table;
+
+	std::vector<Pol> mTable;
 
 public:
 	LinearArrTable();
@@ -48,7 +49,7 @@ class LinearListTable : public Table
 		TNode* pNext;
 	};
 	TNode* pFirst;
-	size_t tableSize;
+	size_t mTableSize;
 
 public:
 	LinearListTable();
@@ -65,6 +66,16 @@ public:
 
 class OrderedTable : public Table 
 {
+	struct Pol
+	{
+		std::string key;
+		polynomial value;
+	};
+
+	Pol* pTable;
+	size_t mCurrentSize;
+	size_t mTableSize;
+
 public:
 	OrderedTable();
 

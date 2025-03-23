@@ -7,12 +7,12 @@ LinearArrTable::LinearArrTable() {}
 void LinearArrTable::addPolynomial(const std::string& polName, const polynomial& pol) // TODO check for unique polName is in app section
 {
 	if (findPolynomial(polName) == std::nullopt)
-		table.push_back({ polName, pol });
+		mTable.push_back({ polName, pol });
 }
 
 std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polName) 
 {
-	for (auto rec: table) 
+	for (auto rec: mTable) 
 		if (rec.key == polName)
 			return rec.value;
 	return {};
@@ -20,11 +20,11 @@ std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polN
 
 void LinearArrTable::delPolynomial(const std::string& polName) 
 {
-	for (int i = 0; i < table.size(); i++) {
-		Pol rec = table[i];
+	for (int i = 0; i < mTable.size(); i++) {
+		Pol rec = mTable[i];
 		if (rec.key == polName) 
 		{
-			table.erase(std::next(table.begin(), i)); // needs a lot of testing
+			mTable.erase(std::next(mTable.begin(), i)); // needs a lot of testing
 			return;
 		}
 	}
@@ -32,17 +32,17 @@ void LinearArrTable::delPolynomial(const std::string& polName)
 
 unsigned int LinearArrTable::size() 
 {
-	return table.size();
+	return mTable.size();
 }
 
 bool LinearArrTable::empty() 
 {
-	return table.empty();
+	return mTable.empty();
 }
 
 // *** LinearListTable ***
 
-LinearListTable::LinearListTable(): pFirst(nullptr), tableSize(0) {}
+LinearListTable::LinearListTable(): pFirst(nullptr), mTableSize(0) {}
 
 std::optional<polynomial> LinearListTable::findPolynomial(const std::string& polName) 
 {
@@ -61,7 +61,7 @@ std::optional<polynomial> LinearListTable::findPolynomial(const std::string& pol
 void LinearListTable::addPolynomial(const std::string& polName, const polynomial& pol) 
 {
 	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
-	tableSize++;
+	mTableSize++;
 	TNode* p = pFirst;
 	if (!p) 
 	{
@@ -83,7 +83,7 @@ void LinearListTable::delPolynomial(const std::string& polName) // needs a lot o
 		TNode* tmp = pFirst->pNext;
 		delete pFirst;
 		pFirst = tmp;
-		tableSize--;
+		mTableSize--;
 		return;
 	}
 	while (p->pNext) 
@@ -92,7 +92,7 @@ void LinearListTable::delPolynomial(const std::string& polName) // needs a lot o
 			TNode* tmp = p->pNext->pNext;
 			delete p->pNext;
 			p->pNext = tmp;
-			tableSize--;
+			mTableSize--;
 			return;
 		}
 		p = p->pNext;
@@ -101,12 +101,12 @@ void LinearListTable::delPolynomial(const std::string& polName) // needs a lot o
 
 unsigned int LinearListTable::size() 
 {
-	return tableSize;
+	return mTableSize;
 }
 
 bool LinearListTable::empty()
 {
-	return tableSize == 0; // or pFirst == nullptr
+	return mTableSize == 0; // or pFirst == nullptr
 }
 
 LinearListTable::~LinearListTable()
@@ -121,35 +121,116 @@ LinearListTable::~LinearListTable()
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable() {
-
-}
-
-void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol) 
-{
-
-}
+OrderedTable::OrderedTable(): pTable(new Pol[4]), mTableSize(4), mCurrentSize(0) {}
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
 {
+	int i = mCurrentSize / 2;
+	int leftBorder = 0;
+	int rightBorder = mCurrentSize;
+	while (pTable[i].key != polName || rightBorder - leftBorder != 1)
+	{
+		if (pTable[i].key.compare(polName) > 0)
+		{
+			rightBorder = i;
+			i -= 1 + (rightBorder - leftBorder) / 2;
+		}
+		if (pTable[i].key.compare(polName) < 0)
+		{
+			leftBorder = i;
+			i += 1 + (rightBorder - leftBorder) / 2;
+		}
+	}
+	if (pTable[i].key == polName)
+		return pTable[i].value;
 	return {};
+}
+
+void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol)
+{
+	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	int i = mCurrentSize / 2;
+	int leftBorder = 0;
+	int rightBorder = mTableSize;
+	while (rightBorder - leftBorder != 1) // binary search
+	{
+		if (pTable[i].key.compare(polName) > 0)
+		{
+			rightBorder = i;
+			i = (rightBorder - leftBorder) / 2;
+		}
+		if (pTable[i].key.compare(polName) < 0)
+		{
+			leftBorder = i;
+			i = (rightBorder - leftBorder) / 2;
+		}
+	}
+	if (mTableSize == mCurrentSize) // repacking and adding entry
+	{
+		Pol* pHelpTable = new Pol[mTableSize * 2];
+		mTableSize *= 2;
+		for (int j = 0; j < leftBorder + 1; j++)
+			pHelpTable[j] = pTable[j];	
+		pHelpTable[leftBorder + 1] = { polName,  pol };
+		for (int j = leftBorder + 1; j < mCurrentSize; j++)
+			pHelpTable[j+1] = pTable[j];
+		delete[]  pTable;
+		pTable = pHelpTable;
+	}
+	else // adding entry
+	{
+		Pol help;
+		for (int j = leftBorder + 1; j < mCurrentSize; j++)
+		{
+			help = pTable[j + 1];
+			pTable[j + 1] = pTable[j];
+		}
+		pTable[leftBorder + 1] = { polName,  pol };
+	}
+	mCurrentSize++;
 }
 
 void OrderedTable::delPolynomial(const std::string& polName)
 {
-
+	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	int i = mCurrentSize / 2;
+	int leftBorder = 0;
+	int rightBorder = mTableSize;
+	while (pTable[i].key != polName)
+	{
+		if (pTable[i].key.compare(polName) > 0)
+		{
+			rightBorder = i;
+			i -= 1 + (rightBorder - leftBorder) / 2;
+		}
+		if (pTable[i].key.compare(polName) < 0)
+		{
+			leftBorder = i;
+			i += 1 + (rightBorder - leftBorder) / 2;
+		}
+	}
+	for (int j = 0; j < mCurrentSize; j++)
+	{
+		pTable[j] = pTable[j+1];
+	}
+	mCurrentSize--;
 }
 
 unsigned int OrderedTable::size()
 {
-	return -1;
+	return mCurrentSize;
 
 }
 
 bool OrderedTable::empty()
 {
-	return true;
+	return mCurrentSize == 0;
 }
+
+OrderedTable::~OrderedTable() 
+{ 
+	delete[]  pTable;
+};
 
 // *** TreeTable ***
 
