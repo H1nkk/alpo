@@ -42,13 +42,13 @@ public:
 
 class LinearListTable : public Table 
 {
-	struct TNode
+	struct Node
 	{
 		std::string key;
 		polynomial value;
-		TNode* pNext;
+		Node* pNext;
 	};
-	TNode* pFirst;
+	Node* pFirst;
 	size_t mTableSize;
 
 public:
@@ -121,7 +121,23 @@ public:
 
 class SeparateChainingHashTable : public Table 
 {
+	struct Node
+	{
+		std::string key;
+		polynomial value;
+		Node* pNextInChain;
+	};
+
+	std::vector<Node*> mTable;
+	size_t mTableSize;
+	size_t mCurrentSize;
+
+	unsigned int hashFunc(const std::string& key);
+
+
+
 public:
+
 	SeparateChainingHashTable();
 
 	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName

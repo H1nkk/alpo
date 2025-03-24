@@ -46,7 +46,7 @@ LinearListTable::LinearListTable(): pFirst(nullptr), mTableSize(0) {}
 
 std::optional<polynomial> LinearListTable::findPolynomial(const std::string& polName) 
 {
-	TNode* p = pFirst;
+	Node* p = pFirst;
 	while (p) 
 	{
 		if (p->key == polName) 
@@ -62,25 +62,25 @@ void LinearListTable::addPolynomial(const std::string& polName, const polynomial
 {
 	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
 	mTableSize++;
-	TNode* p = pFirst;
+	Node* p = pFirst;
 	if (!p) 
 	{
-		pFirst = new TNode{ polName, pol, nullptr };
+		pFirst = new Node{ polName, pol, nullptr };
 		return;
 	}
 	while (p->pNext) 
 		p = p->pNext;
 
-	p->pNext = new TNode{ polName, pol, nullptr };
+	p->pNext = new Node{ polName, pol, nullptr };
 }
 
 void LinearListTable::delPolynomial(const std::string& polName) // needs a lot of testing
 {
-	TNode* p = pFirst;
+	Node* p = pFirst;
 	if (!pFirst) return;
 	if (pFirst->key == polName) 
 	{
-		TNode* tmp = pFirst->pNext;
+		Node* tmp = pFirst->pNext;
 		delete pFirst;
 		pFirst = tmp;
 		mTableSize--;
@@ -89,7 +89,7 @@ void LinearListTable::delPolynomial(const std::string& polName) // needs a lot o
 	while (p->pNext) 
 	{
 		if (p->pNext->key == polName) {
-			TNode* tmp = p->pNext->pNext;
+			Node* tmp = p->pNext->pNext;
 			delete p->pNext;
 			p->pNext = tmp;
 			mTableSize--;
@@ -111,9 +111,9 @@ bool LinearListTable::empty()
 
 LinearListTable::~LinearListTable()
 {
-	TNode* p = pFirst;
+	Node* p = pFirst;
 	while (p) {
-		TNode* tmp = p;
+		Node* tmp = p;
 		p = p->pNext;
 		delete tmp;
 	}
@@ -268,7 +268,8 @@ bool TreeTable::empty()
 
 // *** OpenAddressHashTable ***
 
-OpenAddressHashTable::OpenAddressHashTable() {
+OpenAddressHashTable::OpenAddressHashTable() 
+{
 
 }
 
@@ -302,33 +303,86 @@ bool OpenAddressHashTable::empty()
 
 // *** SeparateChainingHashTable ***
 
-SeparateChainingHashTable::SeparateChainingHashTable() {
+SeparateChainingHashTable::SeparateChainingHashTable(): mTableSize(15), mCurrentSize(0)
+{
+	mTable.resize(mTableSize, nullptr);
+}
 
+unsigned int SeparateChainingHashTable::hashFunc(const std::string& key) //polynomial hash function
+{
+	long long h = 0, pow = 1;
+	long long p = 31, m = 1e9 + 7;
+	for (char c : key)
+	{
+		h = (h + pow * (int)(c - 'a' + 1)) % m;
+		pow = (pow * p) % m;
+	}
+
+	return h % mTableSize;
 }
 
 void SeparateChainingHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-
+	if (findPolynomial(polName) != std::nullopt) return;
+	mCurrentSize++;
+	if (!mTable[hashFunc(polName)])
+	{
+		mTable[hashFunc(polName)] = new Node{ polName, pol, nullptr };
+		return;
+	}
+	Node* p = mTable[hashFunc(polName)];
+	while (p->pNextInChain)
+		p = p->pNextInChain;
+	p->pNextInChain = new Node{ polName, pol, nullptr };
 }
 
 std::optional<polynomial> SeparateChainingHashTable::findPolynomial(const std::string& polName)
 {
+	Node* p = mTable[hashFunc(polName)];
+	while (p)
+	{
+		if (p->key == polName)
+		{
+			return p->value;
+		}
+		p = p->pNextInChain;
+	}
 	return {};
 }
 
 void SeparateChainingHashTable::delPolynomial(const std::string& polName)
 {
-
+	Node* p = mTable[hashFunc(polName)];
+	if (!p) return;
+	if (p->key == polName)
+	{
+		Node* tmp = p->pNextInChain;
+		delete p;
+		p = tmp;
+		mCurrentSize--;
+		return;
+	}
+	while (p->pNextInChain)
+	{
+		if (p->pNextInChain->key == polName) {
+			Node* tmp = p->pNextInChain->pNextInChain;
+			delete p->pNextInChain;
+			p->pNextInChain = tmp;
+			mCurrentSize--;
+			return;
+		}
+		p = p->pNextInChain;
+	}
 }
 
 unsigned int SeparateChainingHashTable::size()
 {
-	return -1;
+	return mCurrentSize;
 }
 
 bool SeparateChainingHashTable::empty()
 {
-	return true;
+	return mCurrentSize == 0;
 
 }
 
