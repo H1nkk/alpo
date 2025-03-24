@@ -356,41 +356,41 @@ namespace Compiler {
 
     struct OpInfo
     {
-        intr::opcode opcode;
+        Intr::Opcode opcode;
         PostfixType resType;
         std::vector<int> argFlags;
         
-        OpInfo(intr::opcode opc, PostfixType res, const std::vector<int>& args) : opcode(opc), resType(res), argFlags(args) {}
+        OpInfo(Intr::Opcode opc, PostfixType res, const std::vector<int>& args) : opcode(opc), resType(res), argFlags(args) {}
     };
 
     const static std::vector<std::pair<TokenType, OpInfo>> ops{
-        { TokenType::ASSIGN, OpInfo(intr::opcode::ASSIGN, PostfixType::POLYNOMIAL, { (int)PostfixType::ID, (int)PostfixType::ANY })},
-        { TokenType::PLUS, OpInfo(intr::opcode::ADD, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
-        { TokenType::MINUS, OpInfo(intr::opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
-        { TokenType::CARET, OpInfo(intr::opcode::POWER, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::INT })},
-        { TokenType::MULT, OpInfo(intr::opcode::MULT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::ASSIGN, OpInfo(Intr::Opcode::ASSIGN, PostfixType::POLYNOMIAL, { (int)PostfixType::ID, (int)PostfixType::ANY })},
+        { TokenType::PLUS, OpInfo(Intr::Opcode::ADD, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::MINUS, OpInfo(Intr::Opcode::SUBTRACT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
+        { TokenType::CARET, OpInfo(Intr::Opcode::POWER, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::INT })},
+        { TokenType::MULT, OpInfo(Intr::Opcode::MULT, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY, (int)PostfixType::ANY })},
     };
 
     const static std::vector<std::pair<TokenType, OpInfo>> prefixOps{
-        { TokenType::CALC, OpInfo(intr::opcode::CALC, PostfixType::FLOAT, { (int)PostfixType::ANY, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT})},
-        { TokenType::DERX, OpInfo(intr::opcode::DERX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::DERY, OpInfo(intr::opcode::DERY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::DERZ, OpInfo(intr::opcode::DERZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::DERW, OpInfo(intr::opcode::DERW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::INTX, OpInfo(intr::opcode::INTX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::INTY, OpInfo(intr::opcode::INTY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::INTZ, OpInfo(intr::opcode::INTZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::INTW, OpInfo(intr::opcode::INTW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
-        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::FLOAT, })},
-        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::INT, })},
-        { TokenType::MINUS, OpInfo(intr::opcode::UMINUS, PostfixType::POLYNOMIAL, { (int)PostfixType::POLYNOMIAL, })},
+        { TokenType::CALC, OpInfo(Intr::Opcode::CALC, PostfixType::FLOAT, { (int)PostfixType::ANY, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT, (int)PostfixType::FLOAT | (int)PostfixType::INT})},
+        { TokenType::DERX, OpInfo(Intr::Opcode::DERX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::DERY, OpInfo(Intr::Opcode::DERY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::DERZ, OpInfo(Intr::Opcode::DERZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::DERW, OpInfo(Intr::Opcode::DERW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::INTX, OpInfo(Intr::Opcode::INTX, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::INTY, OpInfo(Intr::Opcode::INTY, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::INTZ, OpInfo(Intr::Opcode::INTZ, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::INTW, OpInfo(Intr::Opcode::INTW, PostfixType::POLYNOMIAL, { (int)PostfixType::ANY })},
+        { TokenType::MINUS, OpInfo(Intr::Opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::FLOAT, })},
+        { TokenType::MINUS, OpInfo(Intr::Opcode::UMINUS, PostfixType::FLOAT, { (int)PostfixType::INT, })},
+        { TokenType::MINUS, OpInfo(Intr::Opcode::UMINUS, PostfixType::POLYNOMIAL, { (int)PostfixType::POLYNOMIAL, })},
     };
 
     class CompilationContext
     {
     private:
         std::vector<Token> tokens;
-        intr::program prog;
+        Intr::Program prog;
         Stack<PostfixMember> stack;
         Stack<CompilationBlock> blocks;
         Stack<PostfixType> types;
@@ -399,7 +399,7 @@ namespace Compiler {
         Token prev;
         Token tok;
 
-        intr::op CompileOperation(const PostfixMember& member)
+        Intr::Op CompileOperation(const PostfixMember& member)
         {
             if (member.type() == TokenType::ID)
             {
@@ -478,7 +478,7 @@ namespace Compiler {
         TokenType curType() const { return tok.type(); }
         TokenType prevType() const { return prev.type(); }
 
-        const intr::program& getProgram() const { return prog; }
+        const Intr::Program& getProgram() const { return prog; }
 
         void nextTok()
         {
@@ -667,7 +667,7 @@ namespace Compiler {
         }
     };
 
-    std::variant<intr::program, SyntaxError> ExpressionCompiler::compileExpression(
+    std::variant<Intr::Program, SyntaxError> ExpressionCompiler::compileExpression(
         const std::vector<Lexer::Token>& tokens)
     {
         if (tokens.size() == 0 || tokens.back().type() != TokenType::ENDOFFILE)
