@@ -106,6 +106,20 @@ public:
 
 class OpenAddressHashTable : public Table 
 {
+	struct Node
+	{
+		int status; // 1 - занята, 0 - пуста, -1 - удалена
+		std::string key;
+		polynomial value;
+	};
+
+	std::vector<Node> mTable;
+	size_t step;
+	size_t mTableSize;
+	size_t mCurrentSize;
+
+	unsigned int hashFunc(const std::string& key);
+
 public:
 	OpenAddressHashTable();
 

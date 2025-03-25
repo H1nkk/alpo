@@ -268,36 +268,91 @@ bool TreeTable::empty()
 
 // *** OpenAddressHashTable ***
 
-OpenAddressHashTable::OpenAddressHashTable() 
+OpenAddressHashTable::OpenAddressHashTable(): mTableSize(28), mCurrentSize(0), step(3) // mTableSize and step are mutually prime numbers
 {
+	mTable.resize(mTableSize, { }); // int status initialized with zero
+}
 
+unsigned int OpenAddressHashTable::hashFunc(const std::string& key) //polynomial hash function
+{
+	long long h = 0, pow = 1;
+	long long p = 31, m = 1e9 + 7;
+	for (char c : key)
+	{
+		h = (h + pow * (int)(c - 'a' + 1)) % m;
+		pow = (pow * p) % m;
+	}
+
+	return h % mTableSize;
 }
 
 void OpenAddressHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
+	if (findPolynomial(polName) != std::nullopt) return;
+	mCurrentSize++;
 
+	if (mCurrentSize / mTableSize > 0.5) // repacking
+	{
+		mTableSize *= 2;
+		std::vector<Node> helpTable;
+		helpTable.resize(mTableSize, { });
+		for (int i = 0; i < mTableSize / 2; i++)
+		{
+			if (mTable[i].status == 1)
+			{
+				int ind = hashFunc(mTable[i].key);
+				while (helpTable[ind].status != 0)
+					ind += step;
+				helpTable[ind] = mTable[i]; // hashFunc uses mTableSize
+			}
+		}
+		mTable = helpTable;
+	}
+
+	int ind = hashFunc(polName);
+	while (mTable[ind].status != 0 || mTable[ind].status != -1)
+		ind += step;
+	mTable[ind].key = polName;
+	mTable[ind].value = pol;
+	mTable[ind].status = 1;
 }
 
 std::optional<polynomial> OpenAddressHashTable::findPolynomial(const std::string& polName)
 {
+	int ind = hashFunc(polName);
+	while (mTable[ind].status != 0)
+	{
+		if (mTable[ind].key == polName)
+			return mTable[ind].value;
+		ind += step;
+	}
 	return {};
 
 }
 
 void OpenAddressHashTable::delPolynomial(const std::string& polName)
 {
-
+	int ind = hashFunc(polName);
+	while (mTable[ind].status != 0)
+	{
+		if (mTable[ind].status == 1 && mTable[ind].key == polName)
+		{
+			mTable[ind].status = -1;
+			break;
+		}
+		ind += step;
+	}
 }
 
 unsigned int OpenAddressHashTable::size()
 {
-	return -1;
+	return mCurrentSize;
 
 }
 
 bool OpenAddressHashTable::empty()
 {
-	return true;
+	return mCurrentSize == 0;
 
 }
 
