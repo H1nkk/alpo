@@ -11,9 +11,18 @@
 #include "calculator.h"
 
 // TODO test stuff, delete
+#include <random>
 std::vector<std::string> v;
 int zavtraCount = 0;
 void foo(QTextEdit* pOutputField) { pOutputField->setHtml(QString::fromStdString(std::string("To a future of grief #") + std::to_string(++zavtraCount))); }
+std::string rs(int len = 5) {
+    std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    std::string s(len, 'a');
+    for (int i = 0; i < len; i++) {
+        s[i] = charset[rand() % charset.length()];
+    }
+    return s;
+}
 // end of test stuff
 
 std::vector<std::string> polNames;
@@ -103,6 +112,10 @@ void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator)
     pTableWidget->resizeColumnsToContents();
 }
 
+void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::string polyName, double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0) {
+
+}
+
 /// @return false if there was an error
 /// @return true otherwise
 bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField, QTableWidget* pTableWidget) // TODO: tell user the index of mistake
@@ -131,9 +144,9 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
         os.str("");
         os.clear();
 
-        // временное решение, потом надо будет делать нормальное имя полиномов. но вроде у Лёши всё схвачено
+        // TODO временное решение, потом надо будет делать нормальное имя полиномов. но вроде у Лёши всё схвачено
         os << pAggregator->size();
-        std::string name = os.str();
+        std::string name = rs();
         pAggregator->addPolynomial(name, resPol);
 
         pOutputField->setHtml(QString::fromStdString(str) + '\n' + pOutputField->toHtml());
@@ -205,13 +218,15 @@ void changeTable(Aggregator* pAggregator, std::string text) {
         code = "seha";
     } 
     else {
-        throw "WHAT";
+        throw "Something went wrong during table changing";
     }
     pAggregator->selectTable(code);
 }
 
 int main(int argc, char* argv[]) 
 {
+    srand(time(NULL));
+
     QApplication app(argc, argv);
 
     QMainWindow window;
@@ -336,8 +351,10 @@ int main(int argc, char* argv[])
             double y = pYContainer->text().toDouble();
             double z = pZContainer->text().toDouble();
             double w = pWContainer->text().toDouble();
+            int row = pTableWidget->selectionModel()->currentIndex().row();
+            std::string polyName = pTableWidget->item(row, 0)->text().toStdString();
 
-
+            calculateAction(pAggregator, pOutputField, polyName, x, y, z, w);
 
             /* I dont know if this is useful
             pXContainer->clear();

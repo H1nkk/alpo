@@ -494,14 +494,22 @@ std::vector<std::pair< std::string, polynomial>> SeparateChainingHashTable::getP
 
 // *** Aggregator ***
 
-Aggregator::Aggregator() {
+Aggregator::Aggregator() { // TODO ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ ¬≈–Õ”“‹ Õ¿ƒŒ 
 	tables.resize(6, nullptr);
+	tables[0] = new LinearArrTable();
+	tables[1] = new LinearArrTable();
+	tables[2] = new LinearArrTable();
+	tables[3] = new LinearArrTable();
+	tables[4] = new LinearArrTable();
+	tables[5] = new LinearArrTable();
+	/*
 	tables[0] = new LinearArrTable();
 	tables[1] = new LinearListTable();
 	tables[2] = new OrderedTable();
 	tables[3] = new TreeTable();
 	tables[4] = new OpenAddressHashTable();
 	tables[5] = new SeparateChainingHashTable();
+	*/
 	currentTable = 0;
 }
 
