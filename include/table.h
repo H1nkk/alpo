@@ -13,7 +13,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual unsigned int size() = 0;
 	virtual bool empty() = 0;
-	virtual std::vector<polynomial> getPolynomials() = 0;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() = 0;
 
 	virtual ~Table() = 0 {}; // removed {}, may be its bad
 };
@@ -36,7 +36,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty(); 
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 
 	virtual ~LinearArrTable() {};
@@ -62,7 +62,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~LinearListTable();
 };
@@ -88,7 +88,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~OrderedTable();
 };
@@ -104,7 +104,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~TreeTable() {};
 };
@@ -134,7 +134,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~OpenAddressHashTable() {};
 };
@@ -166,7 +166,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
-	virtual std::vector<polynomial> getPolynomials() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~SeparateChainingHashTable() {};
 };
@@ -191,7 +191,7 @@ public:
 	void delPolynomial(const std::string& polName);
 	unsigned int size();
 	bool empty();
-	virtual std::vector<polynomial> getPolynomials();
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials();
 
 	~Aggregator();
 };

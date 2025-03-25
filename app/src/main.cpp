@@ -104,9 +104,15 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
 
         std::ostringstream os;
         os << resPol;
+        os.clear();
 
         std::string str;
         str = os.str();
+
+        // временное решение, потом надо будет делать нормальное имя полиномов. но вроде у Лёши всё схвачено
+        os << pAggregator->size();
+        std::string name = os.str();
+        pAggregator->addPolynomial(name, resPol);
 
         pOutputField->setHtml(QString::fromStdString(str) + '\n' + pOutputField->toHtml());
 
@@ -115,7 +121,7 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
 
 }
 
-void tableWidgetUpdate(QTableWidget* pTableWidget) 
+void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator) 
 {
     for (int i = 0; i < v.size(); i++) {
         QTableWidgetItem* twi = new QTableWidgetItem( QString::number(i) );
@@ -273,13 +279,13 @@ int main(int argc, char* argv[])
         }
         });
 
-    QPushButton::connect(pDeleteButton, &QPushButton::clicked, [pTableWidget]()
+    QPushButton::connect(pDeleteButton, &QPushButton::clicked, [pTableWidget, pAggregator]()
         {
             int row = pTableWidget->selectionModel()->currentIndex().row();
             deleteAction(pTableWidget, row);
 
             pTableWidget->clearSelection();
-            tableWidgetUpdate(pTableWidget);
+            tableWidgetUpdate(pTableWidget, pAggregator);
         });
 
     QPushButton::connect(pClearButton, &QPushButton::clicked, [pTableWidget]() 

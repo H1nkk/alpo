@@ -40,6 +40,16 @@ bool LinearArrTable::empty()
 	return mTable.empty();
 }
 
+std::vector<std::pair< std::string, polynomial>> LinearArrTable::getPolynomials() 
+{
+	std::vector<std::pair< std::string, polynomial>> result(mTable.size());
+	for (int i = 0; i < mTable.size(); i++) {
+		result[i].first = mTable[i].key;
+		result[i].second = mTable[i].value;
+	}
+	return result;
+}
+
 // *** LinearListTable ***
 
 LinearListTable::LinearListTable(): pFirst(nullptr), mTableSize(0) {}
@@ -117,6 +127,19 @@ LinearListTable::~LinearListTable()
 		p = p->pNext;
 		delete tmp;
 	}
+}
+
+std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials() 
+{
+	std::vector<std::pair< std::string, polynomial>> result(mTableSize);
+
+	Node* p = pFirst;
+	int i = 0;
+	while (p) {
+		result[i++] = { p->key, p->value };
+		p = p->pNext;
+	}
+	return result;
 }
 
 // *** OrderedTable ***
