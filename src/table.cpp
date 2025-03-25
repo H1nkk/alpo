@@ -1,5 +1,7 @@
 #include <table.h>
 
+#define DEFAUL_ORDERED_TABLE_SIZE 100
+
 // *** LinearArrTable ***
 
 LinearArrTable::LinearArrTable() {}
@@ -15,7 +17,7 @@ std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polN
 	for (auto rec: mTable) 
 		if (rec.key == polName)
 			return rec.value;
-	return {};
+	return std::nullopt;
 }
 
 void LinearArrTable::delPolynomial(const std::string& polName) 
@@ -65,7 +67,7 @@ std::optional<polynomial> LinearListTable::findPolynomial(const std::string& pol
 		}
 		p = p->pNext;
 	}
-	return {};
+	return std::nullopt;
 }
 
 void LinearListTable::addPolynomial(const std::string& polName, const polynomial& pol) 
@@ -144,29 +146,33 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable(): pTable(new Pol[4]), mTableSize(4), mCurrentSize(0) {}
+OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+{
+	pTable = new Pol[DEFAUL_ORDERED_TABLE_SIZE]; // обожаю магические числа...
+}
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
 {
+	if (mCurrentSize == 0) return std::nullopt;
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mCurrentSize;
-	while (pTable[i].key != polName || rightBorder - leftBorder != 1)
+	while (pTable[i].key != polName && rightBorder - leftBorder > 1) // заменил || на &&
 	{
 		if (pTable[i].key.compare(polName) > 0)
 		{
 			rightBorder = i;
-			i -= 1 + (rightBorder - leftBorder) / 2;
+			i = 1 + (rightBorder + leftBorder) / 2; // заменил -= на =
 		}
 		if (pTable[i].key.compare(polName) < 0)
 		{
 			leftBorder = i;
-			i += 1 + (rightBorder - leftBorder) / 2;
+			i = 1 + (rightBorder + leftBorder) / 2; // заменил += на =
 		}
 	}
 	if (pTable[i].key == polName)
 		return pTable[i].value;
-	return {};
+	return std::nullopt;
 }
 
 void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol)
@@ -175,17 +181,17 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mTableSize;
-	while (rightBorder - leftBorder != 1) // binary search
+	while (rightBorder - leftBorder > 1) // binary search
 	{
 		if (pTable[i].key.compare(polName) > 0)
 		{
 			rightBorder = i;
-			i = (rightBorder - leftBorder) / 2;
+			i = (rightBorder + leftBorder) / 2;
 		}
 		if (pTable[i].key.compare(polName) < 0)
 		{
 			leftBorder = i;
-			i = (rightBorder - leftBorder) / 2;
+			i = (rightBorder + leftBorder) / 2;
 		}
 	}
 	if (mTableSize == mCurrentSize) // repacking and adding entry
@@ -208,14 +214,14 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 			help = pTable[j + 1];
 			pTable[j + 1] = pTable[j];
 		}
-		pTable[leftBorder + 1] = { polName,  pol };
+		pTable[mCurrentSize] = { polName,  pol }; // —”ѕ≈– Ќ≈–јЅќ„≈≈ –≈ЎЌ»≈ ѕ–ќ—“ќ „“ќЅџ Ќ≈ ЅџЋќ Ѕј√ќ¬, ѕќ“ќћ ѕќ‘» —»“№ јјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјј Ћ®Ќя ѕќ‘» —» ћ≈Ќя јјјјјјјј
 	}
 	mCurrentSize++;
 }
 
 void OrderedTable::delPolynomial(const std::string& polName)
 {
-	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	if (findPolynomial(polName) == std::nullopt) return; // uniqueness check тут изменил != на ==
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mTableSize;
@@ -255,6 +261,11 @@ OrderedTable::~OrderedTable()
 	delete[]  pTable;
 };
 
+std::vector<std::pair< std::string, polynomial>> OrderedTable::getPolynomials()
+{
+	return {};
+}
+
 // *** TreeTable ***
 
 TreeTable::TreeTable() {
@@ -287,6 +298,11 @@ bool TreeTable::empty()
 {
 	return true;
 
+}
+
+std::vector<std::pair< std::string, polynomial>> TreeTable::getPolynomials()
+{
+	return {};
 }
 
 // *** OpenAddressHashTable ***
@@ -333,8 +349,10 @@ void OpenAddressHashTable::addPolynomial(const std::string& polName, const polyn
 	}
 
 	int ind = hashFunc(polName);
-	while (mTable[ind].status != 0 || mTable[ind].status != -1)
+	while (mTable[ind].status != 0 && mTable[ind].status != -1) { // тут заменил || на &&
 		ind += step;
+		ind %= mTableSize; // этого не было раньше
+	}
 	mTable[ind].key = polName;
 	mTable[ind].value = pol;
 	mTable[ind].status = 1;
@@ -349,7 +367,7 @@ std::optional<polynomial> OpenAddressHashTable::findPolynomial(const std::string
 			return mTable[ind].value;
 		ind += step;
 	}
-	return {};
+	return std::nullopt;
 
 }
 
@@ -377,6 +395,11 @@ bool OpenAddressHashTable::empty()
 {
 	return mCurrentSize == 0;
 
+}
+
+std::vector<std::pair< std::string, polynomial>> OpenAddressHashTable::getPolynomials()
+{
+	return {};
 }
 
 // *** SeparateChainingHashTable ***
@@ -425,7 +448,7 @@ std::optional<polynomial> SeparateChainingHashTable::findPolynomial(const std::s
 		}
 		p = p->pNextInChain;
 	}
-	return {};
+	return std::nullopt;
 }
 
 void SeparateChainingHashTable::delPolynomial(const std::string& polName)
@@ -436,7 +459,7 @@ void SeparateChainingHashTable::delPolynomial(const std::string& polName)
 	{
 		Node* tmp = p->pNextInChain;
 		delete p;
-		p = tmp;
+		mTable[hashFunc(polName)] = tmp; // заменил p на mTable[hashFunc(polName)], Ќќ Ё“ќ Ќ≈ѕ–ј¬»Ћ№Ќќ, я Ё“ќ —ƒ≈ЋјЋ „“ќЅџ Ќ≈  –јЎ»Ћќ—№, Ћ®Ќя ѕќ„»Ќ»»»»»»»»»»» (если оставить p, то мен€тс€ только локальна€ перменна€ p, а не поле класса)
 		mCurrentSize--;
 		return;
 	}
@@ -462,6 +485,11 @@ bool SeparateChainingHashTable::empty()
 {
 	return mCurrentSize == 0;
 
+}
+
+std::vector<std::pair< std::string, polynomial>> SeparateChainingHashTable::getPolynomials()
+{
+	return {};
 }
 
 // *** Aggregator ***
@@ -509,12 +537,12 @@ std::optional<polynomial> Aggregator::findPolynomial(const std::string& polName)
 }
 
 void Aggregator::addPolynomial(const std::string& polName, const polynomial& pol) {
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 		tables[i]->addPolynomial(polName, pol);
 }
 
 void Aggregator::delPolynomial(const std::string& polName) {
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 		tables[i]->delPolynomial(polName);
 }
 
@@ -526,4 +554,8 @@ Aggregator::~Aggregator() {
 	for (auto table : tables) {
 		delete table; // i dont know if this calls tables' destructors
 	}
+}
+
+std::vector<std::pair< std::string, polynomial>> Aggregator::getPolynomials() {
+	return tables[currentTable]->getPolynomials();
 }

@@ -81,9 +81,31 @@ std::vector<std::string> tokenize(const std::string& originalExpression) // to b
     return tokens;
 }
 
+void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator)
+{
+    std::vector<std::pair< std::string, polynomial>> records = pAggregator->getPolynomials();
+    pTableWidget->setRowCount(0);
+
+    for (int i = 0; i < records.size(); i++) {
+        std::pair< std::string, polynomial> record = records[i];
+        std::ostringstream os;
+        os << record.second;
+        std::string polyString = os.str();
+
+        pTableWidget->insertRow(pTableWidget->rowCount());
+        QTableWidgetItem* twi = new QTableWidgetItem(QString::fromStdString(record.first));
+        pTableWidget->setItem(i, 0, twi);
+        twi = new QTableWidgetItem(QString::fromStdString(polyString));
+        pTableWidget->setItem(i, 1, twi);
+
+    }
+
+    pTableWidget->resizeColumnsToContents();
+}
+
 /// @return false if there was an error
 /// @return true otherwise
-bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField) // TODO: tell user the index of mistake
+bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField, QTableWidget* pTableWidget) // TODO: tell user the index of mistake
 {
     std::variant<polynomial, syntax_error, std::string> result = PolynomialCalculator::calculate(inp, pAggregator);
     if (result.index() == 1)
@@ -104,10 +126,10 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
 
         std::ostringstream os;
         os << resPol;
-        os.clear();
-
         std::string str;
         str = os.str();
+        os.str("");
+        os.clear();
 
         // временное решение, потом надо будет делать нормальное имя полиномов. но вроде у Лёши всё схвачено
         os << pAggregator->size();
@@ -115,31 +137,26 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
         pAggregator->addPolynomial(name, resPol);
 
         pOutputField->setHtml(QString::fromStdString(str) + '\n' + pOutputField->toHtml());
+        tableWidgetUpdate(pTableWidget, pAggregator);
 
         return true;
     }
 
 }
 
-void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator) 
-{
-    for (int i = 0; i < v.size(); i++) {
-        QTableWidgetItem* twi = new QTableWidgetItem( QString::number(i) );
-        pTableWidget->setItem(i, 0, twi);
-        twi = new QTableWidgetItem(QString::fromStdString(v[i]));
-        pTableWidget->setItem(i, 1, twi);
-    }
-
-    pTableWidget->resizeColumnsToContents();
-}
-
-void deleteAction(QTableWidget* pTableWidget, int row) 
+void deleteAction(QTableWidget* pTableWidget, Aggregator* pAggregator, int row) 
 {
     if (row >= 0 && row < v.size()) {
         int rowInd = row;
+
+
+        std::string polyName = (pTableWidget->item(rowInd, 0)->text()).toStdString();
+        pAggregator->delPolynomial(polyName);
+
         pTableWidget->removeRow(row);
         qDebug() << "Row " << rowInd << " deleted";
-        v.erase(std::next(v.begin(), row));
+
+        tableWidgetUpdate(pTableWidget, pAggregator);
     }
     else {
         if (row != -1) // row == -1 if there is no selection
@@ -147,9 +164,16 @@ void deleteAction(QTableWidget* pTableWidget, int row)
     }
 }
 
-void clearAction(QTableWidget* pTableWidget) 
+void clearAction(QTableWidget* pTableWidget, Aggregator* pAggregator)
 {
     v.clear();
+
+    auto records = pAggregator->getPolynomials();
+
+    for (auto record : records) {
+        pAggregator->delPolynomial(record.first);
+    }
+
     qDebug() << "Cleared";
     pTableWidget->setRowCount(0);
 }
@@ -235,12 +259,10 @@ int main(int argc, char* argv[])
                 v.push_back(s);
                 qDebug() << "Input:" << inputText;
 
-                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField)) {
+                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField, pTableWidget)) {
                     /*
                     input processing here
                     */
-                    pTableWidget->insertRow(pTableWidget->rowCount());
-                    tableWidgetUpdate(pTableWidget);
 
                     pInputField->clear();
                     pInputErrorField->clear(); // clear error field if everything is fine
@@ -266,13 +288,13 @@ int main(int argc, char* argv[])
 
             QAction* buttonDeleteAction = menu.addAction("Delete");
 
-            QObject::connect(buttonDeleteAction, &QAction::triggered, [pTableWidget, pItem]()
+            QObject::connect(buttonDeleteAction, &QAction::triggered, [pTableWidget, pItem, pAggregator]()
                 {
                     int row = pItem->row();
-                    deleteAction(pTableWidget, row);
+                    deleteAction(pTableWidget, pAggregator, row);
 
                     pTableWidget->clearSelection();
-                    tableWidgetUpdate(pTableWidget);
+                    tableWidgetUpdate(pTableWidget, pAggregator);
                 });
 
             menu.exec(pTableWidget->viewport()->mapToGlobal(pos));
@@ -282,15 +304,15 @@ int main(int argc, char* argv[])
     QPushButton::connect(pDeleteButton, &QPushButton::clicked, [pTableWidget, pAggregator]()
         {
             int row = pTableWidget->selectionModel()->currentIndex().row();
-            deleteAction(pTableWidget, row);
+            deleteAction(pTableWidget, pAggregator, row);
 
             pTableWidget->clearSelection();
             tableWidgetUpdate(pTableWidget, pAggregator);
         });
 
-    QPushButton::connect(pClearButton, &QPushButton::clicked, [pTableWidget]() 
+    QPushButton::connect(pClearButton, &QPushButton::clicked, [pTableWidget, pAggregator]()
         {
-            clearAction(pTableWidget);
+            clearAction(pTableWidget, pAggregator);
         });
 
     QComboBox::connect(pComboBox, &QComboBox::currentTextChanged, [&](const QString& text) 

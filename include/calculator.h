@@ -18,6 +18,11 @@ public:
             tmp = std::get<polynomial>(tmp.from_string("x^2"));
             return tmp;
         }
+        else if (expression == "fir") {
+            polynomial tmp = polynomial();
+            tmp = std::get<polynomial>(tmp.from_string("x"));
+            return tmp;
+        }
         return "Not implemented!";
     }
 };
