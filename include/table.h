@@ -13,6 +13,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) = 0;
 	virtual unsigned int size() = 0;
 	virtual bool empty() = 0;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() = 0;
 
 	virtual ~Table() = 0 {}; // removed {}, may be its bad
 };
@@ -24,7 +25,8 @@ class LinearArrTable: public Table
 		std::string key;
 		polynomial value;
 	};
-	std::vector<Pol> table;
+
+	std::vector<Pol> mTable;
 
 public:
 	LinearArrTable();
@@ -34,6 +36,8 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty(); 
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
+
 
 	virtual ~LinearArrTable() {};
 };
@@ -41,14 +45,14 @@ public:
 
 class LinearListTable : public Table 
 {
-	struct TNode
+	struct Node
 	{
 		std::string key;
 		polynomial value;
-		TNode* pNext;
+		Node* pNext;
 	};
-	TNode* pFirst;
-	size_t tableSize;
+	Node* pFirst;
+	size_t mTableSize;
 
 public:
 	LinearListTable();
@@ -58,6 +62,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~LinearListTable();
 };
@@ -65,6 +70,16 @@ public:
 
 class OrderedTable : public Table 
 {
+	struct Pol
+	{
+		std::string key;
+		polynomial value;
+	};
+
+	Pol* pTable;
+	size_t mCurrentSize;
+	size_t mTableSize;
+
 public:
 	OrderedTable();
 
@@ -73,8 +88,9 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
-	virtual ~OrderedTable() {};
+	virtual ~OrderedTable();
 };
 
 
@@ -88,6 +104,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~TreeTable() {};
 };
@@ -95,6 +112,20 @@ public:
 
 class OpenAddressHashTable : public Table 
 {
+	struct Node
+	{
+		int status; // 1 - занята, 0 - пуста, -1 - удалена
+		std::string key;
+		polynomial value;
+	};
+
+	std::vector<Node> mTable;
+	size_t step;
+	size_t mTableSize;
+	size_t mCurrentSize;
+
+	unsigned int hashFunc(const std::string& key);
+
 public:
 	OpenAddressHashTable();
 
@@ -103,6 +134,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~OpenAddressHashTable() {};
 };
@@ -110,7 +142,23 @@ public:
 
 class SeparateChainingHashTable : public Table 
 {
+	struct Node
+	{
+		std::string key;
+		polynomial value;
+		Node* pNextInChain;
+	};
+
+	std::vector<Node*> mTable;
+	size_t mTableSize;
+	size_t mCurrentSize;
+
+	unsigned int hashFunc(const std::string& key);
+
+
+
 public:
+
 	SeparateChainingHashTable();
 
 	virtual std::optional<polynomial> findPolynomial(const std::string& polName) override; // find polynomial named polName
@@ -118,6 +166,7 @@ public:
 	virtual void delPolynomial(const std::string& polName) override;
 	virtual unsigned int size() override;
 	virtual bool empty() override;
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
 	virtual ~SeparateChainingHashTable() {};
 };
@@ -141,6 +190,8 @@ public:
 	void addPolynomial(const std::string& polName, const polynomial& pol);
 	void delPolynomial(const std::string& polName);
 	unsigned int size();
+	bool empty();
+	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials();
 
 	~Aggregator();
 };
