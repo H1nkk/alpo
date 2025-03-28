@@ -12,23 +12,37 @@ TYPED_TEST_SUITE(TableTest, TableTypes);
 
 
 TYPED_TEST(TableTest, defaultTableConstructor) {
-	ADD_FAILURE();
-}
-
-TYPED_TEST(TableTest, canFindExsistingPolynomial) {
-	ADD_FAILURE();
-}
-
-TYPED_TEST(TableTest, cannotFindUnexsistingPolynomial) {
-	ADD_FAILURE();
+	EXPECT_TRUE(this->table.empty());
+	EXPECT_EQ(this->table.size(), 0);
 }
 
 TYPED_TEST(TableTest, canAddUnpresentPolynomial) {
-	ADD_FAILURE();
+	polynomial a;
+	a.from_string("12x2-4y");
+	this->table.addPolynomial("Pol1", a);
+	EXPECT_FALSE(this->table.empty());
+	EXPECT_EQ(this->table.size(), 1);
 }
 
 TYPED_TEST(TableTest, cannotAddPresentPolynomial) {
-	ADD_FAILURE();
+	polynomial a;
+	a.from_string("12x2-4y");
+	this->table.addPolynomial("Pol1", a);
+	this->table.addPolynomial("Pol1", a);
+	EXPECT_FALSE(this->table.empty());
+	EXPECT_EQ(this->table.size(), 1);
+}
+
+TYPED_TEST(TableTest, canFindExsistingPolynomial) {
+	//this->table.
+	polynomial a;
+	a.from_string("12x2-4y");
+	this->table.addPolynomial("Pol1", a);
+	EXPECT_EQ(this->table.findPolynomial("Pol1"), a);
+}
+
+TYPED_TEST(TableTest, cannotFindUnexsistingPolynomial) {
+	EXPECT_EQ(this->table.findPolynomial("Pol1"), std::nullopt);
 }
 
 TYPED_TEST(TableTest, canDelPresentPolynomial) {
