@@ -12,6 +12,6 @@ namespace Compiler {
         /// @brief Преобразовать последовательность токенов в программу для интерпретации
         /// @param tokens Последовательность токенов, которую нужно скомпилировать
         /// @return Программа или синтаксическая ошибка
-        std::variant<Intr::Program, SyntaxError> compileExpression(const std::vector<Lexer::Token>& tokens);
+        std::variant<Intr::Program, syntax_error> compileExpression(const std::vector<Lexer::Token>& tokens);
     };
 }

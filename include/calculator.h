@@ -3,6 +3,9 @@
 #include "syntax_error.h"
 #include <string>
 #include "table.h"
+#include "lexer/lexer.h"
+#include "expression_compiler/expression_compiler.h"
+#include "expression_interpreter/expression_interpreter.h"
 
 class PolynomialCalculator final
 {
@@ -11,18 +14,32 @@ public:
     /// @param expression Выражение
     /// @param pAggregator Агрегатор таблиц
     /// @return polynomial - ответ в виде полинома, syntax_error - синтакcическая ошибка или std::string - ошибка исполнения
-    static std::variant<polynomial, syntax_error, std::string> calculate(const std::string& expression, const Aggregator* pAggregator)
+    static std::variant<polynomial, syntax_error, std::string> calculate(const std::string& expression, Aggregator* pAggregator)
     {
-        if (expression == "sec") {
-            polynomial tmp = polynomial();
-            tmp = std::get<polynomial>(tmp.from_string("x^2"));
-            return tmp;
+        Lexer::Lexer lexer(expression);
+        auto tokens = lexer.getAllTokens();
+
+        if (lexer.hasError())
+        {
+            return syntax_error{ tokens.back().startPos(), "Unexpected symbol" };
         }
-        else if (expression == "fir") {
-            polynomial tmp = polynomial();
-            tmp = std::get<polynomial>(tmp.from_string("x"));
-            return tmp;
+
+        Compiler::ExpressionCompiler comp;
+        auto compRes = comp.compileExpression(tokens);
+
+        if (std::holds_alternative<syntax_error>(compRes))
+        {
+            return std::get<syntax_error>(compRes);
         }
-        return "Not implemented!";
+
+        Intr::ExpressionInterpreter intr(pAggregator);
+        auto execRes = intr.execute(std::get<Intr::Program>(compRes));
+        
+        if (std::holds_alternative<std::string>(execRes))
+        {
+            return std::get<std::string>(execRes);
+        }
+
+        return std::get<polynomial>(execRes);
     }
 };

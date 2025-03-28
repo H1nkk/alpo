@@ -486,7 +486,7 @@ namespace Compiler {
             tok = tokens[tokIndex++];
 
             if (!validateToken(prevType(), curType()))
-                throw SyntaxError{ tok.startPos(), "Unexpected token" };
+                throw syntax_error{ tok.startPos(), "Unexpected token" };
         }
 
         bool isTok(TokenType type)
@@ -524,12 +524,12 @@ namespace Compiler {
         void closeBlock()
         {
             if (blocks.Top().commaCount > 0)
-                throw SyntaxError{ tok.startPos(), "Not enough arguments" };
+                throw syntax_error{ tok.startPos(), "Not enough arguments" };
 
             if (isTok(TokenType::RPAR))
             {
                 if (blocks.Top().startTokenType != TokenType::LPAR)
-                    throw SyntaxError{ tok.startPos(), "Unexpected right parenthesis" };
+                    throw syntax_error{ tok.startPos(), "Unexpected right parenthesis" };
 
                 blocks.Pop();
 
@@ -539,7 +539,7 @@ namespace Compiler {
             else if (isTok(TokenType::ENDOFFILE))
             {
                 if (blocks.Size() != 1 || blocks.Top().startTokenType != TokenType::NONE)
-                    throw SyntaxError{ tok.startPos(), "Unclosed parenthesis" };
+                    throw syntax_error{ tok.startPos(), "Unclosed parenthesis" };
 
                 blocks.Pop();
 
@@ -552,7 +552,7 @@ namespace Compiler {
             CompilationBlock val = blocks.Top();
 
             if (val.commaCount == 0)
-                throw SyntaxError{ tok.startPos(), "Too many arguments" };
+                throw syntax_error{ tok.startPos(), "Too many arguments" };
 
             compileToTok({ TokenType::LPAR, }, false);
             
@@ -603,7 +603,7 @@ namespace Compiler {
             };
             
             if (!monomialTokens.count(tok.type()))
-                throw SyntaxError{ tok.startPos(), "Expected polynomial" };
+                throw syntax_error{ tok.startPos(), "Expected polynomial" };
 
             size_t startIndex = tok.startPos();
             size_t count = 0;
@@ -634,7 +634,7 @@ namespace Compiler {
                         prog.push_back(val);
                     } catch(std::out_of_range) 
                     {
-                        throw SyntaxError{ tok.startPos(), "Too big integer" };
+                        throw syntax_error{ tok.startPos(), "Too big integer" };
                     }
                 }
                 else
@@ -647,16 +647,16 @@ namespace Compiler {
                     }
                     catch (std::out_of_range)
                     {
-                        throw SyntaxError{ tok.startPos(), "Too big float" };
+                        throw syntax_error{ tok.startPos(), "Too big float" };
                     }
                 }
             }
             else
             {
-                std::variant<polynomial, SyntaxError> res = polynomial::from_string(monomialStr.str());
-                if (std::holds_alternative<SyntaxError>(res))
+                std::variant<polynomial, syntax_error> res = polynomial::from_string(monomialStr.str());
+                if (std::holds_alternative<syntax_error>(res))
                 {
-                    SyntaxError err = std::get<SyntaxError>(res);
+                    syntax_error err = std::get<syntax_error>(res);
                     err.pos = startIndex + err.pos;
                     throw err;
                 }
@@ -667,7 +667,7 @@ namespace Compiler {
         }
     };
 
-    std::variant<Intr::Program, SyntaxError> ExpressionCompiler::compileExpression(
+    std::variant<Intr::Program, syntax_error> ExpressionCompiler::compileExpression(
         const std::vector<Lexer::Token>& tokens)
     {
         if (tokens.size() == 0 || tokens.back().type() != TokenType::ENDOFFILE)
@@ -715,7 +715,7 @@ namespace Compiler {
 
             } while (!ctx.isTok(TokenType::ENDOFFILE));
         }
-        catch (SyntaxError e)
+        catch (syntax_error e)
         {
             return e;
         }

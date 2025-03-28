@@ -130,10 +130,10 @@ TEST(PolynomialTest, can_compare)
 TEST(PolynomialTest, check_power_limit)
 {
     auto result = polynomial::from_string("2w^65536");
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(result));
-    if (std::holds_alternative<SyntaxError>(result))
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(result));
+    if (std::holds_alternative<syntax_error>(result))
     {
-        SyntaxError err = std::get<SyntaxError>(result);
+        syntax_error err = std::get<syntax_error>(result);
         EXPECT_EQ(err.message, "Too big power! Maximum supported power is 65535");
     }
 }
@@ -214,10 +214,10 @@ TEST(PolynomialTest, error_overflow_on_int_z)
 TEST(PolynomialTest, error_on_invalid_coefficient)
 {
     auto result = polynomial::from_string("3.5.2x");
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(result));
-    if (std::holds_alternative<SyntaxError>(result))
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(result));
+    if (std::holds_alternative<syntax_error>(result))
     {
-        SyntaxError err = std::get<SyntaxError>(result);
+        syntax_error err = std::get<syntax_error>(result);
         EXPECT_EQ(err.message, "Invalid coefficient!");
     }
 }
@@ -225,10 +225,10 @@ TEST(PolynomialTest, error_on_invalid_coefficient)
 TEST(PolynomialTest, error_on_repeated_variable)
 {
     auto result = polynomial::from_string("2xx");
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(result));
-    if (std::holds_alternative<SyntaxError>(result))
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(result));
+    if (std::holds_alternative<syntax_error>(result))
     {
-        SyntaxError err = std::get<SyntaxError>(result);
+        syntax_error err = std::get<syntax_error>(result);
         EXPECT_EQ(err.message, "Variables in monomes should be mentioned no more than once.");
     }
 }

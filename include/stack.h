@@ -157,9 +157,9 @@ public:
 
     friend void swap(Stack& lhs, Stack& rhs) noexcept
     {
-        std::swap(m_Size, other.m_Size);
-        std::swap(m_Capacity, other.m_Capacity);
-        std::swap(m_Memory, other.m_Memory);
+        std::swap(lhs.m_Size, rhs.m_Size);
+        std::swap(lhs.m_Capacity, rhs.m_Capacity);
+        std::swap(lhs.m_Memory, rhs.m_Memory);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Stack& s)

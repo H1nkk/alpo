@@ -22,7 +22,7 @@ TEST(ExprCompilerTest, error_on_big_integer)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("123313249873429874329213").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
 }
 
 TEST(ExprCompilerTest, can_compile_single_float)
@@ -43,7 +43,7 @@ TEST(ExprCompilerTest, error_on_big_float)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer(std::string(400, '1') + ".2133213").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
 }
 
 TEST(ExprCompilerTest, can_compile_identifier) 
@@ -333,8 +333,8 @@ TEST(ExprCompilerTest, error_on_unclosed_parenthesis)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 43);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 43);
 }
 
 TEST(ExprCompilerTest, error_on_too_many_parentheses)
@@ -342,8 +342,8 @@ TEST(ExprCompilerTest, error_on_too_many_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4)) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 13);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 13);
 }
 
 TEST(ExprCompilerTest, error_on_empty_parentheses)
@@ -351,8 +351,8 @@ TEST(ExprCompilerTest, error_on_empty_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4) + () + * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 17);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 17);
 }
 
 TEST(ExprCompilerTest, error_on_two_operators_in_a_row)
@@ -360,8 +360,8 @@ TEST(ExprCompilerTest, error_on_two_operators_in_a_row)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + = pol4) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 8);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 8);
 }
 
 TEST(ExprCompilerTest, error_on_binary_operator_without_left_argument)
@@ -369,8 +369,8 @@ TEST(ExprCompilerTest, error_on_binary_operator_without_left_argument)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer(" * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 1);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 1);
 }
 
 TEST(ExprCompilerTest, error_on_binary_operator_without_right_argument)
@@ -378,8 +378,8 @@ TEST(ExprCompilerTest, error_on_binary_operator_without_right_argument)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("2 * (2.31 + (pol2 = xy2 * )").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 26);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 26);
 }
 
 TEST(ExprCompilerTest, error_on_function_use_without_parentheses)
@@ -387,8 +387,8 @@ TEST(ExprCompilerTest, error_on_function_use_without_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("2 * derx 2.31 + (pol2 = xy2 * 20)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 9);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 9);
 }
 
 TEST(ExprCompilerTest, error_on_function_too_many_params)
@@ -396,8 +396,8 @@ TEST(ExprCompilerTest, error_on_function_too_many_params)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("intx(x, y)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 6);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 6);
 }
 
 TEST(ExprCompilerTest, error_on_function_not_enough_params)
@@ -405,6 +405,6 @@ TEST(ExprCompilerTest, error_on_function_not_enough_params)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("calc(x, 10)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
-    EXPECT_EQ(std::get<SyntaxError>(res).pos, 10);
+    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_EQ(std::get<syntax_error>(res).pos, 10);
 }
