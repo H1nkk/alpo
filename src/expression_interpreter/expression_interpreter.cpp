@@ -1,11 +1,12 @@
 #include "expression_interpreter/expression_interpreter.h"
+#include "table.h"
 
 namespace Intr {
 
     class VirtualMachine final
     {
     private:
-        const Aggregator* pAggregator;
+        Aggregator* pAggregator;
         Stack<Op> mOperands;
 
         double getDoubleOp()
@@ -44,7 +45,13 @@ namespace Intr {
             }
             else if (std::holds_alternative<std::string>(op))
             {
-                // TODO: aggregator
+                auto p = pAggregator->findPolynomial(std::get<std::string>(op));
+                if (!p.has_value())
+                {
+                    throw "Polynomial with name " + std::get<std::string>(op) + " does not exist";
+                }
+
+                return p.value();
             }
             else
             {
@@ -66,11 +73,56 @@ namespace Intr {
             mOperands.Push(p2 - p1);
         }
 
-        void multiply();
+        void multiply()
+        {
+            polynomial p1 = getPolynomialOp();
+            polynomial p2 = getPolynomialOp();
+            mOperands.Push(p2 * p1);
+        }
 
-        void assign();
+        void assign()
+        {
+            polynomial p = getPolynomialOp();
+            
+            Op name = mOperands.Top();
+            mOperands.Pop();
 
-        void negate();
+            if (!std::holds_alternative<std::string>(name))
+            {
+                throw std::runtime_error(__FUNCTION__ ": expected identifier.");
+            }
+
+            pAggregator->addPolynomial(std::get<std::string>(name), p);
+        }
+
+        void negate()
+        {
+            Op op = mOperands.Top();
+            mOperands.Pop();
+
+            if (std::holds_alternative<polynomial>(op))
+            {
+                mOperands.Push(-std::get<polynomial>(op));
+            } else if (std::holds_alternative<unsigned long>(op))
+            {
+                mOperands.Push(-(double)std::get<unsigned long>(op));
+            } else if (std::holds_alternative<double>(op))
+            {
+                mOperands.Push(-std::get<double>(op));
+            } else if (std::holds_alternative<std::string>(op))
+            {
+                auto p = pAggregator->findPolynomial(std::get<std::string>(op));
+                if (!p.has_value())
+                {
+                    throw "Polynomial with name " + std::get<std::string>(op) + " does not exist";
+                }
+
+                mOperands.Push(-p.value());
+            } else
+            {
+                throw std::runtime_error(__FUNCTION__ ": unknown operand type.");
+            }
+        }
 
         void calc()
         {
@@ -102,13 +154,28 @@ namespace Intr {
             mOperands.Push(getPolynomialOp().derivative_w());
         }
 
-        void intx();
-        void inty();
-        void intz();
-        void intw();
+        void intx()
+        {
+            mOperands.Push(getPolynomialOp().integral_x());
+        }
+
+        void inty()
+        {
+            mOperands.Push(getPolynomialOp().integral_y());
+        }
+
+        void intz()
+        {
+            mOperands.Push(getPolynomialOp().integral_z());
+        }
+
+        void intw()
+        {
+            mOperands.Push(getPolynomialOp().integral_w());
+        }
 
     public:
-        VirtualMachine(const Aggregator* aggregator) : pAggregator(aggregator) {}
+        VirtualMachine(Aggregator* aggregator) : pAggregator(aggregator) {}
 
         void execOp(const Op& op)
         {

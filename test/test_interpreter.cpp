@@ -1,50 +1,113 @@
 #include <gtest/gtest.h>
+#include "lexer/lexer.h"
+#include "expression_compiler/expression_compiler.h"
 #include "expression_interpreter/expression_interpreter.h"
 
+using namespace Intr;
+using namespace Compiler;
+
 TEST(ExprInterpreterTest, can_execute_single_monomial) {
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("123x54y12z12w").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w")));
 }
 
 TEST(ExprInterpreterTest, can_execute_polynomial_name) {
+    // TODO: implement this then all tables will be done
     ADD_FAILURE();
 }
 
 TEST(ExprInterpreterTest, can_execute_sum) {
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("123x54y12z12w + (50 + 40x)").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w + 40x + 50")));
 }
 
 TEST(ExprInterpreterTest, can_execute_subtraction) {
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("123x54y12z12w - (50 + 40x)").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w - 40x - 50")));
 }
 
 TEST(ExprInterpreterTest, can_execute_multiplication) {
-    ADD_FAILURE();
-}
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("123x54y12z12w * (50 + 40x)").getAllTokens()
+        ))
+    );
 
-TEST(ExprInterpreterTest, can_execute_power) {
-    ADD_FAILURE();
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
 }
 
 TEST(ExprInterpreterTest, can_execute_assignment) {
+    // TODO: implement this then all tables will be done
     ADD_FAILURE();
 }
 
 TEST(ExprInterpreterTest, can_execute_calc) {
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("123x54y12z12w + calc(50 + 40x + y, 50.0, -10, -2, 30.112)").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w + 2040")));
 }
 
 TEST(ExprInterpreterTest, can_execute_der) {
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("derx(3w^2 + 2x + z + 4y^3) + dery(3w^2 + 2x + z + 4y^3) + derz(3w^2 + 2x + z + 4y^3) + derw(3w^2 + 2x + z + 4y^3)").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("3 + 12y2 + 6w")));
 }
 
 TEST(ExprInterpreterTest, can_execute_int) {
-    ADD_FAILURE();
-}
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("intx(3w^2 + 2x + z + 4y^3) + inty(3w^2 + 2x + z + 4y^3) + intz(3w^2 + 2x + z + 4y^3) + intw(3w^2 + 2x + z + 4y^3)").getAllTokens()
+        ))
+    );
 
-TEST(ExprInterpreterTest, can_execute_big_expression) {
-    ADD_FAILURE();
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("3xw2+x2+3xz+4xy3 + 3yw2+2xy+yz+y4 + 3zw2+0.5z2+4zy3 + w3+2xw+wz+4wy3")));
 }
 
 TEST(ExprInterpreterTest, throw_on_unknown_polynomial) {
+    // TODO: implement this then all tables will be done
     ADD_FAILURE();
 }

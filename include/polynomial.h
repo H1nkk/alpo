@@ -13,23 +13,28 @@ private:
     {
     private:
         double mCoefficient;
-        uint32_t mDegree;
+        uint64_t mDegree;
     public:
         monomial() noexcept : mCoefficient(0.0), mDegree(0) {}
-        monomial(double coefficient, uint8_t w, uint8_t x, uint8_t y, uint8_t z) noexcept : mCoefficient(coefficient),
-            mDegree(((uint32_t)w << 24) | ((uint32_t)x << 16) | ((uint32_t)y << 8) | ((uint32_t)z))
-        {}
+        monomial(double coefficient, uint32_t w, uint32_t x, uint32_t y, uint32_t z) noexcept : mCoefficient(coefficient),
+            mDegree(((uint64_t)w << 48) | ((uint64_t)x << 32) | ((uint64_t)y << 16) | ((uint64_t)z))
+        {
+            if (w > UINT16_MAX || x > UINT16_MAX || y > UINT16_MAX || z > UINT16_MAX)
+            {
+                throw std::invalid_argument(__FUNCTION__ ": overflow occurred.");
+            }
+        }
 
         bool operator==(const monomial& other) const { return mCoefficient == other.mCoefficient && mDegree == other.mDegree; }
         bool operator!=(const monomial& other) const { return !operator==(other); }
 
         double coefficient() const noexcept { return mCoefficient; }
         void setCoefficient(double coefficient) { mCoefficient = coefficient; }
-        uint32_t degree() const noexcept { return mDegree; }
-        uint8_t w() const noexcept { return static_cast<uint8_t>(mDegree >> 24); }
-        uint8_t x() const noexcept { return static_cast<uint8_t>(mDegree >> 16); }
-        uint8_t y() const noexcept { return static_cast<uint8_t>(mDegree >> 8); }
-        uint8_t z() const noexcept { return static_cast<uint8_t>(mDegree); }
+        uint64_t degree() const noexcept { return mDegree; }
+        uint16_t w() const noexcept { return static_cast<uint16_t>(mDegree >> 48); }
+        uint16_t x() const noexcept { return static_cast<uint16_t>(mDegree >> 32); }
+        uint16_t y() const noexcept { return static_cast<uint16_t>(mDegree >> 16); }
+        uint16_t z() const noexcept { return static_cast<uint16_t>(mDegree); }
     };
 
     linked_list<monomial> mMonomials;
@@ -54,6 +59,7 @@ public:
     polynomial operator-() const;
     polynomial operator-(const polynomial& other) const;
     polynomial& operator-=(const polynomial& other);
+    polynomial operator*(const polynomial& other) const;
     polynomial operator*(double coefficient) const;
     friend polynomial operator*(double coefficient, const polynomial& p);
     polynomial& operator*=(double coefficient);
@@ -64,4 +70,8 @@ public:
     polynomial derivative_x() const;
     polynomial derivative_y() const;
     polynomial derivative_z() const;
+    polynomial integral_x() const;
+    polynomial integral_y() const;
+    polynomial integral_z() const;
+    polynomial integral_w() const;
 };

@@ -13,8 +13,8 @@ polynomial polynomial::operator+(const polynomial& other) const
 
     while (it1 != mMonomials.end() && it2 != other.mMonomials.end())
     {
-        uint32_t deg1 = (*it1).degree();
-        uint32_t deg2 = (*it2).degree();
+        uint64_t deg1 = (*it1).degree();
+        uint64_t deg2 = (*it2).degree();
 
         if (deg1 > deg2)
         {
@@ -49,6 +49,36 @@ polynomial polynomial::operator+(const polynomial& other) const
     }
 
     return result;
+}
+
+polynomial polynomial::operator*(const polynomial& other) const
+{
+    polynomial res{};
+
+    for (const auto& ms : mMonomials)
+    {
+        polynomial tmp{};
+
+        for (const auto& mo : other.mMonomials)
+        {
+            double coef = ms.coefficient() * mo.coefficient();
+            uint32_t xDeg = ms.x() + mo.x();
+            uint32_t yDeg = ms.y() + mo.y();
+            uint32_t zDeg = ms.z() + mo.z();
+            uint32_t wDeg = ms.w() + mo.w();
+
+            if (xDeg > UINT16_MAX || yDeg > UINT16_MAX || zDeg > UINT16_MAX || wDeg > UINT16_MAX)
+            {
+                throw "Overflow in multiplication occurred";
+            }
+
+            tmp.mMonomials.push_back(monomial(coef, wDeg, xDeg, yDeg, zDeg));
+        }
+
+        res += tmp;
+    }
+
+    return res;
 }
 
 polynomial polynomial::operator*(double coefficient) const
@@ -183,7 +213,7 @@ polynomial polynomial::derivative_w() const
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
-        uint8_t degree = (*it).w();
+        uint16_t degree = (*it).w();
         if (degree > 0)
         {
             res.mMonomials.push_back(
@@ -201,7 +231,7 @@ polynomial polynomial::derivative_x() const
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
-        uint8_t degree = (*it).x();
+        uint16_t degree = (*it).x();
         if (degree > 0)
         {
             res.mMonomials.push_back(
@@ -219,7 +249,7 @@ polynomial polynomial::derivative_y() const
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
-        uint8_t degree = (*it).y();
+        uint16_t degree = (*it).y();
         if (degree > 0)
         {
             res.mMonomials.push_back(
@@ -237,12 +267,100 @@ polynomial polynomial::derivative_z() const
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
-        uint8_t degree = (*it).z();
+        uint16_t degree = (*it).z();
         if (degree > 0)
         {
             res.mMonomials.push_back(
                 monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y(), (*it).z() - 1)
             );
+        }
+    }
+
+    return res;
+}
+
+polynomial polynomial::integral_x() const
+{
+    polynomial res;
+
+    for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
+    {
+        uint16_t degree = (*it).x();
+        if (degree < UINT16_MAX)
+        {
+            res.mMonomials.push_back(
+                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x() + 1, (*it).y(), (*it).z())
+            );
+        }
+        else
+        {
+            throw "Overflow in integration occurred";
+        }
+    }
+
+    return res;
+}
+
+polynomial polynomial::integral_y() const
+{
+    polynomial res;
+
+    for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
+    {
+        uint16_t degree = (*it).y();
+        if (degree < UINT16_MAX)
+        {
+            res.mMonomials.push_back(
+                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y() + 1, (*it).z())
+            );
+        }
+        else
+        {
+            throw "Overflow in integration occurred";
+        }
+    }
+
+    return res;
+}
+
+polynomial polynomial::integral_z() const
+{
+    polynomial res;
+
+    for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
+    {
+        uint16_t degree = (*it).z();
+        if (degree < UINT16_MAX)
+        {
+            res.mMonomials.push_back(
+                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y(), (*it).z() + 1)
+            );
+        }
+        else
+        {
+            throw "Overflow in integration occurred";
+        }
+    }
+
+    return res;
+}
+
+polynomial polynomial::integral_w() const
+{
+    polynomial res;
+
+    for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
+    {
+        uint16_t degree = (*it).w();
+        if (degree < UINT16_MAX)
+        {
+            res.mMonomials.push_back(
+                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w() + 1, (*it).x(), (*it).y(), (*it).z())
+            );
+        }
+        else
+        {
+            throw "Overflow in integration occurred";
         }
     }
 
@@ -275,11 +393,11 @@ std::variant<polynomial::monomial, SyntaxError> polynomial::parse_monomial(const
         if (coefl != coefficient.size()) return SyntaxError{ offset, "Invalid coefficient!" };
     }
 
-    uint8_t powers[4]{};
+    uint16_t powers[4]{};
 
     while (offset < str.size() && (str[offset] == 'w' || str[offset] == 'x' || str[offset] == 'y' || str[offset] == 'z'))
     {
-        uint8_t& p = powers[str[offset] - 'w'];
+        uint16_t& p = powers[str[offset] - 'w'];
         if (p != 0)
         {
             return SyntaxError{ offset,"Variables in monomes should be mentioned no more than once." };
@@ -303,8 +421,8 @@ std::variant<polynomial::monomial, SyntaxError> polynomial::parse_monomial(const
 
         if (power.size())
         {
-            int32_t poweri = std::stoi(power);
-            if (poweri > 255) return SyntaxError{ offset, "Too big power! Maximum supported power is 255" };
+            uint32_t poweri = std::stoul(power);
+            if (poweri > UINT16_MAX) return SyntaxError{ offset, "Too big power! Maximum supported power is 65535" };
             p = poweri;
         }
     }
@@ -327,7 +445,7 @@ std::variant<polynomial, SyntaxError> polynomial::parse_polynomial(const std::st
     }
     originalIndices.push_back(str.size());
 
-    std::map<uint32_t, monomial> monomials;
+    std::map<uint64_t, monomial> monomials;
     size_t offset = 0;
     while (offset < nospaces.size())
     {

@@ -10,9 +10,9 @@ namespace Intr {
 
     class ExpressionInterpreter final {
     private:
-        const Aggregator* mAggregator;
+        Aggregator* mAggregator;
     public:
-        ExpressionInterpreter(const Aggregator* aggregator) : mAggregator(aggregator) {
+        ExpressionInterpreter(Aggregator* aggregator) : mAggregator(aggregator) {
             if (aggregator == nullptr) {
                 throw std::runtime_error(__FUNCTION__ ": aggregator was null.");
             }

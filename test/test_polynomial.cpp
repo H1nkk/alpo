@@ -17,6 +17,16 @@ TEST(PolynomialTest, can_add_polynomials)
     EXPECT_EQ(sum, std::get<polynomial>(polynomial::from_string("3w^2 + 4x + 4")));
 }
 
+TEST(PolynomialTest, can_multiply_polynomials)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2w^2 + 3x"));
+    polynomial p2 = std::get<polynomial>(polynomial::from_string("w^2 + x + 4"));
+
+    polynomial prod = p1 * p2;
+
+    EXPECT_EQ(prod, std::get<polynomial>(polynomial::from_string("2w4 + 5xw2 + 8w2 + 3x2 + 12x")));
+}
+
 TEST(PolynomialTest, can_subtract_polynomials)
 {
     polynomial p1 = std::get<polynomial>(polynomial::from_string("2w^2 + 3x"));
@@ -75,6 +85,38 @@ TEST(PolynomialTest, can_get_z_derivative)
     EXPECT_EQ(derivative, std::get<polynomial>(polynomial::from_string("1")));
 }
 
+TEST(PolynomialTest, can_get_w_integral)
+{
+    polynomial p = std::get<polynomial>(polynomial::from_string("3w^2 + 2x + z + 4y^3"));
+    polynomial derivative = p.integral_w();
+
+    EXPECT_EQ(derivative, std::get<polynomial>(polynomial::from_string("w^3 + 2xw + zw + 4wy^3")));
+}
+
+TEST(PolynomialTest, can_get_x_integral)
+{
+    polynomial p = std::get<polynomial>(polynomial::from_string("3w^2 + 2x + z + 4y^3"));
+    polynomial derivative = p.integral_x();
+
+    EXPECT_EQ(derivative, std::get<polynomial>(polynomial::from_string("3xw^2 + x^2 + zx + 4xy^3")));
+}
+
+TEST(PolynomialTest, can_get_y_integral)
+{
+    polynomial p = std::get<polynomial>(polynomial::from_string("3w^2 + 2x + z + 4y^3"));
+    polynomial derivative = p.integral_y();
+
+    EXPECT_EQ(derivative, std::get<polynomial>(polynomial::from_string("3yw^2 + 2xy + zy + y^4")));
+}
+
+TEST(PolynomialTest, can_get_z_integral)
+{
+    polynomial p = std::get<polynomial>(polynomial::from_string("3w^2 + 2x + z + 4y^3"));
+    polynomial derivative = p.integral_z();
+
+    EXPECT_EQ(derivative, std::get<polynomial>(polynomial::from_string("3zw^2 + 2xz + 0.5z^2 + 4zy^3")));
+}
+
 TEST(PolynomialTest, can_compare)
 {
     polynomial p1 = std::get<polynomial>(polynomial::from_string("2w^2 + 3x"));
@@ -87,12 +129,12 @@ TEST(PolynomialTest, can_compare)
 
 TEST(PolynomialTest, check_power_limit)
 {
-    auto result = polynomial::from_string("2w^256");
+    auto result = polynomial::from_string("2w^65536");
     EXPECT_TRUE(std::holds_alternative<SyntaxError>(result));
     if (std::holds_alternative<SyntaxError>(result))
     {
         SyntaxError err = std::get<SyntaxError>(result);
-        EXPECT_EQ(err.message, "Too big power! Maximum supported power is 255");
+        EXPECT_EQ(err.message, "Too big power! Maximum supported power is 65535");
     }
 }
 
@@ -135,6 +177,38 @@ TEST(PolynomialTest, returns_empty_derivative)
     polynomial p = std::get<polynomial>(polynomial::from_string("3w^2 + 2x + z"));
     polynomial derivative = p.derivative_y();
     EXPECT_EQ(derivative, polynomial());
+}
+
+TEST(PolynomialTest, error_overflow_on_multiply)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2w^65000"));
+    polynomial p2 = std::get<polynomial>(polynomial::from_string("w^65000"));
+
+    EXPECT_ANY_THROW(p1 * p2);
+}
+
+TEST(PolynomialTest, error_overflow_on_int_w)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2w^65535"));
+    EXPECT_ANY_THROW(p1.integral_w());
+}
+
+TEST(PolynomialTest, error_overflow_on_int_x)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2x^65535"));
+    EXPECT_ANY_THROW(p1.integral_x());
+}
+
+TEST(PolynomialTest, error_overflow_on_int_y)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2y^65535"));
+    EXPECT_ANY_THROW(p1.integral_y());
+}
+
+TEST(PolynomialTest, error_overflow_on_int_z)
+{
+    polynomial p1 = std::get<polynomial>(polynomial::from_string("2z^65535"));
+    EXPECT_ANY_THROW(p1.integral_z());
 }
 
 TEST(PolynomialTest, error_on_invalid_coefficient)
