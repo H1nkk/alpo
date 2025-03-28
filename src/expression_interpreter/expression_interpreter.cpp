@@ -92,6 +92,7 @@ namespace Intr {
                 throw std::runtime_error(__FUNCTION__ ": expected identifier.");
             }
 
+            mOperands.Push(p);
             pAggregator->addPolynomial(std::get<std::string>(name), p);
         }
 
