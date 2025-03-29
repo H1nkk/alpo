@@ -108,7 +108,7 @@ void clearAction(QTableWidget* pTableWidget, Aggregator* pAggregator)
     pTableWidget->setRowCount(0);
 }
 
-void changeTable(Aggregator* pAggregator, std::string text) {
+void changeTable(QTableWidget* pTableWidget, Aggregator* pAggregator, std::string text) {
     std::string code;
     if (text == "Linear array table") 
     {
@@ -138,6 +138,7 @@ void changeTable(Aggregator* pAggregator, std::string text) {
         throw "Something went wrong during table changing";
     }
     pAggregator->selectTable(code);
+    tableWidgetUpdate(pTableWidget, pAggregator);
 }
 
 int main(int argc, char* argv[]) 
@@ -263,7 +264,7 @@ int main(int argc, char* argv[])
     QComboBox::connect(pComboBox, &QComboBox::currentTextChanged, [&](const QString& text) 
         {
             std::string s = text.toUtf8().constData();
-            changeTable(pAggregator, s);
+            changeTable(pTableWidget, pAggregator, s);
             qDebug() << "Table changed to" << text;
         });
 
