@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <sstream>
+#include <format>
 #include "ui_main_window.h"
 #include "ui_info_widget.h"
 #include "test.h"
@@ -32,10 +33,12 @@ void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator)
     pTableWidget->resizeColumnsToContents();
 }
 
-void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::string polyName, double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0) {
-    double result = (pAggregator->findPolynomial(polyName).value()).evaluate(x, y, z, w);
+void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::string polyName, double w = 0.0, double x = 0.0, double y = 0.0, double z = 0.0) {
+    double result = (pAggregator->findPolynomial(polyName).value()).evaluate(w, x, y, z);
 
-    pOutputField->setHtml(QString::fromStdString(std::to_string(result)) + '\n' + pOutputField->toHtml());
+    std::string outputLine = polyName + std::format("({}, {}, {}, {})", w, x, y, z) + " = " + std::to_string(result);
+
+    pOutputField->setHtml(QString::fromStdString(outputLine) + '\n' + pOutputField->toHtml());
 }
 
 /// @return false if there was an error
@@ -171,6 +174,7 @@ int main(int argc, char* argv[])
 
     infoWindow.setWindowTitle("Help");
     pValidator->setNotation(QDoubleValidator::StandardNotation);
+    pValidator->setLocale(QLocale::C);
 
     pXContainer->setValidator(pValidator);
     pYContainer->setValidator(pValidator);
@@ -206,6 +210,7 @@ int main(int argc, char* argv[])
         if (pItem) {
             QMenu menu;
 
+            QAction* buttonCalculateAction = menu.addAction("Calculate");
             QAction* buttonDeleteAction = menu.addAction("Delete");
 
             QObject::connect(buttonDeleteAction, &QAction::triggered, [pTableWidget, pItem, pAggregator]()
@@ -215,6 +220,26 @@ int main(int argc, char* argv[])
 
                     pTableWidget->clearSelection();
                     tableWidgetUpdate(pTableWidget, pAggregator);
+                });
+
+            QObject::connect(buttonCalculateAction, &QAction::triggered, [&]() {
+                double w = pWContainer->text().toDouble();
+                double x = pXContainer->text().toDouble();
+                double y = pYContainer->text().toDouble();
+                double z = pZContainer->text().toDouble();
+
+                try
+                {
+                    int row = pTableWidget->selectionModel()->currentIndex().row();
+
+                    std::string polyName = pTableWidget->item(row, 0)->text().toStdString();
+
+                    calculateAction(pAggregator, pOutputField, polyName, w, x, y, z);
+                }
+                catch (char* s)
+                {
+                    pInputErrorField->setText("Select a polynomial to evaluate");
+                }
                 });
 
             menu.exec(pTableWidget->viewport()->mapToGlobal(pos));
@@ -252,21 +277,20 @@ int main(int argc, char* argv[])
 
     QPushButton::connect(pCalculateButton, &QPushButton::clicked, [&]() 
         {
+            double w = pWContainer->text().toDouble();
             double x = pXContainer->text().toDouble();
             double y = pYContainer->text().toDouble();
             double z = pZContainer->text().toDouble();
-            double w = pWContainer->text().toDouble();
+   
             int row = pTableWidget->selectionModel()->currentIndex().row();
+            if (row == -1) {
+                pInputErrorField->setText("Select a polynomial to evaluate");
+                return;
+            }
             std::string polyName = pTableWidget->item(row, 0)->text().toStdString();
 
-            calculateAction(pAggregator, pOutputField, polyName, x, y, z, w);
-
-            /* I dont know if this is useful
-            pXContainer->clear();
-            pYContainer->clear();
-            pZContainer->clear();
-            pWContainer->clear();
-            */
+            calculateAction(pAggregator, pOutputField, polyName, w, x, y, z);
+            pInputErrorField->clear();
         });
 
     window.show();
