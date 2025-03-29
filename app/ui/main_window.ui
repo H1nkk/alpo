@@ -212,6 +212,16 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>W:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="wLineEdit"/>
+          </item>
+          <item>
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>X:</string>
@@ -240,16 +250,6 @@
           </item>
           <item>
            <widget class="QLineEdit" name="zLineEdit"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>W:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="wLineEdit"/>
           </item>
           <item>
            <widget class="QPushButton" name="calculateButton">
@@ -310,7 +310,7 @@
 }</string>
           </property>
           <property name="text">
-           <string>Error text syntax</string>
+           <string/>
           </property>
           <property name="readOnly">
            <bool>true</bool>
