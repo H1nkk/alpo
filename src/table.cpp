@@ -146,7 +146,7 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
 {
 	pTable = new Pol[DEFAUL_ORDERED_TABLE_SIZE];
 }
@@ -486,16 +486,17 @@ std::optional<polynomial> SeparateChainingHashTable::findPolynomial(const std::s
 
 void SeparateChainingHashTable::delPolynomial(const std::string& polName)
 {
-	Node* p = mTable[hashFunc(polName)];
-	if (!p) return;
-	if (p->key == polName)
+	int ind = hashFunc(polName); 
+	if (!mTable[ind]) return;
+	if (mTable[ind]->key == polName)
 	{
-		Node* tmp = p->pNextInChain;
-		delete p;
-		mTable[hashFunc(polName)] = tmp; // заменил p на mTable[hashFunc(polName)], Ќќ Ё“ќ Ќ≈ѕ–ј¬»Ћ№Ќќ, я Ё“ќ —ƒ≈ЋјЋ „“ќЅџ Ќ≈  –јЎ»Ћќ—№, Ћ®Ќя ѕќ„»Ќ»»»»»»»»»»» (если оставить p, то мен€тс€ только локальна€ перменна€ p, а не поле класса)
+		Node* tmp = mTable[ind]->pNextInChain;
+		delete mTable[ind];
+		mTable[ind] = tmp; // получаетс€, сделал (Ћ) // заменил p на mTable[hashFunc(polName)], Ќќ Ё“ќ Ќ≈ѕ–ј¬»Ћ№Ќќ, я Ё“ќ —ƒ≈ЋјЋ „“ќЅџ Ќ≈  –јЎ»Ћќ—№, Ћ®Ќя ѕќ„»Ќ»»»»»»»»»»» (если оставить p, то мен€тс€ только локальна€ перменна€ p, а не поле класса)
 		mCurrentSize--;
 		return;
 	}
+	Node* p = mTable[ind];
 	while (p->pNextInChain)
 	{
 		if (p->pNextInChain->key == polName) {
