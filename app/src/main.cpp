@@ -293,6 +293,34 @@ int main(int argc, char* argv[])
             pInputErrorField->clear();
         });
 
+    QLineEdit::connect(pWContainer, &QLineEdit::textChanged, [&](const QString& text) {
+        QString txt = text;
+        if (txt.contains(',')) {
+            pWContainer->setText(txt.replace(',', '.'));
+        }
+        });
+
+    QLineEdit::connect(pXContainer, &QLineEdit::textChanged, [&](const QString& text) {
+        QString txt = text;
+        if (txt.contains(',')) {
+            pXContainer->setText(txt.replace(',', '.'));
+        }
+        });
+
+    QLineEdit::connect(pYContainer, &QLineEdit::textChanged, [&](const QString& text) {
+        QString txt = text;
+        if (txt.contains(',')) {
+            pYContainer->setText(txt.replace(',', '.'));
+        }
+        });
+
+    QLineEdit::connect(pZContainer, &QLineEdit::textChanged, [&](const QString& text) {
+        QString txt = text;
+        if (txt.contains(',')) {
+            pZContainer->setText(txt.replace(',', '.'));
+        }
+        });
+
     window.show();
     return app.exec();
 }
