@@ -10,86 +10,6 @@
 #include "table.h"
 #include "calculator.h"
 
-// TODO test stuff, delete
-#include <random>
-std::vector<std::string> v;
-int zavtraCount = 0;
-void foo(QTextEdit* pOutputField) { pOutputField->setHtml(QString::fromStdString(std::string("To a future of grief #") + std::to_string(++zavtraCount))); }
-std::string rs(int len = 5) {
-    std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    std::string s(len, 'a');
-    for (int i = 0; i < len; i++) {
-        s[i] = charset[rand() % charset.length()];
-    }
-    return s;
-}
-// end of test stuff
-
-std::vector<std::string> polNames;
-
-// to be deleted
-std::string despace(const std::string& str) // to be deleted
-{ 
-    std::string res = "";
-    for (auto x : str) {
-        if (x != ' ') res += x;
-    }
-    return res;
-}
-
-// to be deleted
-std::vector<std::string> tokenize(const std::string& originalExpression) // to be deleted
-{
-    std::vector<std::string> tokens;
-    size_t start = 0, end = 0;
-    std::string expression = despace(originalExpression);
-
-    while (end < expression.length()) 
-    {
-
-        if (expression[end] == '+' || expression[end] == '-' || expression[end] == '*' || expression[end] == '/')
-        {
-            tokens.push_back(std::string(1, expression[end]));
-            end++;
-            continue;
-        }
-
-        if (expression[end] == '(') 
-        {
-            size_t funcStart = end;
-            if (!(end == 0 || expression[end] == '+' || expression[end] == '-' || expression[end] == '*' || expression[end] == '/')) {
-                tokens.pop_back();
-                while (funcStart > 0 && (isalnum(expression[funcStart - 1]) || expression[funcStart - 1] == '_'))
-                {
-                    funcStart--;
-                }
-            }
-
-            size_t funcEnd = expression.find(')', end);
-            if (funcEnd == std::string::npos)
-            {
-                throw "Mismatch of opening and closing parenthesis";
-            }
-            std::string Token = expression.substr(funcStart, funcEnd - funcStart + 1);
-            tokens.push_back(Token);
-            end = funcEnd + 1;
-            continue;
-        }
-
-        start = end;
-        while (end < expression.length() && expression[end] != '+' && expression[end] != '-' && expression[end] != '*' && expression[end] != '/' && expression[end] != '(') 
-        {
-            end++;
-        }
-        if (start != end) {
-            tokens.push_back(expression.substr(start, end - start));
-        }
-    }
-
-
-    return tokens;
-}
-
 void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator)
 {
     std::vector<std::pair< std::string, polynomial>> records = pAggregator->getPolynomials();
@@ -113,7 +33,9 @@ void tableWidgetUpdate(QTableWidget* pTableWidget, Aggregator* pAggregator)
 }
 
 void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::string polyName, double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0) {
+    double result = (pAggregator->findPolynomial(polyName).value()).evaluate(x, y, z, w);
 
+    pOutputField->setHtml(QString::fromStdString(std::to_string(result)) + '\n' + pOutputField->toHtml());
 }
 
 /// @return false if there was an error
@@ -124,7 +46,7 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
     if (result.index() == 1)
     {
         qDebug() << "Syntax error in polynomial";
-        pInputErrorField->setText("Syntax error in polynomial");
+        pInputErrorField->setText(QString::fromStdString( (std::string)"Syntax error in polynomial at index " + std::to_string(std::get<syntax_error>(result).pos) + (std::string)": " + std::get<syntax_error>(result).message) );
         return false;
     }
     else if (result.index() == 2)
@@ -144,11 +66,6 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
         os.str("");
         os.clear();
 
-        // TODO ��������� �������, ����� ���� ����� ������ ���������� ��� ���������. �� ����� � ˸�� �� ��������
-        os << pAggregator->size();
-        std::string name = rs();
-        pAggregator->addPolynomial(name, resPol);
-
         pOutputField->setHtml(QString::fromStdString(str) + '\n' + pOutputField->toHtml());
         tableWidgetUpdate(pTableWidget, pAggregator);
 
@@ -159,9 +76,8 @@ bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErro
 
 void deleteAction(QTableWidget* pTableWidget, Aggregator* pAggregator, int row) 
 {
-    if (row >= 0 && row < v.size()) {
+    if (row >= 0 && row < pAggregator->size()) {
         int rowInd = row;
-
 
         std::string polyName = (pTableWidget->item(rowInd, 0)->text()).toStdString();
         pAggregator->delPolynomial(polyName);
@@ -179,8 +95,6 @@ void deleteAction(QTableWidget* pTableWidget, Aggregator* pAggregator, int row)
 
 void clearAction(QTableWidget* pTableWidget, Aggregator* pAggregator)
 {
-    v.clear();
-
     auto records = pAggregator->getPolynomials();
 
     for (auto record : records) {
@@ -225,8 +139,6 @@ void changeTable(Aggregator* pAggregator, std::string text) {
 
 int main(int argc, char* argv[]) 
 {
-    srand(time(NULL));
-
     QApplication app(argc, argv);
 
     QMainWindow window;
@@ -271,27 +183,20 @@ int main(int argc, char* argv[])
                 inputText = pInputField->text();
                 std::string s = inputText.toUtf8().constData();
 
-                v.push_back(s);
                 qDebug() << "Input:" << inputText;
 
-                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField, pTableWidget)) {
-                    /*
-                    input processing here
-                    */
-
+                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField, pTableWidget)) { // TODO may be "else" is needed
                     pInputField->clear();
                     pInputErrorField->clear(); // clear error field if everything is fine
                 }
-                else {
-
-                }
-
             }
             catch (std::string x) {
                 qDebug() << "Error: " << x;
+                pInputErrorField->setText(QString::fromStdString(x));
             }
             catch (const char* c) {
                 qDebug() << "Error: " << c;
+                pInputErrorField->setText(QString::fromStdString(c));
             }
         });
 
