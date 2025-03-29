@@ -155,8 +155,6 @@ class SeparateChainingHashTable : public Table
 
 	unsigned int hashFunc(const std::string& key);
 
-
-
 public:
 
 	SeparateChainingHashTable();

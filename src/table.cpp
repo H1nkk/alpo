@@ -1,6 +1,6 @@
 #include <table.h>
 
-#define DEFAUL_ORDERED_TABLE_SIZE 100
+#define DEFAUL_ORDERED_TABLE_SIZE 4
 
 // *** LinearArrTable ***
 
@@ -148,7 +148,7 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
 {
-	pTable = new Pol[DEFAUL_ORDERED_TABLE_SIZE]; // обожаю магические числа...
+	pTable = new Pol[DEFAUL_ORDERED_TABLE_SIZE];
 }
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
@@ -156,18 +156,23 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 	if (mCurrentSize == 0) return std::nullopt;
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
-	int rightBorder = mCurrentSize;
-	while (pTable[i].key != polName && rightBorder - leftBorder > 1) // заменил || на &&
+	int rightBorder = mCurrentSize - 1;
+	bool flag = false;
+	while (rightBorder > leftBorder && flag == false) // binary search
 	{
 		if (pTable[i].key.compare(polName) > 0)
 		{
-			rightBorder = i;
-			i = 1 + (rightBorder + leftBorder) / 2; // заменил -= на =
+			rightBorder = i - 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
-		if (pTable[i].key.compare(polName) < 0)
+		else if (pTable[i].key.compare(polName) < 0)
 		{
-			leftBorder = i;
-			i = 1 + (rightBorder + leftBorder) / 2; // заменил += на =
+			leftBorder = i + 1;
+			i = (leftBorder + rightBorder) / 2;
+		}
+		else if (pTable[i].key == polName)
+		{
+			flag == true;
 		}
 	}
 	if (pTable[i].key == polName)
@@ -180,41 +185,52 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
-	int rightBorder = mTableSize;
-	while (rightBorder - leftBorder > 1) // binary search
+	int rightBorder = mCurrentSize - 1;
+	while (rightBorder > leftBorder && pTable[i].key != polName) // binary search
 	{
 		if (pTable[i].key.compare(polName) > 0)
 		{
-			rightBorder = i;
-			i = (rightBorder + leftBorder) / 2;
+			rightBorder = i - 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
-		if (pTable[i].key.compare(polName) < 0)
+		else if (pTable[i].key.compare(polName) < 0)
 		{
-			leftBorder = i;
-			i = (rightBorder + leftBorder) / 2;
+			leftBorder = i + 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
 	}
 	if (mTableSize == mCurrentSize) // repacking and adding entry
 	{
 		Pol* pHelpTable = new Pol[mTableSize * 2];
 		mTableSize *= 2;
-		for (int j = 0; j < leftBorder + 1; j++)
+		if (pTable[i].key.compare(polName) > 0)
+		{
+			i += 1;
+		}
+		for (int j = 0; j < i + 1; j++)
 			pHelpTable[j] = pTable[j];	
-		pHelpTable[leftBorder + 1] = { polName,  pol };
-		for (int j = leftBorder + 1; j < mCurrentSize; j++)
+		for (int j = i + 1; j < mCurrentSize; j++)
 			pHelpTable[j+1] = pTable[j];
+		pHelpTable[i + 1] = { polName,  pol };
 		delete[]  pTable;
 		pTable = pHelpTable;
 	}
 	else // adding entry
 	{
-		Pol help;
-		for (int j = leftBorder + 1; j < mCurrentSize; j++)
+		if (mCurrentSize != 0)
 		{
-			help = pTable[j + 1];
-			pTable[j + 1] = pTable[j];
+			if (pTable[i].key.compare(polName) > 0)
+			{
+				i += 1;
+			}
+			for (int j = i + 1; j < mCurrentSize; j++)
+				pTable[j + 1] = pTable[j];
+			pTable[i + 1] = { polName,  pol };
 		}
-		pTable[mCurrentSize] = { polName,  pol }; // —”ѕ≈– Ќ≈–јЅќ„≈≈ –≈ЎЌ»≈ ѕ–ќ—“ќ „“ќЅџ Ќ≈ ЅџЋќ Ѕј√ќ¬, ѕќ“ќћ ѕќ‘» —»“№ јјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјјј Ћ®Ќя ѕќ‘» —» ћ≈Ќя јјјјјјјј
+		else
+		{
+			pTable[i] = { polName,  pol };
+		}
 	}
 	mCurrentSize++;
 }
@@ -225,14 +241,14 @@ void OrderedTable::delPolynomial(const std::string& polName)
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mTableSize;
-	while (pTable[i].key != polName)
+	while (rightBorder > leftBorder && pTable[i].key != polName)
 	{
 		if (pTable[i].key.compare(polName) > 0)
 		{
 			rightBorder = i;
 			i -= 1 + (rightBorder - leftBorder) / 2;
 		}
-		if (pTable[i].key.compare(polName) < 0)
+		else if (pTable[i].key.compare(polName) < 0)
 		{
 			leftBorder = i;
 			i += 1 + (rightBorder - leftBorder) / 2;
@@ -263,7 +279,12 @@ OrderedTable::~OrderedTable()
 
 std::vector<std::pair< std::string, polynomial>> OrderedTable::getPolynomials()
 {
-	return {};
+	std::vector<std::pair< std::string, polynomial>> result(mCurrentSize);
+	for (int i = 0; i < mCurrentSize; i++) {
+		result[i].first = pTable[i].key;
+		result[i].second = pTable[i].value;
+	}
+	return result;
 }
 
 // *** TreeTable ***
@@ -349,7 +370,8 @@ void OpenAddressHashTable::addPolynomial(const std::string& polName, const polyn
 	}
 
 	int ind = hashFunc(polName);
-	while (mTable[ind].status != 0 && mTable[ind].status != -1) { // тут заменил || на &&
+	while (mTable[ind].status != 0 && mTable[ind].status != -1) 
+	{ 
 		ind += step;
 		ind %= mTableSize; // этого не было раньше
 	}
@@ -379,6 +401,7 @@ void OpenAddressHashTable::delPolynomial(const std::string& polName)
 		if (mTable[ind].status == 1 && mTable[ind].key == polName)
 		{
 			mTable[ind].status = -1;
+			mCurrentSize--;
 			break;
 		}
 		ind += step;
@@ -399,7 +422,17 @@ bool OpenAddressHashTable::empty()
 
 std::vector<std::pair< std::string, polynomial>> OpenAddressHashTable::getPolynomials()
 {
-	return {};
+	std::vector<std::pair< std::string, polynomial>> result(mCurrentSize);
+	int j = 0;
+	for (int i = 0; i < mTableSize; i++) {
+		if (mTable[i].status == 1)
+		{
+			result[j].first = mTable[i].key;
+			result[j].second = mTable[i].value;
+			j++;
+		}
+	}
+	return result;
 }
 
 // *** SeparateChainingHashTable ***
@@ -489,7 +522,20 @@ bool SeparateChainingHashTable::empty()
 
 std::vector<std::pair< std::string, polynomial>> SeparateChainingHashTable::getPolynomials()
 {
-	return {};
+	std::vector<std::pair< std::string, polynomial>> result(mCurrentSize);
+	int j = 0;
+	for (int i = 0; i < mTableSize; i++)
+	{
+		Node* p = mTable[i];
+		while (p != nullptr)
+		{
+			result[j].first = p->key;
+			result[j].second = p->value;
+			p = p->pNextInChain;
+			j++;
+		}
+	}
+	return result;
 }
 
 // *** Aggregator ***
