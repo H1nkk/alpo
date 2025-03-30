@@ -145,7 +145,6 @@ TEST(Aggregator, cannotSelectIncorrectTable)
 TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 {
 	Aggregator* pAggregator = new Aggregator();
-	OpenAddressHashTable* pTab = new OpenAddressHashTable(); // TODO удалить, дебаг
 
 	std::vector<polynomial> pols;
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
@@ -172,13 +171,9 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 		a = std::get<polynomial>(polynomial::from_string(st));
 		pols.push_back(a);
 	}
+
 	for (int i = 0; i < polyCount; i++) {
 		polynomial toDel = pols[i];
-		if (i == 11) { // TODO удалить, дебаг
-			polyCount++;
-			polyCount--;
-		}
-		pTab->addPolynomial(std::to_string(i), pols[i]); // TODO удалить, дебаг
 		pAggregator->addPolynomial(std::to_string(i), pols[i]);
 	}
 
@@ -187,6 +182,7 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 		if (i % 6 == 3) { // TODO потом убрать, когда будет реализация treeTable aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 			continue;
 		}
+<<<<<<< HEAD
 		std::optional<polynomial> foo;
 		(pAggregator->findPolynomial(std::to_string(i))).value();
 		if (i % 6 == 2) {
@@ -194,10 +190,12 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			pAggregator->selectTable(tableNames[0]);
 			foo = pAggregator->findPolynomial(std::to_string(i));
 		}
+=======
+		
+>>>>>>> 5cdfcbaaa20d2fc03322acf5d071f0b1b412692a
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
-
 
 TEST(Aggregator, cannotFindUnexsistingPolynomialUsingAggregator)
 {
@@ -261,6 +259,8 @@ TEST(Aggregator, cannotAddPresentPolynomialUsingAggregator)
 
 TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 {
+	ADD_FAILURE();
+	return;
 	Aggregator aggr;
 
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
@@ -287,12 +287,15 @@ TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
 {
 	Aggregator aggr;
+	OpenAddressHashTable tab; // TODO debug, to be deleted
 
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
 	std::vector<std::string> polynomials = { "x3y5z4w2", "xy", "zy", "wyz2", "xy5", "-x4y5", "45+ xy", "78", "234x + 6y", "53xyz", "wx", "w" };
 
-	for (int i = 0; i < polynomials.size(); i++)
+	for (int i = 0; i < polynomials.size(); i++) {
 		aggr.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));
+		tab.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));// TODO debug, to be deleted
+	}
 
 
 	aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x3y5z4w2")));
@@ -303,6 +306,7 @@ TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
 
 	for (int i = 453; i < 459; i++) {
 		aggr.selectTable(tableNames[i % 6]);
+		tab.delPolynomial(std::to_string(i)); // TODO debug, to be deleted BUG IS HERE
 		aggr.delPolynomial(std::to_string(i));
 	}
 
