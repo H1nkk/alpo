@@ -1,6 +1,6 @@
 #include <table.h>
 
-#define DEFAUL_ORDERED_TABLE_SIZE 4
+#define DEFAULT_ORDERED_TABLE_SIZE 4
 
 // *** LinearArrTable ***
 
@@ -10,6 +10,8 @@ void LinearArrTable::addPolynomial(const std::string& polName, const polynomial&
 {
 	if (findPolynomial(polName) == std::nullopt)
 		mTable.push_back({ polName, pol });
+	else
+		throw "This polynomial already exists";
 }
 
 std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polName) 
@@ -35,7 +37,7 @@ void LinearArrTable::delPolynomial(const std::string& polName)
 unsigned int LinearArrTable::size() 
 {
 	return mTable.size();
-}
+ }
 
 bool LinearArrTable::empty() 
 {
@@ -72,7 +74,8 @@ std::optional<polynomial> LinearListTable::findPolynomial(const std::string& pol
 
 void LinearListTable::addPolynomial(const std::string& polName, const polynomial& pol) 
 {
-	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	if (findPolynomial(polName) != std::nullopt) // uniqueness check
+		throw "This polynomial already exists"; 
 	mTableSize++;
 	Node* p = pFirst;
 	if (!p) 
@@ -146,9 +149,9 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+OrderedTable::OrderedTable(): mTableSize(DEFAULT_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
 {
-	pTable = new Pol[DEFAUL_ORDERED_TABLE_SIZE];
+	mTable.resize(DEFAULT_ORDERED_TABLE_SIZE);
 }
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
@@ -158,42 +161,43 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 	int leftBorder = 0;
 	int rightBorder = mCurrentSize - 1;
 	bool flag = false;
-	while (rightBorder > leftBorder && flag == false) // binary search
+	while (rightBorder > leftBorder && mTable[i].key != polName) // binary search
 	{
-		if (pTable[i].key.compare(polName) > 0)
+		if (mTable[i].key.compare(polName) > 0)
 		{
 			rightBorder = i - 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (pTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key.compare(polName) < 0)
 		{
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (pTable[i].key == polName)
+		/*else if (mTable[i].key != polName)
 		{
-			flag == true;
-		}
+			flag = true;
+		}*/
 	}
-	if (pTable[i].key == polName)
-		return pTable[i].value;
+	if (mTable[i].key == polName)
+		return mTable[i].value;
 	return std::nullopt;
 }
 
 void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	if (findPolynomial(polName) != std::nullopt) // uniqueness check
+		throw "This polynomial already exists";
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mCurrentSize - 1;
-	while (rightBorder > leftBorder && pTable[i].key != polName) // binary search
+	while (rightBorder > leftBorder && mTable[i].key != polName) // binary search
 	{
-		if (pTable[i].key.compare(polName) > 0)
+		if (mTable[i].key.compare(polName) > 0)
 		{
 			rightBorder = i - 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (pTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key.compare(polName) < 0)
 		{
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
@@ -201,36 +205,22 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 	}
 	if (mTableSize == mCurrentSize) // repacking and adding entry
 	{
-		Pol* pHelpTable = new Pol[mTableSize * 2];
 		mTableSize *= 2;
-		if (pTable[i].key.compare(polName) > 0)
+		mTable.resize(mTableSize);
+	}
+	if (mCurrentSize != 0)
+	{
+		if (mTable[i].key.compare(polName) < 0)
 		{
 			i += 1;
 		}
-		for (int j = 0; j < i + 1; j++)
-			pHelpTable[j] = pTable[j];	
-		for (int j = i + 1; j < mCurrentSize; j++)
-			pHelpTable[j+1] = pTable[j];
-		pHelpTable[i + 1] = { polName,  pol };
-		delete[]  pTable;
-		pTable = pHelpTable;
+		for (int j = mCurrentSize; j > i; j--)
+			mTable[j] = mTable[j - 1];
+		mTable[i] = { polName,  pol };
 	}
-	else // adding entry
+	else
 	{
-		if (mCurrentSize != 0)
-		{
-			if (pTable[i].key.compare(polName) > 0)
-			{
-				i += 1;
-			}
-			for (int j = i + 1; j < mCurrentSize; j++)
-				pTable[j + 1] = pTable[j];
-			pTable[i + 1] = { polName,  pol };
-		}
-		else
-		{
-			pTable[i] = { polName,  pol };
-		}
+		mTable[i] = { polName,  pol };
 	}
 	mCurrentSize++;
 }
@@ -241,22 +231,27 @@ void OrderedTable::delPolynomial(const std::string& polName)
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mTableSize;
-	while (rightBorder > leftBorder && pTable[i].key != polName)
+	while (rightBorder > leftBorder && mTable[i].key != polName)
 	{
-		if (pTable[i].key.compare(polName) > 0)
+		if (mTable[i].key.compare(polName) > 0)
 		{
-			rightBorder = i;
-			i -= 1 + (rightBorder - leftBorder) / 2;
+			rightBorder = i - 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (pTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key.compare(polName) < 0)
 		{
-			leftBorder = i;
-			i += 1 + (rightBorder - leftBorder) / 2;
+			leftBorder = i + 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
 	}
-	for (int j = 0; j < mCurrentSize; j++)
+	if (mTable[i].key.compare(polName) < 0)
 	{
-		pTable[j] = pTable[j+1];
+		i += 1;
+	}
+	mTable.erase(mTable.begin() +  i);
+	for (int j = i; j < mCurrentSize - 1; j++)
+	{
+		mTable[j] = mTable[j+1];
 	}
 	mCurrentSize--;
 }
@@ -272,17 +267,12 @@ bool OrderedTable::empty()
 	return mCurrentSize == 0;
 }
 
-OrderedTable::~OrderedTable() 
-{ 
-	delete[]  pTable;
-};
-
 std::vector<std::pair< std::string, polynomial>> OrderedTable::getPolynomials()
 {
 	std::vector<std::pair< std::string, polynomial>> result(mCurrentSize);
 	for (int i = 0; i < mCurrentSize; i++) {
-		result[i].first = pTable[i].key;
-		result[i].second = pTable[i].value;
+		result[i].first = mTable[i].key;
+		result[i].second = mTable[i].value;
 	}
 	return result;
 }
@@ -352,7 +342,8 @@ unsigned int OpenAddressHashTable::hashFunc(const std::string& key) //polynomial
 
 void OpenAddressHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return;
+	if (findPolynomial(polName) != std::nullopt) 
+		throw "This polynomial already exists";
 	mCurrentSize++;
 
 	if (mCurrentSize / mTableSize > 0.5) // repacking
@@ -392,6 +383,7 @@ std::optional<polynomial> OpenAddressHashTable::findPolynomial(const std::string
 		if (mTable[ind].key == polName)
 			return mTable[ind].value;
 		ind += step;
+		ind %= mTableSize;
 	}
 	return std::nullopt;
 
@@ -409,6 +401,7 @@ void OpenAddressHashTable::delPolynomial(const std::string& polName)
 			break;
 		}
 		ind += step;
+		ind %= mTableSize;
 	}
 }
 
@@ -461,7 +454,8 @@ unsigned int SeparateChainingHashTable::hashFunc(const std::string& key) //polyn
 
 void SeparateChainingHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return;
+	if (findPolynomial(polName) != std::nullopt)
+		throw "This polynomial already exists";
 	mCurrentSize++;
 	if (!mTable[hashFunc(polName)])
 	{
@@ -547,13 +541,7 @@ std::vector<std::pair< std::string, polynomial>> SeparateChainingHashTable::getP
 
 Aggregator::Aggregator() {
 	tables.resize(6, nullptr);
-	//tables[0] = new LinearArrTable();
-	//tables[1] = new LinearArrTable();
-	//tables[2] = new LinearArrTable();
-	//tables[3] = new LinearArrTable();
-	//tables[4] = new LinearArrTable();
-	//tables[5] = new LinearArrTable();
-	//
+
 	tables[0] = new LinearArrTable();
 	tables[1] = new LinearListTable();
 	tables[2] = new OrderedTable();
@@ -589,6 +577,9 @@ void Aggregator::selectTable(const std::string& tableName) {
 	{
 		currentTable = 5;
 	}
+	else {
+		throw "Cannot select table " + tableName;
+	}
 }
 
 std::optional<polynomial> Aggregator::findPolynomial(const std::string& polName) {
@@ -609,12 +600,16 @@ unsigned int Aggregator::size() {
 	return tables[currentTable]->size();
 }
 
-Aggregator::~Aggregator() {
-	for (auto table : tables) {
-		delete table; // i dont know if this calls tables' destructors
-	}
+bool Aggregator::empty() {
+	return size() == 0;
 }
 
 std::vector<std::pair< std::string, polynomial>> Aggregator::getPolynomials() {
 	return tables[currentTable]->getPolynomials();
+}
+
+Aggregator::~Aggregator() {
+	for (auto table : tables) {
+		delete table; // i dont know if this calls tables' destructors
+	}
 }

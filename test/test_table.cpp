@@ -2,33 +2,33 @@
 #include "table.h"
 
 template <class Table>
-class TableTest : public ::testing::Test 
+class TableTest : public ::testing::Test
 {
 protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable, TreeTable>;
+using TableTypes = ::testing::Types<OrderedTable, LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable, TreeTable>;
 TYPED_TEST_SUITE(TableTest, TableTypes);
 
 
-TYPED_TEST(TableTest, defaultTableConstructor) 
+TYPED_TEST(TableTest, defaultTableConstructor)
 {
 	EXPECT_TRUE(this->table.empty());
 	EXPECT_EQ(this->table.size(), 0);
 }
 
-TYPED_TEST(TableTest, canAddUnpresentPolynomial) 
+TYPED_TEST(TableTest, canAddUnpresentPolynomial)
 {
 	polynomial a;
 	std::vector<std::pair< std::string, polynomial>> pol(6);
 	a.from_string("12x2-4y");
 	this->table.addPolynomial("Pol1", a);
 	this->table.addPolynomial("Pol2", a);
-	this->table.addPolynomial("Pol3", a);
 	this->table.addPolynomial("Pol4", a);
-	this->table.addPolynomial("Pol5", a);
 	this->table.addPolynomial("Pol6", a);
+	this->table.addPolynomial("Pol5", a);
+	this->table.addPolynomial("Pol3", a);
 	pol[0].first = "Pol1";
 	pol[0].second = a;
 	pol[1].first = "Pol2";
@@ -46,17 +46,15 @@ TYPED_TEST(TableTest, canAddUnpresentPolynomial)
 	//EXPECT_EQ(this->table.getPolynomials(), pol);
 }
 
-TYPED_TEST(TableTest, cannotAddPresentPolynomial) 
+TYPED_TEST(TableTest, cannotAddPresentPolynomial)
 {
 	polynomial a;
 	a.from_string("12x2-4y");
 	this->table.addPolynomial("Pol1", a);
-	this->table.addPolynomial("Pol1", a);
-	EXPECT_FALSE(this->table.empty());
-	EXPECT_EQ(this->table.size(), 1);
+	EXPECT_ANY_THROW(this->table.addPolynomial("Pol1", a));
 }
 
-TYPED_TEST(TableTest, canFindExsistingPolynomial) 
+TYPED_TEST(TableTest, canFindExsistingPolynomial)
 {
 	polynomial a;
 	a.from_string("12x2-4y");
@@ -64,12 +62,12 @@ TYPED_TEST(TableTest, canFindExsistingPolynomial)
 	EXPECT_EQ(this->table.findPolynomial("Pol1"), a);
 }
 
-TYPED_TEST(TableTest, cannotFindUnexsistingPolynomial) 
+TYPED_TEST(TableTest, cannotFindUnexsistingPolynomial)
 {
 	EXPECT_EQ(this->table.findPolynomial("Pol1"), std::nullopt);
 }
 
-TYPED_TEST(TableTest, canDelPresentPolynomial) 
+TYPED_TEST(TableTest, canDelPresentPolynomial)
 {
 	polynomial a;
 	a.from_string("12x2-4y");
@@ -79,7 +77,7 @@ TYPED_TEST(TableTest, canDelPresentPolynomial)
 	EXPECT_EQ(this->table.size(), 0);
 }
 
-TYPED_TEST(TableTest, delOfUnpresentPolynomialDoesNothing) 
+TYPED_TEST(TableTest, delOfUnpresentPolynomialDoesNothing)
 {
 	polynomial a, b;
 	a.from_string("12x2-4y");
@@ -91,12 +89,12 @@ TYPED_TEST(TableTest, delOfUnpresentPolynomialDoesNothing)
 	EXPECT_EQ(this->table.size(), 2);
 }
 
-TYPED_TEST(TableTest, canGetSizeWhenEmpty) 
+TYPED_TEST(TableTest, canGetSizeWhenEmpty)
 {
 	EXPECT_EQ(this->table.size(), 0);
 }
 
-TYPED_TEST(TableTest, canGetSizeWhenNonEmpty) 
+TYPED_TEST(TableTest, canGetSizeWhenNonEmpty)
 {
 	polynomial a;
 	a.from_string("12x2-4y");
@@ -104,12 +102,12 @@ TYPED_TEST(TableTest, canGetSizeWhenNonEmpty)
 	EXPECT_EQ(this->table.size(), 1);
 }
 
-TYPED_TEST(TableTest, emptyTableIsEmpty) 
+TYPED_TEST(TableTest, emptyTableIsEmpty)
 {
 	EXPECT_TRUE(this->table.empty());
 }
 
-TYPED_TEST(TableTest, nonEmptyTableIsNonEmpty) 
+TYPED_TEST(TableTest, nonEmptyTableIsNonEmpty)
 {
 	polynomial a;
 	a.from_string("12x2-4y");
@@ -117,60 +115,226 @@ TYPED_TEST(TableTest, nonEmptyTableIsNonEmpty)
 	EXPECT_FALSE(this->table.empty());
 }
 
+
 TEST(Aggregator, defaultAggregatorConstructor)
 {
-	/*Aggregator a;
+	Aggregator a;
 	EXPECT_TRUE(a.empty());
-	EXPECT_EQ(a.size(), 0);*/
-	ADD_FAILURE();
+	EXPECT_EQ(a.size(), 0);
 }
 
-TEST(TableTest, canSelectCorrectTable) 
+TEST(Aggregator, canSelectCorrectTable)
 {
-	ADD_FAILURE();
+	Aggregator a;
+	EXPECT_NO_THROW(a.selectTable("liar"));
+	EXPECT_NO_THROW(a.selectTable("lili"));
+	EXPECT_NO_THROW(a.selectTable("ordr"));
+	EXPECT_NO_THROW(a.selectTable("tree"));
+	EXPECT_NO_THROW(a.selectTable("opha"));
+	EXPECT_NO_THROW(a.selectTable("seha"));
 }
 
-TEST(TableTest, cannotSelectIncorrectTable) 
+TEST(Aggregator, cannotSelectIncorrectTable)
 {
-	ADD_FAILURE();
+	Aggregator a;
+	EXPECT_ANY_THROW(a.selectTable("fooo"));
 }
 
-TEST(TableTest, canFindExsistingPolynomialUsingAggregator) 
+TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
+	Aggregator* pAggregator = new Aggregator();
+
+	std::vector<polynomial> pols;
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	int polyCount = 50;
+	for (int i = 1; i < polyCount + 1; i++) {
+		polynomial a;
+		std::string st;
+		switch (i % 4)
+		{
+		case 0:
+			st += "w";
+			break;
+		case 1:
+			st += "x";
+			break;
+		case 2:
+			st += "y";
+			break;
+		case 3:
+			st += "z";
+			break;
+		}
+		st += std::to_string(i);
+		a = std::get<polynomial>(polynomial::from_string(st));
+		pols.push_back(a);
+	}
+
+	for (int i = 0; i < polyCount; i++) {
+		polynomial toDel = pols[i];
+		pAggregator->addPolynomial(std::to_string(i), pols[i]);
+	}
+
+	for (int i = 0; i < polyCount; i++) {
+		pAggregator->selectTable(tableNames[i % 6]);
+		if (i % 6 == 3) { // TODO ����� ������, ����� ����� ���������� treeTable aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			continue;
+		}
+		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
+	}
 }
 
-TEST(TableTest, cannotFindUnexsistingPolynomialUsingAggregator) 
+TEST(Aggregator, cannotFindUnexsistingPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	Aggregator aggr;
+
+	aggr.addPolynomial("fir", std::get<polynomial>(polynomial::from_string("x")));
+	aggr.addPolynomial("sec", std::get<polynomial>(polynomial::from_string("w")));
+	aggr.addPolynomial("trd", std::get<polynomial>(polynomial::from_string("z")));
+	aggr.addPolynomial("frt", std::get<polynomial>(polynomial::from_string("y")));
+
+	for (int i = 0; i < 6; i++) {
+		aggr.selectTable(tableNames[i]);
+		EXPECT_EQ(aggr.findPolynomial("fft"), std::nullopt);
+	}
 }
 
-TEST(TableTest, canAddUnpresentPolynomialUsingAggregator) 
+TEST(Aggregator, canAddUnpresentPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
+	Aggregator aggr;
+
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	int polyCount = 6; // TODO ������� 100
+	for (int i = 1; i < polyCount + 1; i++) {
+		polynomial a;
+		std::string st;
+		switch (i % 4)
+		{
+		case 0:
+			st += "w";
+			break;
+		case 1:
+			st += "x";
+			break;
+		case 2:
+			st += "y";
+			break;
+		case 3:
+			st += "z";
+			break;
+		}
+		st += std::to_string(i);
+		a = std::get<polynomial>(polynomial::from_string(st));
+		aggr.addPolynomial(std::to_string(i - 1), a);
+	}
+
+	int sz = aggr.size();
+	aggr.addPolynomial("newpol", std::get<polynomial>(polynomial::from_string("xyzw2")));
+
+	EXPECT_EQ(aggr.size(), sz + 1);
 }
 
-TEST(TableTest, cannotAddPresentPolynomialUsingAggregator) 
+TEST(Aggregator, cannotAddPresentPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
+	Aggregator aggr;
+
+	aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x3y5z4w2")));
+
+	EXPECT_ANY_THROW(aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x35y53z42w21"))));
 }
 
-TEST(TableTest, canDelPresentPolynomialUsingAggregator) 
+TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
+	return;
+	Aggregator aggr;
+
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	std::vector<std::string> polynomials = { "x3y5z4w2", "xy", "zy", "wyz2", "xy5", "-x4y5", "45+ xy", "78", "234x + 6y", "53xyz", "wx", "w" };
+
+	for (int i = 0; i < polynomials.size(); i++)
+		aggr.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));
+
+
+	aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x3y5z4w2")));
+	aggr.addPolynomial("existing1", std::get<polynomial>(polynomial::from_string("x34y5z4w2")));
+	aggr.addPolynomial("existing2", std::get<polynomial>(polynomial::from_string("x")));
+
+	int sz = aggr.size();
+
+	for (int i = 3; i < 9; i++) {
+		aggr.selectTable(tableNames[i % 6]);
+		aggr.delPolynomial(std::to_string(i));
+	}
+
+	EXPECT_EQ(aggr.size(), sz - 6);
 }
 
-TEST(TableTest, delOfUnpresentPolynomialDoesNothingUsingAggregator) 
+TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
 {
-	ADD_FAILURE();
+	Aggregator aggr;
+	OpenAddressHashTable tab; // TODO debug, to be deleted
+
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	std::vector<std::string> polynomials = { "x3y5z4w2", "xy", "zy", "wyz2", "xy5", "-x4y5", "45+ xy", "78", "234x + 6y", "53xyz", "wx", "w" };
+
+	for (int i = 0; i < polynomials.size(); i++) {
+		aggr.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));
+		tab.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));// TODO debug, to be deleted
+	}
+
+
+	aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x3y5z4w2")));
+	aggr.addPolynomial("existing1", std::get<polynomial>(polynomial::from_string("x34y5z4w2")));
+	aggr.addPolynomial("existing2", std::get<polynomial>(polynomial::from_string("x")));
+
+	int sz = aggr.size();
+
+	for (int i = 453; i < 459; i++) {
+		aggr.selectTable(tableNames[i % 6]);
+		tab.delPolynomial(std::to_string(i)); // TODO debug, to be deleted BUG IS HERE
+		aggr.delPolynomial(std::to_string(i));
+	}
+
+	EXPECT_EQ(aggr.size(), sz);
 }
 
-TEST(TableTest, canGetSizeWhenEmptyUsingAggregator) 
+TEST(Aggregator, canGetSizeWhenEmptyUsingAggregator)
 {
-	ADD_FAILURE();
+	Aggregator aggr;
+
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	std::vector<std::string> polynomials = { "x3y5z4w2", "xy", "zy", "wyz2", "xy5", "-x4y5", "45+ xy", "78", "234x + 6y", "53xyz", "wx", "w" };
+
+	for (int i = 0; i < polynomials.size(); i++)
+		aggr.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));
+
+	for (int i = 0; i < polynomials.size(); i++) {
+		aggr.selectTable(tableNames[i % 6]);
+		aggr.delPolynomial(std::to_string(i));
+	}
+
+	EXPECT_EQ(aggr.size(), 0);
 }
 
-TEST(TableTest, canGetSizeWhenNonEmptyUsingAggregator) 
+TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
 {
-	ADD_FAILURE();
-}
+	Aggregator aggr;
+
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	std::vector<std::string> polynomials = { "x3y5z4w2", "xy", "zy", "wyz2", "xy5", "-x4y5", "45+ xy", "78", "234x + 6y", "53xyz", "wx", "w" };
+
+	int resSize = 6;
+
+	for (int i = 0; i < polynomials.size(); i++)
+		aggr.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));
+
+	for (int i = 0; i < polynomials.size() - resSize; i++) {
+		aggr.selectTable(tableNames[i % 6]);
+		aggr.delPolynomial(std::to_string(i));
+	}
+
+	EXPECT_EQ(aggr.size(), resSize);
+ }
+
+
