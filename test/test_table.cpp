@@ -188,20 +188,20 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
-<<<<<<< HEAD
+//<<<<<<< HEAD
 		//if (i == 8) {
 		//	foo = pAggregator->findPolynomial(std::to_string(i)); // аюц бнр рср
 		//	pAggregator->selectTable(tableNames[0]);
 		//	foo = pAggregator->findPolynomial(std::to_string(i));
 		//}
 		(pAggregator->findPolynomial(std::to_string(i))).value();
-=======
+//=======
 		if (i % 6 == 2) {
 			foo = pAggregator->findPolynomial(std::to_string(i)); // аюц бнр рср
 			pAggregator->selectTable(tableNames[0]);
 			foo = pAggregator->findPolynomial(std::to_string(i));
 		}
->>>>>>> cfde0a76ba26c684a6fd36a1492c3dab61377f52
+//>>>>>>> cfde0a76ba26c684a6fd36a1492c3dab61377f52
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }

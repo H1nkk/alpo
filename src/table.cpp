@@ -370,6 +370,7 @@ std::optional<polynomial> OpenAddressHashTable::findPolynomial(const std::string
 		if (mTable[ind].key == polName)
 			return mTable[ind].value;
 		ind += step;
+		ind %= mTableSize;
 	}
 	return std::nullopt;
 
