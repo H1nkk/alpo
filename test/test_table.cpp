@@ -145,9 +145,11 @@ TEST(Aggregator, cannotSelectIncorrectTable)
 TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 {
 	Aggregator* pAggregator = new Aggregator();
+	OpenAddressHashTable* pTab = new OpenAddressHashTable();
+
 	std::vector<polynomial> pols;
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
-	int polyCount = 10;
+	int polyCount = 50;
 	for (int i = 1; i < polyCount + 1; i++) {
 		polynomial a;
 		std::string st;
@@ -171,6 +173,12 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 		pols.push_back(a);
 	}
 	for (int i = 0; i < polyCount; i++) {
+		polynomial toDel = pols[i];
+		if (i == 11) { // TODO удалить, дебаг
+			polyCount++;
+			polyCount--;
+		}
+		pTab->addPolynomial(std::to_string(i), pols[i]); // TODO удалить, дебаг
 		pAggregator->addPolynomial(std::to_string(i), pols[i]);
 	}
 
@@ -180,7 +188,7 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
-		if (i == 8) {
+		if (i % 6 == 2) {
 			foo = pAggregator->findPolynomial(std::to_string(i)); // БАГ ВОТ ТУТ
 			pAggregator->selectTable(tableNames[0]);
 			foo = pAggregator->findPolynomial(std::to_string(i));
