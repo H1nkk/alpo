@@ -51,9 +51,7 @@ TYPED_TEST(TableTest, cannotAddPresentPolynomial)
 	polynomial a;
 	a.from_string("12x2-4y");
 	this->table.addPolynomial("Pol1", a);
-	this->table.addPolynomial("Pol1", a);
-	EXPECT_FALSE(this->table.empty());
-	EXPECT_EQ(this->table.size(), 1);
+	EXPECT_ANY_THROW(this->table.addPolynomial("Pol1", a));
 }
 
 TYPED_TEST(TableTest, canFindExsistingPolynomial)
