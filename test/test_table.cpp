@@ -190,11 +190,6 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
-		if (i % 6 == 2) {
-			foo = pAggregator->findPolynomial(std::to_string(i)); // аюц бнр рср
-			pAggregator->selectTable(tableNames[0]);
-			foo = pAggregator->findPolynomial(std::to_string(i));
-		}
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
