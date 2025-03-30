@@ -8,7 +8,7 @@ protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable>; // add TreeTable after realization
+using TableTypes = ::testing::Types<OrderedTable, LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable>; // add TreeTable after realization
 TYPED_TEST_SUITE(TableTest, TableTypes);
 
 
@@ -25,10 +25,10 @@ TYPED_TEST(TableTest, canAddUnpresentPolynomial)
 	a.from_string("12x2-4y");
 	this->table.addPolynomial("Pol1", a);
 	this->table.addPolynomial("Pol2", a);
-	this->table.addPolynomial("Pol3", a);
 	this->table.addPolynomial("Pol4", a);
-	this->table.addPolynomial("Pol5", a);
 	this->table.addPolynomial("Pol6", a);
+	this->table.addPolynomial("Pol5", a);
+	this->table.addPolynomial("Pol3", a);
 	pol[0].first = "Pol1";
 	pol[0].second = a;
 	pol[1].first = "Pol2";

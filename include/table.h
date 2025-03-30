@@ -75,8 +75,9 @@ class OrderedTable : public Table
 		std::string key;
 		polynomial value;
 	};
+	std::vector<Pol> mTable;
 
-	Pol* pTable;
+	//Pol* pTable;
 	size_t mCurrentSize;
 	size_t mTableSize;
 
@@ -90,7 +91,7 @@ public:
 	virtual bool empty() override;
 	virtual std::vector<std::pair< std::string, polynomial>> getPolynomials() override;
 
-	virtual ~OrderedTable();
+	virtual ~OrderedTable() {};
 };
 
 
