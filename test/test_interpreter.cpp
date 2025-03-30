@@ -20,8 +20,18 @@ TEST(ExprInterpreterTest, can_execute_single_monomial) {
 }
 
 TEST(ExprInterpreterTest, can_execute_polynomial_name) {
-    // TODO: implement this then all tables will be done
-    ADD_FAILURE();
+    Aggregator agg;
+    polynomial p = std::get<polynomial>(polynomial::from_string("123x54y12z12w"));
+    agg.addPolynomial("mypol", p);
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("mypol").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), p);
 }
 
 TEST(ExprInterpreterTest, can_execute_sum) {
@@ -64,8 +74,19 @@ TEST(ExprInterpreterTest, can_execute_multiplication) {
 }
 
 TEST(ExprInterpreterTest, can_execute_assignment) {
-    // TODO: implement this then all tables will be done
-    ADD_FAILURE();
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    auto res = intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("mypol = 123x54y12z12w * (50 + 40x)").getAllTokens()
+        ))
+    );
+
+    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
+    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
+
+    EXPECT_EQ(agg.size(), 1);
+    EXPECT_EQ(agg.findPolynomial("mypol"), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
 }
 
 TEST(ExprInterpreterTest, can_execute_calc) {
@@ -108,6 +129,12 @@ TEST(ExprInterpreterTest, can_execute_int) {
 }
 
 TEST(ExprInterpreterTest, throw_on_unknown_polynomial) {
-    // TODO: implement this then all tables will be done
-    ADD_FAILURE();
+    
+    Aggregator agg;
+    ExpressionInterpreter intr(&agg);
+    EXPECT_ANY_THROW(intr.execute(
+        std::get<Program>(ExpressionCompiler().compileExpression(
+            Lexer::Lexer("b = 2 * a").getAllTokens()
+        ))
+    ));
 }

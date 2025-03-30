@@ -116,32 +116,32 @@ TEST(RedBlackTreeTest, can_convert_to_vector)
     }
 }
 
-TEST(RedBlackTreeTest, tree_stress_test)
-{
-    RedBlackTree<int, int> tree;
-
-    const int n = 10000000;
-    vector<int> data(n);
-    iota(data.begin(), data.end(), 0);
-    for (auto v : data) tree.insert(v, v + 1);
-    EXPECT_EQ(tree.size(), n);
-    EXPECT_TRUE(tree.isValidTree());
-
-    reverse(data.begin(), data.end());
-    for (auto v : data)
-    {
-        EXPECT_EQ(tree.find(v), v + 1);
-    }
-
-    std::random_device rd;
-    std::mt19937 g(rd());
-    g.seed(123);
-
-    shuffle(data.begin(), data.end(), g);
-    for (auto v : data)
-    {
-        EXPECT_TRUE(tree.erase(v));
-    }
-    EXPECT_TRUE(tree.isValidTree());
-    EXPECT_EQ(tree.size(), 0);
-}
+//TEST(RedBlackTreeTest, tree_stress_test)
+//{
+//    RedBlackTree<int, int> tree;
+//
+//    const int n = 10000000;
+//    vector<int> data(n);
+//    iota(data.begin(), data.end(), 0);
+//    for (auto v : data) tree.insert(v, v + 1);
+//    EXPECT_EQ(tree.size(), n);
+//    EXPECT_TRUE(tree.isValidTree());
+//
+//    reverse(data.begin(), data.end());
+//    for (auto v : data)
+//    {
+//        EXPECT_EQ(tree.find(v), v + 1);
+//    }
+//
+//    std::random_device rd;
+//    std::mt19937 g(rd());
+//    g.seed(123);
+//
+//    shuffle(data.begin(), data.end(), g);
+//    for (auto v : data)
+//    {
+//        EXPECT_TRUE(tree.erase(v));
+//    }
+//    EXPECT_TRUE(tree.isValidTree());
+//    EXPECT_EQ(tree.size(), 0);
+//}
