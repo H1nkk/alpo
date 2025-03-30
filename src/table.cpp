@@ -295,35 +295,39 @@ TreeTable::TreeTable() {
 
 void TreeTable::addPolynomial(const std::string& polName, const polynomial& pol) 
 {
+	if (tree.find(polName) != std::nullopt)
+	{
+		throw std::runtime_error("Polynomial already exist");
+	}
 
+	tree.insert(polName, pol);
 }
 
 std::optional<polynomial> TreeTable::findPolynomial(const std::string& polName)
 {
-	return {};
-
+	return tree.find(polName);
 }
 
 void TreeTable::delPolynomial(const std::string& polName)
 {
-
+	tree.erase(polName);
 }
 
 unsigned int TreeTable::size()
 {
-	return -1;
+	return tree.size();
 
 }
 
 bool TreeTable::empty()
 {
-	return true;
+	return tree.empty();
 
 }
 
 std::vector<std::pair< std::string, polynomial>> TreeTable::getPolynomials()
 {
-	return {};
+	return tree.toVector();
 }
 
 // *** OpenAddressHashTable ***

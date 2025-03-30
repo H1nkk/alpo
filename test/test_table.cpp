@@ -8,7 +8,7 @@ protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable>; // add TreeTable after realization
+using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable, TreeTable>;
 TYPED_TEST_SUITE(TableTest, TableTypes);
 
 

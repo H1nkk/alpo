@@ -1,5 +1,6 @@
 #pragma once
 #include "polynomial.h"
+#include "red_black_tree.h"
 #include <string>
 #include <vector>
 #include <optional>
@@ -96,6 +97,8 @@ public:
 
 class TreeTable : public Table 
 {
+private:
+	RedBlackTree<std::string, polynomial> tree;
 public:
 	TreeTable();
 
