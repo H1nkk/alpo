@@ -231,17 +231,21 @@ void OrderedTable::delPolynomial(const std::string& polName)
 	{
 		if (mTable[i].key.compare(polName) > 0)
 		{
-			rightBorder = i;
-			i -= 1 + (rightBorder - leftBorder) / 2;
+			rightBorder = i - 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
 		else if (mTable[i].key.compare(polName) < 0)
 		{
-			leftBorder = i;
-			i += 1 + (rightBorder - leftBorder) / 2;
+			leftBorder = i + 1;
+			i = (leftBorder + rightBorder) / 2;
 		}
 	}
+	if (mTable[i].key.compare(polName) < 0)
+	{
+		i += 1;
+	}
 	mTable.erase(mTable.begin() +  i);
-	for (int j = 0; j < mCurrentSize; j++)
+	for (int j = i; j < mCurrentSize - 1; j++)
 	{
 		mTable[j] = mTable[j+1];
 	}
@@ -388,6 +392,7 @@ void OpenAddressHashTable::delPolynomial(const std::string& polName)
 			break;
 		}
 		ind += step;
+		ind %= mTableSize;
 	}
 }
 

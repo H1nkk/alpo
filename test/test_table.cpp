@@ -144,8 +144,6 @@ TEST(Aggregator, cannotSelectIncorrectTable)
 
 TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
-	return;
 	Aggregator* pAggregator = new Aggregator();
 	OpenAddressHashTable* pTab = new OpenAddressHashTable(); // TODO Û‰‡ÎËÚ¸, ‰Â·‡„
 
@@ -190,23 +188,12 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
-<<<<<<< HEAD
-//<<<<<<< HEAD
-		//if (i == 8) {
-		//	foo = pAggregator->findPolynomial(std::to_string(i)); // ¡¿√ ¬Œ“ “”“
-		//	pAggregator->selectTable(tableNames[0]);
-		//	foo = pAggregator->findPolynomial(std::to_string(i));
-		//}
 		(pAggregator->findPolynomial(std::to_string(i))).value();
-//=======
 		if (i % 6 == 2) {
 			foo = pAggregator->findPolynomial(std::to_string(i)); // ¡¿√ ¬Œ“ “”“
 			pAggregator->selectTable(tableNames[0]);
 			foo = pAggregator->findPolynomial(std::to_string(i));
 		}
-//>>>>>>> cfde0a76ba26c684a6fd36a1492c3dab61377f52
-=======
->>>>>>> d7a779f7af519269b9b508d9e9a0fce0f0366e75
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
