@@ -1,4 +1,5 @@
-#pragma once
+п»ї#pragma once
+#include <vector>
 #include <optional>
 
 template <typename K, typename V>
@@ -18,10 +19,10 @@ private:
         K key;
         V value;
 
-        bool isLeave;
+        bool isLeaf;
 
-        Node(Node* pParent_, Node* pLeft_, Node* pRight_, Color color_, K key_, V value_, bool isLeave_) :
-            pParent(pParent_), pLeft(pLeft_), pRight(pRight_), color(color_), key(key_), value(value_), isLeave(isLeave_)
+        Node(Node* pParent_, Node* pLeft_, Node* pRight_, Color color_, K key_, V value_, bool isLeaf_) :
+            pParent(pParent_), pLeft(pLeft_), pRight(pRight_), color(color_), key(key_), value(value_), isLeaf(isLeaf_)
         {
             if (pLeft != nullptr) pLeft->pParent = this;
             if (pRight != nullptr) pRight->pParent = this;
@@ -80,6 +81,37 @@ private:
         } else
         {
             return g->pLeft;
+        }
+    }
+
+    Node* getSibling(const Node* pNode)
+    {
+        if (isLeftChild(pNode))
+        {
+            return pNode->pParent->pRight;
+        } else
+        {
+            return pNode->pParent->pLeft;
+        }
+    }
+
+    void replaceNode(Node* pNode, Node* pChild)
+    {
+        pChild->pParent = pNode->pParent;
+
+        if (pChild->pParent == nullptr)
+        {
+            pRoot = pChild;
+        }
+        else
+        {
+            if (isLeftChild(pNode))
+            {
+                pNode->pParent->pLeft = pChild;
+            } else
+            {
+                pNode->pParent->pRight = pChild;
+            }
         }
     }
 
@@ -143,54 +175,230 @@ private:
 
     void fixInsert(Node* pNode)
     {
-        if (pNode->pParent == nullptr) // pNode корень
+        if (pNode->pParent == nullptr) // pNode РєРѕСЂРµРЅСЊ
         {
-            // красим корень в красный
+            // РєСЂР°СЃРёРј РєРѕСЂРµРЅСЊ РІ РєСЂР°СЃРЅС‹Р№
             pNode->color = Node::BLACK;
             return;
-        } else if (pNode->pParent->color == Node::BLACK) // дерево сохранило правильность
+        }
+        
+        while (pNode->pParent != nullptr && pNode->pParent->color == Node::RED)
+        {
+            if (isLeftChild(pNode->pParent))
+            {
+                Node* pUncle = getUncle(pNode);
+                Node* pGrand = getGrandparent(pNode);
+                if (pUncle != nullptr && pUncle->color == Node::RED)
+                {
+                    pNode->pParent->color = Node::BLACK;
+                    pUncle->color = Node::BLACK;
+                    pGrand->color = Node::RED;
+                    pNode = pGrand;
+                }
+                else
+                {
+                    if (isRightChild(pNode))
+                    {
+                        pNode = pNode->pParent;
+                        rotateLeft(pNode);
+                    }
+
+                    pNode->pParent->color = Node::BLACK;
+                    pGrand->color = Node::RED;
+                    rotateRight(pGrand);
+                }
+            }
+            else
+            {
+                Node* pUncle = getUncle(pNode);
+                Node* pGrand = getGrandparent(pNode);
+                if (pUncle != nullptr && pUncle->color == Node::RED)
+                {
+                    pNode->pParent->color = Node::BLACK;
+                    pUncle->color = Node::BLACK;
+                    pGrand->color = Node::RED;
+                    pNode = pGrand;
+                }
+                else
+                {
+                    if (isLeftChild(pNode))
+                    {
+                        pNode = pNode->pParent;
+                        rotateRight(pNode);
+                    }
+                    pNode->pParent->color = Node::BLACK;
+                    pGrand->color = Node::RED;
+                    rotateLeft(pGrand);
+                }
+            }
+        }
+
+        pRoot->color = Node::BLACK;
+    }
+
+    void fixDelete(Node* pNode)
+    {
+        // pNode РєРѕСЂРµРЅСЊ, РґРµСЂРµРІРѕ РЅРµ СЃР»РѕРјР°РЅРѕ
+        if (pNode->pParent == nullptr)
         {
             return;
         }
 
-        // к этому моменту знаем, что отец красный
-        Node* pGrand = getGrandparent(pNode);
-        Node* pUncle = getUncle(pNode);
-
-        if (pUncle != nullptr && pUncle->color == Node::RED)
+        Node* pSibling = getSibling(pNode);
+        if (pSibling->color == Node::RED)
         {
-            // дядя красный, можно покрасить его и отца в черный, а деда в красный
+            pNode->pParent->color = Node::RED;
+            pSibling->color = Node::BLACK;
+            if (isLeftChild(pNode))
+            {
+                rotateLeft(pNode->pParent);
+            }
+            else
+            {
+                rotateRight(pNode->pParent);
+            }
+        }
 
+        pSibling = getSibling(pNode);
+
+        // РѕС‚РµС†, Р±СЂР°С‚ Рё РґРµС‚Рё Р±СЂР°С‚Р° С‡РµСЂРЅС‹Рµ, РјРѕР¶РЅРѕ РїСЂРѕСЃС‚Рѕ РїРѕРјРµРЅСЏС‚СЊ С†РІРµС‚ Р±СЂР°С‚Р°, РїРѕС‚РѕРј РёСЃРїСЂР°РІР»СЏС‚СЊ Сѓ РѕС‚С†Р°
+        if (pNode->pParent->color == Node::BLACK &&
+            pSibling->color == Node::BLACK &&
+            pSibling->pLeft->color == Node::BLACK &&
+            pSibling->pRight->color == Node::BLACK)
+        {
+            pSibling->color = Node::RED;
+            fixDelete(pNode->pParent);
+            return;
+        }
+
+        // С‚РѕР¶Рµ СЃР°РјРѕРµ, РЅРѕ РѕС‚РµС† РєСЂР°СЃРЅС‹Р№, РµРіРѕ РєСЂР°СЃРёРј РІ С‡РµСЂРЅС‹Р№, Р° Р±СЂР°С‚Р° РІ РєСЂР°СЃРЅС‹Р№
+        if (pNode->pParent->color == Node::RED &&
+            pSibling->color == Node::BLACK &&
+            pSibling->pLeft->color == Node::BLACK &&
+            pSibling->pRight->color == Node::BLACK)
+        {
+            pSibling->color = Node::RED;
             pNode->pParent->color = Node::BLACK;
-            pUncle->color = Node::BLACK;
-            pGrand->color = Node::RED;
-
-            fixInsert(pGrand); // теперь дед красный и на нем могли сломаться свойства
             return;
         }
 
-        // дядя оказался черным
-        // если pNode не левый левый и не правый правый, то повернем дерево
-        if (isRightChild(pNode) && isLeftChild(pNode->pParent))
+
+        if (isLeftChild(pNode) &&
+            pSibling->pLeft->color == Node::RED &&
+            pSibling->pRight->color == Node::BLACK)
         {
+            pSibling->color = Node::RED;
+            pSibling->pLeft->color = Node::BLACK;
+            rotateRight(pSibling);
+        }
+        else if (isRightChild(pNode) &&
+            pSibling->pLeft->color == Node::BLACK &&
+            pSibling->pRight->color == Node::RED)
+        {
+            pSibling->color = Node::RED;
+            pSibling->pRight->color = Node::BLACK;
+            rotateLeft(pSibling);
+        }
+
+        pSibling = getSibling(pNode);
+
+        pSibling->color = pNode->pParent->color;
+        pNode->pParent->color = Node::BLACK;
+
+        if (isLeftChild(pNode))
+        {
+            pSibling->pRight->color = Node::BLACK;
             rotateLeft(pNode->pParent);
-            pNode = pNode->pRight;
-        } else if (isLeftChild(pNode) && isRightChild(pNode->pParent))
+        }
+        else
         {
+            pSibling->pLeft->color = Node::BLACK;
             rotateRight(pNode->pParent);
+        }
+
+        pRoot->color = Node::BLACK;
+    }
+
+    void deleteZeroOneChild(Node* pNode)
+    {
+        Node* pChild = pNode->pRight->isLeaf ? pNode->pLeft : pNode->pRight;
+        Node* pOtherChild = pNode->pRight->isLeaf ? pNode->pRight : pNode->pLeft;
+
+        replaceNode(pNode, pChild);
+        if (pNode->color == Node::BLACK)
+        {
+            if (pChild->color == Node::RED)
+            {
+                pChild->color = Node::BLACK;
+            }
+            else
+            {
+                fixDelete(pChild);
+            }
+        }
+
+        delete pOtherChild;
+        delete pNode;
+    }
+
+    Node* getNext(Node* pNode)
+    {
+        pNode = pNode->pRight;
+
+        while (!pNode->pLeft->isLeaf)
+        {
             pNode = pNode->pLeft;
         }
 
-        pGrand = getGrandparent(pNode);
-        pNode->pParent->color = Node::BLACK;
-        pGrand->color = Node::RED;
-        if (isLeftChild(pNode) && isRightChild(pNode->pLeft))
+        return pNode;
+    }
+
+    void traverse(const Node* pNode, std::vector<std::pair<K, V>>& dat)
+    {
+        if (pNode->isLeaf)
         {
-            rotateRight(pGrand);
-        } else
-        {
-            rotateLeft(pGrand);
+            return;
         }
+
+        traverse(pNode->pLeft, dat);
+        dat.push_back({ pNode->key, pNode->value });
+        traverse(pNode->pRight, dat);
+    }
+
+    std::pair<bool, int> checkNode(const Node* pNode)
+    {
+        if (pNode->isLeaf)
+        {
+            return { true, 1 };
+        }
+
+        auto res1 = checkNode(pNode->pLeft);
+        auto res2 = checkNode(pNode->pRight);
+
+        int h = res1.second;
+        if (pNode->color == Node::BLACK) h++;
+
+        if (pNode->color == Node::RED)
+        {
+            if (pNode->pLeft->color == Node::RED ||
+                pNode->pRight->color == Node::RED)
+            {
+                return { false, h };
+            }
+        }
+
+        if (!res1.first || !res2.first)
+        {
+            return { false, h };
+        }
+
+        if (res1.second != res2.second)
+        {
+            return { false, h };
+        }
+
+        return { true, h };
     }
 
 public:
@@ -208,7 +416,7 @@ public:
 
         Node* pCur = pRoot;
 
-        while (!pCur->isLeave && pCur->key != key)
+        while (!pCur->isLeaf && pCur->key != key)
         {
             if (pCur->key < key)
             {
@@ -220,7 +428,7 @@ public:
             }
         }
 
-        if (pCur->isLeave)
+        if (pCur->isLeaf)
         {
             return std::nullopt;
         }
@@ -242,7 +450,7 @@ public:
 
         Node* pCur = pRoot;
 
-        while (!pCur->isLeave && pCur->key != key)
+        while (!pCur->isLeaf && pCur->key != key)
         {
             if (pCur->key < key)
             {
@@ -253,7 +461,7 @@ public:
             }
         }
 
-        if (pCur->isLeave)
+        if (pCur->isLeaf)
         {
             Node* pNew;
             if (isLeftChild(pCur))
@@ -273,5 +481,73 @@ public:
         {
             pCur->value = value;
         }
+    }
+
+    bool erase(const K& key)
+    {
+        if (pRoot == nullptr)
+        {
+            return false;
+        }
+
+        Node* pCur = pRoot;
+
+        while (!pCur->isLeaf && pCur->key != key)
+        {
+            if (pCur->key < key)
+            {
+                pCur = pCur->pRight;
+            } else
+            {
+                pCur = pCur->pLeft;
+            }
+        }
+
+        if (pCur->isLeaf)
+        {
+            return false;
+        }
+
+        // РЅРѕР»СЊ РёР»Рё РѕРґРёРЅ СЂРµР±РµРЅРѕРє
+        if (pCur->pLeft->isLeaf ||
+            pCur->pRight->isLeaf)
+        {
+            deleteZeroOneChild(pCur);
+            mSize--;
+            return true;
+        }
+
+        // РґРІР° СЂРµР±РµРЅРєР°
+        Node* pNext = getNext(pCur);
+
+        pCur->key = pNext->key;
+        pCur->value = pNext->value;
+
+        deleteZeroOneChild(pNext);
+        mSize--;
+
+        return true;
+    }
+
+    bool isValidTree()
+    {
+        if (pRoot == nullptr)
+        {
+            return true;
+        }
+
+        return checkNode(pRoot).first;
+    }
+
+    std::vector<std::pair<K, V>> toVector()
+    {
+        std::vector<std::pair<K, V>> ans;
+
+        if (pRoot != nullptr)
+        {
+            traverse(pRoot, ans);
+        }
+
+        return ans;
     }
 };
