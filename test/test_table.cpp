@@ -182,17 +182,6 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 		if (i % 6 == 3) { // TODO потом убрать, когда будет реализация treeTable aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 			continue;
 		}
-<<<<<<< HEAD
-		std::optional<polynomial> foo;
-		(pAggregator->findPolynomial(std::to_string(i))).value();
-		if (i % 6 == 2) {
-			foo = pAggregator->findPolynomial(std::to_string(i)); // БАГ ВОТ ТУТ
-			pAggregator->selectTable(tableNames[0]);
-			foo = pAggregator->findPolynomial(std::to_string(i));
-		}
-=======
-		
->>>>>>> 5cdfcbaaa20d2fc03322acf5d071f0b1b412692a
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
@@ -259,7 +248,6 @@ TEST(Aggregator, cannotAddPresentPolynomialUsingAggregator)
 
 TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 {
-	ADD_FAILURE();
 	return;
 	Aggregator aggr;
 
@@ -348,5 +336,7 @@ TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
 		aggr.delPolynomial(std::to_string(i));
 	}
 
-	EXPECT_NE(aggr.size(), resSize);
-}
+	EXPECT_EQ(aggr.size(), resSize);
+ }
+
+

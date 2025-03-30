@@ -35,7 +35,7 @@ void LinearArrTable::delPolynomial(const std::string& polName)
 unsigned int LinearArrTable::size() 
 {
 	return mTable.size();
-}
+ }
 
 bool LinearArrTable::empty() 
 {
