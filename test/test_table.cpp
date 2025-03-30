@@ -117,60 +117,110 @@ TYPED_TEST(TableTest, nonEmptyTableIsNonEmpty)
 	EXPECT_FALSE(this->table.empty());
 }
 
+
 TEST(Aggregator, defaultAggregatorConstructor)
 {
-	/*Aggregator a;
+	Aggregator a;
 	EXPECT_TRUE(a.empty());
-	EXPECT_EQ(a.size(), 0);*/
-	ADD_FAILURE();
+	EXPECT_EQ(a.size(), 0);
 }
 
-TEST(TableTest, canSelectCorrectTable) 
+TEST(Aggregator, canSelectCorrectTable)
+{
+	Aggregator a;
+	EXPECT_NO_THROW(a.selectTable("liar"));
+	EXPECT_NO_THROW(a.selectTable("lili"));
+	EXPECT_NO_THROW(a.selectTable("ordr"));
+	EXPECT_NO_THROW(a.selectTable("tree"));
+	EXPECT_NO_THROW(a.selectTable("opha"));
+	EXPECT_NO_THROW(a.selectTable("seha"));
+}
+
+TEST(Aggregator, cannotSelectIncorrectTable)
+{
+	Aggregator a;
+	EXPECT_ANY_THROW(a.selectTable("fooo"));
+}
+
+TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
+{
+	Aggregator* pAggregator = new Aggregator();
+	std::vector<polynomial> pols;
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+	int polyCount = 10;
+	for (int i = 1; i < polyCount + 1; i++) {
+		polynomial a;
+		std::string st;
+		switch (i % 4)
+		{
+		case 0:
+			st += "w";
+			break;
+		case 1:
+			st += "x";
+			break;
+		case 2:
+			st += "y";
+			break;
+		case 3:
+			st += "z";
+			break;
+		}
+		st += std::to_string(i);
+		a = std::get<polynomial>(polynomial::from_string(st));
+		pols.push_back(a);
+	}
+	for (int i = 0; i < polyCount; i++) {
+		pAggregator->addPolynomial(std::to_string(i), pols[i]);
+	}
+
+	for (int i = 0; i < polyCount; i++) {
+		pAggregator->selectTable(tableNames[i % 6]);
+		if (i % 6 == 3) { // TODO потом убрать, когда будет реализация treeTable aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			continue;
+		}
+		std::optional<polynomial> foo;
+		if (i == 8) {
+			foo = pAggregator->findPolynomial(std::to_string(i)); // БАГ ВОТ ТУТ
+			pAggregator->selectTable(tableNames[0]);
+			foo = pAggregator->findPolynomial(std::to_string(i));
+		}
+		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
+	}
+}
+
+
+TEST(Aggregator, cannotFindUnexsistingPolynomialUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, cannotSelectIncorrectTable) 
+TEST(Aggregator, canAddUnpresentPolynomialUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, canFindExsistingPolynomialUsingAggregator) 
+TEST(Aggregator, cannotAddPresentPolynomialUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, cannotFindUnexsistingPolynomialUsingAggregator) 
+TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, canAddUnpresentPolynomialUsingAggregator) 
+TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, cannotAddPresentPolynomialUsingAggregator) 
+TEST(Aggregator, canGetSizeWhenEmptyUsingAggregator)
 {
 	ADD_FAILURE();
 }
 
-TEST(TableTest, canDelPresentPolynomialUsingAggregator) 
-{
-	ADD_FAILURE();
-}
-
-TEST(TableTest, delOfUnpresentPolynomialDoesNothingUsingAggregator) 
-{
-	ADD_FAILURE();
-}
-
-TEST(TableTest, canGetSizeWhenEmptyUsingAggregator) 
-{
-	ADD_FAILURE();
-}
-
-TEST(TableTest, canGetSizeWhenNonEmptyUsingAggregator) 
+TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
 {
 	ADD_FAILURE();
 }

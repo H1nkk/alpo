@@ -1,6 +1,6 @@
 #include <table.h>
 
-#define DEFAUL_ORDERED_TABLE_SIZE 4
+#define DEFAULT_ORDERED_TABLE_SIZE 4
 
 // *** LinearArrTable ***
 
@@ -146,9 +146,9 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable(): mTableSize(DEFAUL_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+OrderedTable::OrderedTable(): mTableSize(DEFAULT_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
 {
-	mTable.resize(DEFAUL_ORDERED_TABLE_SIZE);
+	mTable.resize(DEFAULT_ORDERED_TABLE_SIZE);
 }
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
@@ -524,13 +524,7 @@ std::vector<std::pair< std::string, polynomial>> SeparateChainingHashTable::getP
 
 Aggregator::Aggregator() {
 	tables.resize(6, nullptr);
-	//tables[0] = new LinearArrTable();
-	//tables[1] = new LinearArrTable();
-	//tables[2] = new LinearArrTable();
-	//tables[3] = new LinearArrTable();
-	//tables[4] = new LinearArrTable();
-	//tables[5] = new LinearArrTable();
-	//
+
 	tables[0] = new LinearArrTable();
 	tables[1] = new LinearListTable();
 	tables[2] = new OrderedTable();
@@ -566,6 +560,9 @@ void Aggregator::selectTable(const std::string& tableName) {
 	{
 		currentTable = 5;
 	}
+	else {
+		throw "Cannot select table " + tableName;
+	}
 }
 
 std::optional<polynomial> Aggregator::findPolynomial(const std::string& polName) {
@@ -586,12 +583,16 @@ unsigned int Aggregator::size() {
 	return tables[currentTable]->size();
 }
 
-Aggregator::~Aggregator() {
-	for (auto table : tables) {
-		delete table; // i dont know if this calls tables' destructors
-	}
+bool Aggregator::empty() {
+	return size() == 0;
 }
 
 std::vector<std::pair< std::string, polynomial>> Aggregator::getPolynomials() {
 	return tables[currentTable]->getPolynomials();
+}
+
+Aggregator::~Aggregator() {
+	for (auto table : tables) {
+		delete table; // i dont know if this calls tables' destructors
+	}
 }
