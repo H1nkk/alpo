@@ -145,9 +145,11 @@ TEST(Aggregator, cannotSelectIncorrectTable)
 TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 {
 	Aggregator* pAggregator = new Aggregator();
+	OpenAddressHashTable* pTab = new OpenAddressHashTable();
+
 	std::vector<polynomial> pols;
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
-	int polyCount = 10;
+	int polyCount = 50;
 	for (int i = 1; i < polyCount + 1; i++) {
 		polynomial a;
 		std::string st;
@@ -171,6 +173,12 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 		pols.push_back(a);
 	}
 	for (int i = 0; i < polyCount; i++) {
+		polynomial toDel = pols[i];
+		if (i == 11) { // TODO óäàëèòü, äåáàã
+			polyCount++;
+			polyCount--;
+		}
+		pTab->addPolynomial(std::to_string(i), pols[i]); // TODO óäàëèòü, äåáàã
 		pAggregator->addPolynomial(std::to_string(i), pols[i]);
 	}
 
@@ -180,12 +188,20 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
+<<<<<<< HEAD
 		//if (i == 8) {
 		//	foo = pAggregator->findPolynomial(std::to_string(i)); // ÁÀÃ ÂÎÒ ÒÓÒ
 		//	pAggregator->selectTable(tableNames[0]);
 		//	foo = pAggregator->findPolynomial(std::to_string(i));
 		//}
 		(pAggregator->findPolynomial(std::to_string(i))).value();
+=======
+		if (i % 6 == 2) {
+			foo = pAggregator->findPolynomial(std::to_string(i)); // ÁÀÃ ÂÎÒ ÒÓÒ
+			pAggregator->selectTable(tableNames[0]);
+			foo = pAggregator->findPolynomial(std::to_string(i));
+		}
+>>>>>>> cfde0a76ba26c684a6fd36a1492c3dab61377f52
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
