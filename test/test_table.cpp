@@ -124,13 +124,11 @@ TEST(Aggregator, defaultAggregatorConstructor)
 
 TEST(Aggregator, canSelectCorrectTable)
 {
-	Aggregator a;
-	EXPECT_NO_THROW(a.selectTable("liar"));
-	EXPECT_NO_THROW(a.selectTable("lili"));
-	EXPECT_NO_THROW(a.selectTable("ordr"));
-	EXPECT_NO_THROW(a.selectTable("tree"));
-	EXPECT_NO_THROW(a.selectTable("opha"));
-	EXPECT_NO_THROW(a.selectTable("seha"));
+	Aggregator aggr;
+	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
+
+	for (int i = 0; i < 6; i++)
+		EXPECT_NO_THROW(aggr.selectTable(tableNames[i]));
 }
 
 TEST(Aggregator, cannotSelectIncorrectTable)
@@ -283,7 +281,6 @@ TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
 		tab.addPolynomial(std::to_string(i), std::get<polynomial>(polynomial::from_string(polynomials[i])));// TODO debug, to be deleted
 	}
 
-
 	aggr.addPolynomial("existing", std::get<polynomial>(polynomial::from_string("x3y5z4w2")));
 	aggr.addPolynomial("existing1", std::get<polynomial>(polynomial::from_string("x34y5z4w2")));
 	aggr.addPolynomial("existing2", std::get<polynomial>(polynomial::from_string("x")));
@@ -341,7 +338,4 @@ TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
 		aggr.selectTable(tableNames[i]);
 		EXPECT_EQ(aggr.size(), resSize);
 	}
-
  }
-
-
