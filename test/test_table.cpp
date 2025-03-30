@@ -8,9 +8,8 @@ protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<OrderedTable, LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable, TreeTable>;
+using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, TreeTable, OpenAddressHashTable, SeparateChainingHashTable>;
 TYPED_TEST_SUITE(TableTest, TableTypes);
-
 
 TYPED_TEST(TableTest, defaultTableConstructor)
 {
@@ -177,9 +176,7 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 
 	for (int i = 0; i < polyCount; i++) {
 		pAggregator->selectTable(tableNames[i % 6]);
-		if (i % 6 == 3) { // TODO ����� ������, ����� ����� ���������� treeTable aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-			continue;
-		}
+
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }
@@ -205,7 +202,7 @@ TEST(Aggregator, canAddUnpresentPolynomialUsingAggregator)
 	Aggregator aggr;
 
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
-	int polyCount = 6; // TODO ������� 100
+	int polyCount = 100; // TODO ������� 100
 	for (int i = 1; i < polyCount + 1; i++) {
 		polynomial a;
 		std::string st;
@@ -246,7 +243,6 @@ TEST(Aggregator, cannotAddPresentPolynomialUsingAggregator)
 
 TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 {
-	return;
 	Aggregator aggr;
 
 	std::vector<std::string> tableNames = { "liar" , "lili", "ordr", "tree", "opha", "seha" };
@@ -266,8 +262,11 @@ TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 		aggr.selectTable(tableNames[i % 6]);
 		aggr.delPolynomial(std::to_string(i));
 	}
-
-	EXPECT_EQ(aggr.size(), sz - 6);
+	for (int i = 0; i < 6; i++) {
+		aggr.selectTable(tableNames[i]);
+		int newSz = aggr.size();
+		EXPECT_EQ(newSz, sz - 6);
+	}
 }
 
 TEST(Aggregator, delOfUnpresentPolynomialDoesNothingUsingAggregator)
