@@ -149,19 +149,18 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable(): mTableSize(DEFAULT_ORDERED_TABLE_SIZE), mCurrentSize(0) // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+OrderedTable::OrderedTable() // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
 {
-	mTable.resize(DEFAULT_ORDERED_TABLE_SIZE);
+
 }
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
 {
-	if (mCurrentSize == 0) return std::nullopt;
-	int i = mCurrentSize / 2;
+	if (mTable.size() == 0) return std::nullopt;
+	int i = mTable.size() / 2;
 	int leftBorder = 0;
-	int rightBorder = mCurrentSize - 1;
-	bool flag = false;
-	while (rightBorder > leftBorder && mTable[i].key != polName) // binary search
+	int rightBorder = mTable.size()-1;
+	while (rightBorder >= leftBorder && mTable[i].key != polName) // binary search
 	{
 		if (mTable[i].key.compare(polName) > 0)
 		{
@@ -173,10 +172,6 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		/*else if (mTable[i].key != polName)
-		{
-			flag = true;
-		}*/
 	}
 	if (mTable[i].key == polName)
 		return mTable[i].value;
@@ -187,10 +182,10 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 {
 	if (findPolynomial(polName) != std::nullopt) // uniqueness check
 		throw "This polynomial already exists";
-	int i = mCurrentSize / 2;
+	int i = mTable.size() / 2;
 	int leftBorder = 0;
-	int rightBorder = mCurrentSize - 1;
-	while (rightBorder > leftBorder && mTable[i].key != polName) // binary search
+	int rightBorder = mTable.size() - 1;
+	while (rightBorder >= leftBorder) // binary search
 	{
 		if (mTable[i].key.compare(polName) > 0)
 		{
@@ -203,35 +198,18 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 			i = (leftBorder + rightBorder) / 2;
 		}
 	}
-	if (mTableSize == mCurrentSize) // repacking and adding entry
-	{
-		mTableSize *= 2;
-		mTable.resize(mTableSize);
-	}
-	if (mCurrentSize != 0)
-	{
-		if (mTable[i].key.compare(polName) < 0)
-		{
-			i += 1;
-		}
-		for (int j = mCurrentSize; j > i; j--)
-			mTable[j] = mTable[j - 1];
-		mTable[i] = { polName,  pol };
-	}
-	else
-	{
-		mTable[i] = { polName,  pol };
-	}
-	mCurrentSize++;
+	if (mTable.size() == 2 && mTable[i].key.compare(polName) > 0)
+		i += 1;
+	mTable.insert(mTable.begin() + i, { polName, pol });
 }
 
 void OrderedTable::delPolynomial(const std::string& polName)
 {
 	if (findPolynomial(polName) == std::nullopt) return; // uniqueness check тут изменил != на ==
-	int i = mCurrentSize / 2;
+	int i = mTable.size() / 2;
 	int leftBorder = 0;
-	int rightBorder = mTableSize;
-	while (rightBorder > leftBorder && mTable[i].key != polName)
+	int rightBorder = mTable.size() - 1;
+	while (rightBorder >= leftBorder && mTable[i].key != polName)
 	{
 		if (mTable[i].key.compare(polName) > 0)
 		{
@@ -244,33 +222,23 @@ void OrderedTable::delPolynomial(const std::string& polName)
 			i = (leftBorder + rightBorder) / 2;
 		}
 	}
-	if (mTable[i].key.compare(polName) < 0)
-	{
-		i += 1;
-	}
 	mTable.erase(mTable.begin() +  i);
-	for (int j = i; j < mCurrentSize - 1; j++)
-	{
-		mTable[j] = mTable[j+1];
-	}
-	mCurrentSize--;
 }
 
 unsigned int OrderedTable::size()
 {
-	return mCurrentSize;
-
+	return mTable.size();
 }
 
 bool OrderedTable::empty()
 {
-	return mCurrentSize == 0;
+	return mTable.size() == 0;
 }
 
 std::vector<std::pair< std::string, polynomial>> OrderedTable::getPolynomials()
 {
-	std::vector<std::pair< std::string, polynomial>> result(mCurrentSize);
-	for (int i = 0; i < mCurrentSize; i++) {
+	std::vector<std::pair< std::string, polynomial>> result(mTable.size());
+	for (int i = 0; i < mTable.size(); i++) {
 		result[i].first = mTable[i].key;
 		result[i].second = mTable[i].value;
 	}

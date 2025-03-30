@@ -76,11 +76,8 @@ class OrderedTable : public Table
 		std::string key;
 		polynomial value;
 	};
-	std::vector<Pol> mTable;
 
-	//Pol* pTable;
-	size_t mCurrentSize;
-	size_t mTableSize;
+	std::vector<Pol> mTable;
 
 public:
 	OrderedTable();

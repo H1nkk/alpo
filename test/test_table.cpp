@@ -19,9 +19,8 @@ TYPED_TEST(TableTest, defaultTableConstructor)
 
 TYPED_TEST(TableTest, canAddUnpresentPolynomial)
 {
-	polynomial a;
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	std::vector<std::pair< std::string, polynomial>> pol(6);
-	a.from_string("12x2-4y");
 	this->table.addPolynomial("Pol1", a);
 	this->table.addPolynomial("Pol2", a);
 	this->table.addPolynomial("Pol4", a);
@@ -47,16 +46,14 @@ TYPED_TEST(TableTest, canAddUnpresentPolynomial)
 
 TYPED_TEST(TableTest, cannotAddPresentPolynomial)
 {
-	polynomial a;
-	a.from_string("12x2-4y");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	EXPECT_ANY_THROW(this->table.addPolynomial("Pol1", a));
 }
 
 TYPED_TEST(TableTest, canFindExsistingPolynomial)
 {
-	polynomial a;
-	a.from_string("12x2-4y");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	EXPECT_EQ(this->table.findPolynomial("Pol1"), a);
 }
@@ -68,8 +65,7 @@ TYPED_TEST(TableTest, cannotFindUnexsistingPolynomial)
 
 TYPED_TEST(TableTest, canDelPresentPolynomial)
 {
-	polynomial a;
-	a.from_string("12x2-4y");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	this->table.delPolynomial("Pol1");
 	EXPECT_TRUE(this->table.empty());
@@ -78,9 +74,8 @@ TYPED_TEST(TableTest, canDelPresentPolynomial)
 
 TYPED_TEST(TableTest, delOfUnpresentPolynomialDoesNothing)
 {
-	polynomial a, b;
-	a.from_string("12x2-4y");
-	b.from_string("12x3-6z");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
+	polynomial b = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	this->table.addPolynomial("Pol2", b);
 	this->table.delPolynomial("Pol3");
@@ -95,8 +90,7 @@ TYPED_TEST(TableTest, canGetSizeWhenEmpty)
 
 TYPED_TEST(TableTest, canGetSizeWhenNonEmpty)
 {
-	polynomial a;
-	a.from_string("12x2-4y");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	EXPECT_EQ(this->table.size(), 1);
 }
@@ -108,8 +102,7 @@ TYPED_TEST(TableTest, emptyTableIsEmpty)
 
 TYPED_TEST(TableTest, nonEmptyTableIsNonEmpty)
 {
-	polynomial a;
-	a.from_string("12x2-4y");
+	polynomial a = std::get<polynomial>(polynomial::from_string("12x2-4y"));
 	this->table.addPolynomial("Pol1", a);
 	EXPECT_FALSE(this->table.empty());
 }
