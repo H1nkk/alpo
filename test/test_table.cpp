@@ -8,7 +8,7 @@ protected:
 	Table table;
 };
 
-using TableTypes = ::testing::Types<OrderedTable, LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable>; // add TreeTable after realization
+using TableTypes = ::testing::Types<LinearArrTable, LinearListTable, OrderedTable, OpenAddressHashTable, SeparateChainingHashTable>; // add TreeTable after realization
 TYPED_TEST_SUITE(TableTest, TableTypes);
 
 
@@ -180,11 +180,12 @@ TEST(Aggregator, canFindExsistingPolynomialUsingAggregator)
 			continue;
 		}
 		std::optional<polynomial> foo;
-		if (i == 8) {
-			foo = pAggregator->findPolynomial(std::to_string(i)); // аюц бнр рср
-			pAggregator->selectTable(tableNames[0]);
-			foo = pAggregator->findPolynomial(std::to_string(i));
-		}
+		//if (i == 8) {
+		//	foo = pAggregator->findPolynomial(std::to_string(i)); // аюц бнр рср
+		//	pAggregator->selectTable(tableNames[0]);
+		//	foo = pAggregator->findPolynomial(std::to_string(i));
+		//}
+		(pAggregator->findPolynomial(std::to_string(i))).value();
 		EXPECT_EQ((pAggregator->findPolynomial(std::to_string(i))).value(), pols[i]);
 	}
 }

@@ -157,6 +157,7 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mCurrentSize - 1;
+	bool flag = false;
 	while (rightBorder > leftBorder && mTable[i].key != polName) // binary search
 	{
 		if (mTable[i].key.compare(polName) > 0)
@@ -169,6 +170,10 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
+		/*else if (mTable[i].key != polName)
+		{
+			flag = true;
+		}*/
 	}
 	if (mTable[i].key == polName)
 		return mTable[i].value;
@@ -196,27 +201,23 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 	}
 	if (mTableSize == mCurrentSize) // repacking and adding entry
 	{
+		mTableSize *= 2;
+		mTable.resize(mTableSize);
+	}
+	if (mCurrentSize != 0)
+	{
 		if (mTable[i].key.compare(polName) < 0)
 		{
 			i += 1;
 		}
-		mTableSize *= 2;
-		mTable.resize(mTableSize);
+		for (int j = mCurrentSize; j > i; j--)
+			mTable[j] = mTable[j - 1];
+		mTable[i] = { polName,  pol };
 	}
-		if (mCurrentSize != 0)
-		{
-			if (mTable[i].key.compare(polName) < 0)
-			{
-				i += 1;
-			}
-			for (int j = mCurrentSize; j > i; j--)
-				mTable[j] = mTable[j - 1];
-			mTable[i] = { polName,  pol };
-		}
-		else
-		{
-			mTable[i] = { polName,  pol };
-		}
+	else
+	{
+		mTable[i] = { polName,  pol };
+	}
 	mCurrentSize++;
 }
 
@@ -239,7 +240,7 @@ void OrderedTable::delPolynomial(const std::string& polName)
 			i += 1 + (rightBorder - leftBorder) / 2;
 		}
 	}
-	mTable.erase(std::next(mTable.begin(), i));
+	mTable.erase(mTable.begin() +  i);
 	for (int j = 0; j < mCurrentSize; j++)
 	{
 		mTable[j] = mTable[j+1];
