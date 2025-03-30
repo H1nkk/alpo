@@ -262,6 +262,7 @@ TEST(Aggregator, canDelPresentPolynomialUsingAggregator)
 		aggr.selectTable(tableNames[i % 6]);
 		aggr.delPolynomial(std::to_string(i));
 	}
+
 	for (int i = 0; i < 6; i++) {
 		aggr.selectTable(tableNames[i]);
 		int newSz = aggr.size();
@@ -313,7 +314,10 @@ TEST(Aggregator, canGetSizeWhenEmptyUsingAggregator)
 		aggr.delPolynomial(std::to_string(i));
 	}
 
-	EXPECT_EQ(aggr.size(), 0);
+	for (int i = 0; i < 6; i++) {
+		aggr.selectTable(tableNames[i]);
+		EXPECT_EQ(aggr.size(), 0);
+	}
 }
 
 TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
@@ -333,7 +337,11 @@ TEST(Aggregator, canGetSizeWhenNonEmptyUsingAggregator)
 		aggr.delPolynomial(std::to_string(i));
 	}
 
-	EXPECT_EQ(aggr.size(), resSize);
+	for (int i = 0; i < 6; i++) {
+		aggr.selectTable(tableNames[i]);
+		EXPECT_EQ(aggr.size(), resSize);
+	}
+
  }
 
 
