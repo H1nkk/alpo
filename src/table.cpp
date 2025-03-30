@@ -10,6 +10,8 @@ void LinearArrTable::addPolynomial(const std::string& polName, const polynomial&
 {
 	if (findPolynomial(polName) == std::nullopt)
 		mTable.push_back({ polName, pol });
+	else
+		throw "This polynomial already exists";
 }
 
 std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polName) 
@@ -72,7 +74,8 @@ std::optional<polynomial> LinearListTable::findPolynomial(const std::string& pol
 
 void LinearListTable::addPolynomial(const std::string& polName, const polynomial& pol) 
 {
-	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	if (findPolynomial(polName) != std::nullopt) // uniqueness check
+		throw "This polynomial already exists"; 
 	mTableSize++;
 	Node* p = pFirst;
 	if (!p) 
@@ -182,7 +185,8 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 
 void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return; // uniqueness check
+	if (findPolynomial(polName) != std::nullopt) // uniqueness check
+		throw "This polynomial already exists";
 	int i = mCurrentSize / 2;
 	int leftBorder = 0;
 	int rightBorder = mCurrentSize - 1;
@@ -334,7 +338,8 @@ unsigned int OpenAddressHashTable::hashFunc(const std::string& key) //polynomial
 
 void OpenAddressHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return;
+	if (findPolynomial(polName) != std::nullopt) 
+		throw "This polynomial already exists";
 	mCurrentSize++;
 
 	if (mCurrentSize / mTableSize > 0.5) // repacking
@@ -445,7 +450,8 @@ unsigned int SeparateChainingHashTable::hashFunc(const std::string& key) //polyn
 
 void SeparateChainingHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
-	if (findPolynomial(polName) != std::nullopt) return;
+	if (findPolynomial(polName) != std::nullopt)
+		throw "This polynomial already exists";
 	mCurrentSize++;
 	if (!mTable[hashFunc(polName)])
 	{
