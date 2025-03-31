@@ -48,7 +48,7 @@ namespace Intr {
                 auto p = pAggregator->findPolynomial(std::get<std::string>(op));
                 if (!p.has_value())
                 {
-                    throw "Polynomial with name " + std::get<std::string>(op) + " does not exist";
+                    throw "Polynomial with name \'" + std::get<std::string>(op) + "\' does not exist";
                 }
 
                 return p.value();
@@ -115,7 +115,7 @@ namespace Intr {
                 auto p = pAggregator->findPolynomial(std::get<std::string>(op));
                 if (!p.has_value())
                 {
-                    throw "Polynomial with name " + std::get<std::string>(op) + " does not exist";
+                    throw "Polynomial with name \'" + std::get<std::string>(op) + "\' does not exist";
                 }
 
                 mOperands.Push(-p.value());
