@@ -160,14 +160,21 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 	int i = mTable.size() / 2;
 	int leftBorder = 0;
 	int rightBorder = mTable.size()-1;
+	//for (int j = 0; j < mTable.size(); j++)
+	//{
+	//	if (mTable[i].key == polName)
+	//	{
+	//		return mTable[i].value;
+	//	}
+	//}
 	while (rightBorder >= leftBorder && mTable[i].key != polName) // binary search
 	{
-		if (mTable[i].key.compare(polName) > 0)
+		if (mTable[i].key > polName == 1)
 		{
 			rightBorder = i - 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (mTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key < polName == 1)
 		{
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
@@ -187,20 +194,23 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 	int rightBorder = mTable.size() - 1;
 	while (rightBorder >= leftBorder) // binary search
 	{
-		if (mTable[i].key.compare(polName) > 0)
+		if (mTable[i].key > polName)
 		{
 			rightBorder = i - 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (mTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key < polName)
 		{
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
 	}
-	if (mTable.size() == 2 && mTable[i].key.compare(polName) > 0)
-		i += 1;
-	mTable.insert(mTable.begin() + i, { polName, pol });
+	if (mTable.size() == 0)
+		mTable.push_back({ polName, pol });
+	else if (mTable[i].key > polName)
+		mTable.insert(mTable.begin() + i, { polName, pol });
+	else if (mTable[i].key < polName)
+		mTable.insert(mTable.begin() + i + 1, { polName, pol });
 }
 
 void OrderedTable::delPolynomial(const std::string& polName)
@@ -211,12 +221,12 @@ void OrderedTable::delPolynomial(const std::string& polName)
 	int rightBorder = mTable.size() - 1;
 	while (rightBorder >= leftBorder && mTable[i].key != polName)
 	{
-		if (mTable[i].key.compare(polName) > 0)
+		if (mTable[i].key > polName)
 		{
 			rightBorder = i - 1;
 			i = (leftBorder + rightBorder) / 2;
 		}
-		else if (mTable[i].key.compare(polName) < 0)
+		else if (mTable[i].key < polName)
 		{
 			leftBorder = i + 1;
 			i = (leftBorder + rightBorder) / 2;
