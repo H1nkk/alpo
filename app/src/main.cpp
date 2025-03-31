@@ -1,6 +1,7 @@
 #include <iostream>
 #include <qapplication>
 #include <qpushbutton>
+#include <QElapsedTimer>
 #include <string>
 #include <algorithm>
 #include <sstream>
@@ -178,6 +179,7 @@ int main(int argc, char* argv[])
     QLineEdit* pZContainer = ui.zLineEdit;
     QLineEdit* pWContainer = ui.wLineEdit;
     QLineEdit* pInputErrorField = ui.inputError;
+    QLabel* pElapsedTime = ui.elapsedTime;
     QComboBox* pComboBox = ui.comboBox;
     QTextEdit* pOutputField = ui.outputField;
     QTableWidget* pTableWidget = ui.tableWidget;
@@ -198,6 +200,8 @@ int main(int argc, char* argv[])
 
     QObject::connect(pInputField, &QLineEdit::returnPressed, [&]()
         {
+            QElapsedTimer timer;
+            timer.start();
             try {
                 inputText = pInputField->text();
                 std::string s = inputText.toUtf8().constData();
@@ -217,6 +221,9 @@ int main(int argc, char* argv[])
                 qDebug() << "Error: " << c;
                 pInputErrorField->setText(QString::fromStdString(c));
             }
+            timer.nsecsElapsed();
+            long long elapsed = timer.nsecsElapsed();
+            pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
         });
 
     QObject::connect(pTableWidget, &QTableWidget::customContextMenuRequested, [&](const QPoint &pos) {
@@ -228,16 +235,27 @@ int main(int argc, char* argv[])
             QAction* buttonCalculateAction = menu.addAction("Calculate");
             QAction* buttonDeleteAction = menu.addAction("Delete");
 
-            QObject::connect(buttonDeleteAction, &QAction::triggered, [pTableWidget, pItem, pAggregator]()
+            QObject::connect(buttonDeleteAction, &QAction::triggered, [pTableWidget, pItem, pAggregator, pElapsedTime]()
                 {
                     int row = pItem->row();
+
+                    QElapsedTimer timer;
+                    timer.start();
+
                     deleteAction(pTableWidget, pAggregator, row);
+
+                    timer.nsecsElapsed();
+                    long long elapsed = timer.nsecsElapsed();
+                    pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
 
                     pTableWidget->clearSelection();
                     tableWidgetUpdate(pTableWidget, pAggregator);
+
                 });
 
             QObject::connect(buttonCalculateAction, &QAction::triggered, [&]() {
+
+
                 double w = pWContainer->text().toDouble();
                 double x = pXContainer->text().toDouble();
                 double y = pYContainer->text().toDouble();
@@ -249,36 +267,69 @@ int main(int argc, char* argv[])
 
                     std::string polyName = pTableWidget->item(row, 0)->text().toStdString();
 
+                    QElapsedTimer timer;
+                    timer.start();
+
                     calculateAction(pAggregator, pOutputField, polyName, w, x, y, z);
+
+                    timer.nsecsElapsed();
+                    long long elapsed = timer.nsecsElapsed();
+                    pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
                 }
                 catch (char* s)
                 {
                     pInputErrorField->setText("Select a polynomial to evaluate");
                 }
+
+
                 });
 
             menu.exec(pTableWidget->viewport()->mapToGlobal(pos));
         }
         });
 
-    QPushButton::connect(pDeleteButton, &QPushButton::clicked, [pTableWidget, pAggregator]()
+    QPushButton::connect(pDeleteButton, &QPushButton::clicked, [pTableWidget, pAggregator, pElapsedTime]()
         {
+            QElapsedTimer timer;
+            timer.start();
+
             int row = pTableWidget->selectionModel()->currentIndex().row();
             deleteAction(pTableWidget, pAggregator, row);
 
             pTableWidget->clearSelection();
             tableWidgetUpdate(pTableWidget, pAggregator);
+
+            timer.nsecsElapsed();
+            long long elapsed = timer.nsecsElapsed();
+            pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
+
         });
 
-    QPushButton::connect(pClearButton, &QPushButton::clicked, [pTableWidget, pAggregator]()
+    QPushButton::connect(pClearButton, &QPushButton::clicked, [pTableWidget, pAggregator, pElapsedTime]()
         {
+            QElapsedTimer timer;
+            timer.start();
+
             clearAction(pTableWidget, pAggregator);
+
+            timer.nsecsElapsed();
+            long long elapsed = timer.nsecsElapsed();
+            pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
         });
 
     QComboBox::connect(pComboBox, &QComboBox::currentTextChanged, [&](const QString& text) 
         {
             std::string s = text.toUtf8().constData();
+
+            QElapsedTimer timer;
+            timer.start();
+
             changeTable(pTableWidget, pAggregator, s);
+
+            timer.nsecsElapsed();
+            long long elapsed = timer.nsecsElapsed();
+            pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
+
             qDebug() << "Table changed to" << text;
         });
 
@@ -304,7 +355,15 @@ int main(int argc, char* argv[])
             }
             std::string polyName = pTableWidget->item(row, 0)->text().toStdString();
 
+            QElapsedTimer timer;
+            timer.start();
+
             calculateAction(pAggregator, pOutputField, polyName, w, x, y, z);
+
+            timer.nsecsElapsed();
+            long long elapsed = timer.nsecsElapsed();
+            pElapsedTime->setText("Elapsed time: " + QString::fromStdString(std::to_string(elapsed / 1e9)) + " sec");
+
             pInputErrorField->clear();
         });
 

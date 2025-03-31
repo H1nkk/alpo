@@ -351,7 +351,7 @@ std::optional<polynomial> OpenAddressHashTable::findPolynomial(const std::string
 	int ind = hashFunc(polName);
 	while (mTable[ind].status != 0)
 	{
-		if (mTable[ind].key == polName)
+		if (mTable[ind].key == polName && mTable[ind].status != -1) // hotfixed by Z
 			return mTable[ind].value;
 		ind += step;
 		ind %= mTableSize;
