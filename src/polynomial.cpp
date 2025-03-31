@@ -389,7 +389,13 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
     else
     {
         size_t coefl = 0;
-        coefd = std::stod(coefficient, &coefl);
+        try
+        {
+            coefd = std::stod(coefficient, &coefl);
+        }
+        catch(...) {
+            return syntax_error{ offset, "Invalid coefficient!" };
+        }
         if (coefl != coefficient.size()) return syntax_error{ offset, "Invalid coefficient!" };
     }
 
@@ -421,7 +427,17 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
 
         if (power.size())
         {
-            uint32_t poweri = std::stoul(power);
+            uint32_t poweri;
+
+            try
+            {
+                poweri = std::stoul(power);
+            }
+            catch (...)
+            {
+                return syntax_error{ offset, "Too big power! Maximum supported power is 65535" };
+            }
+
             if (poweri > UINT16_MAX) return syntax_error{ offset, "Too big power! Maximum supported power is 65535" };
             p = poweri;
         }
