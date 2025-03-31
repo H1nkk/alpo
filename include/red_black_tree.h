@@ -326,13 +326,13 @@ private:
         Node* pOtherChild = pNode->pRight->isLeaf ? pNode->pRight : pNode->pLeft;
 
         replaceNode(pNode, pChild);
+
         if (pNode->color == Node::BLACK)
         {
             if (pChild->color == Node::RED)
             {
                 pChild->color = Node::BLACK;
-            }
-            else
+            } else
             {
                 fixDelete(pChild);
             }
@@ -340,6 +340,12 @@ private:
 
         delete pOtherChild;
         delete pNode;
+
+        if (pChild->isLeaf && pChild == pRoot)
+        {
+            pRoot = nullptr;
+            delete pChild;
+        }
     }
 
     Node* getNext(Node* pNode)

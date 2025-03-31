@@ -92,6 +92,22 @@ TEST(RedBlackTreeTest, erasing_does_not_corrupt_data)
     EXPECT_EQ(tree.find("c"), std::nullopt);
 }
 
+TEST(RedBlackTreeTest, can_insert_after_erased)
+{
+    RedBlackTree<string, int> tree;
+
+    tree.insert("a", 1);
+    tree.insert("ab", 12);
+    tree.insert("A", -1);
+    tree.insert("c", 3);
+    tree.erase("A");
+    tree.erase("a");
+    tree.erase("ab");
+    tree.erase("c");
+
+    EXPECT_NO_THROW(tree.insert("a", 120));
+}
+
 TEST(RedBlackTreeTest, can_convert_to_vector)
 {
     RedBlackTree<int, int> tree;
