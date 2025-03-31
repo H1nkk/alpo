@@ -6,12 +6,12 @@
 
 LinearArrTable::LinearArrTable() {}
 
-void LinearArrTable::addPolynomial(const std::string& polName, const polynomial& pol) // TODO check for unique polName is in app section
+void LinearArrTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
 	if (findPolynomial(polName) == std::nullopt)
 		mTable.push_back({ polName, pol });
 	else
-		throw "This polynomial already exists";
+		throw "There already is a polynomial with that name";
 }
 
 std::optional<polynomial> LinearArrTable::findPolynomial(const std::string& polName) 
@@ -28,7 +28,7 @@ void LinearArrTable::delPolynomial(const std::string& polName)
 		Pol rec = mTable[i];
 		if (rec.key == polName) 
 		{
-			mTable.erase(std::next(mTable.begin(), i)); // needs a lot of testing
+			mTable.erase(std::next(mTable.begin(), i));
 			return;
 		}
 	}
@@ -75,7 +75,7 @@ std::optional<polynomial> LinearListTable::findPolynomial(const std::string& pol
 void LinearListTable::addPolynomial(const std::string& polName, const polynomial& pol) 
 {
 	if (findPolynomial(polName) != std::nullopt) // uniqueness check
-		throw "This polynomial already exists"; 
+		throw "There already is a polynomial with that name"; 
 	mTableSize++;
 	Node* p = pFirst;
 	if (!p) 
@@ -89,7 +89,7 @@ void LinearListTable::addPolynomial(const std::string& polName, const polynomial
 	p->pNext = new Node{ polName, pol, nullptr };
 }
 
-void LinearListTable::delPolynomial(const std::string& polName) // needs a lot of testing
+void LinearListTable::delPolynomial(const std::string& polName)
 {
 	Node* p = pFirst;
 	if (!pFirst) return;
@@ -121,7 +121,7 @@ unsigned int LinearListTable::size()
 
 bool LinearListTable::empty()
 {
-	return mTableSize == 0; // or pFirst == nullptr
+	return mTableSize == 0;
 }
 
 LinearListTable::~LinearListTable()
@@ -149,9 +149,8 @@ std::vector<std::pair< std::string, polynomial>> LinearListTable::getPolynomials
 
 // *** OrderedTable ***
 
-OrderedTable::OrderedTable() // в данный момент 4, но было: тут сделал 100, потому что с 4 не работает - кака€-то ошибка с чтением вне доступа. Ћ®Ќя ѕќ‘» —» „“ќЅџ –јЅќ“јЋќ јјјјјјјјјјј (ошибка происходит, когда добавл€ешь п€тую запись в таблицу, у которой размер 4)
+OrderedTable::OrderedTable()
 {
-
 }
 
 std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polName)
@@ -160,13 +159,7 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 	int i = mTable.size() / 2;
 	int leftBorder = 0;
 	int rightBorder = mTable.size()-1;
-	//for (int j = 0; j < mTable.size(); j++)
-	//{
-	//	if (mTable[i].key == polName)
-	//	{
-	//		return mTable[i].value;
-	//	}
-	//}
+
 	while (rightBorder >= leftBorder && mTable[i].key != polName) // binary search
 	{
 		if (mTable[i].key > polName == 1)
@@ -188,7 +181,7 @@ std::optional<polynomial> OrderedTable::findPolynomial(const std::string& polNam
 void OrderedTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
 	if (findPolynomial(polName) != std::nullopt) // uniqueness check
-		throw "This polynomial already exists";
+		throw "There already is a polynomial with that name";
 	int i = mTable.size() / 2;
 	int leftBorder = 0;
 	int rightBorder = mTable.size() - 1;
@@ -215,7 +208,7 @@ void OrderedTable::addPolynomial(const std::string& polName, const polynomial& p
 
 void OrderedTable::delPolynomial(const std::string& polName)
 {
-	if (findPolynomial(polName) == std::nullopt) return; // uniqueness check тут изменил != на ==
+	if (findPolynomial(polName) == std::nullopt) return; // uniqueness check
 	int i = mTable.size() / 2;
 	int leftBorder = 0;
 	int rightBorder = mTable.size() - 1;
@@ -321,7 +314,7 @@ unsigned int OpenAddressHashTable::hashFunc(const std::string& key) //polynomial
 void OpenAddressHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
 	if (findPolynomial(polName) != std::nullopt) 
-		throw "This polynomial already exists";
+		throw "There already is a polynomial with that name";
 	mCurrentSize++;
 
 	if (mCurrentSize / mTableSize > 0.5) // repacking
@@ -346,7 +339,7 @@ void OpenAddressHashTable::addPolynomial(const std::string& polName, const polyn
 	while (mTable[ind].status != 0 && mTable[ind].status != -1) 
 	{ 
 		ind += step;
-		ind %= mTableSize; // этого не было раньше
+		ind %= mTableSize;
 	}
 	mTable[ind].key = polName;
 	mTable[ind].value = pol;
@@ -433,7 +426,7 @@ unsigned int SeparateChainingHashTable::hashFunc(const std::string& key) //polyn
 void SeparateChainingHashTable::addPolynomial(const std::string& polName, const polynomial& pol)
 {
 	if (findPolynomial(polName) != std::nullopt)
-		throw "This polynomial already exists";
+		throw "There already is a polynomial with that name";
 	mCurrentSize++;
 	if (!mTable[hashFunc(polName)])
 	{
@@ -468,7 +461,7 @@ void SeparateChainingHashTable::delPolynomial(const std::string& polName)
 	{
 		Node* tmp = mTable[ind]->pNextInChain;
 		delete mTable[ind];
-		mTable[ind] = tmp; // получаетс€, сделал (Ћ) // заменил p на mTable[hashFunc(polName)], Ќќ Ё“ќ Ќ≈ѕ–ј¬»Ћ№Ќќ, я Ё“ќ —ƒ≈ЋјЋ „“ќЅџ Ќ≈  –јЎ»Ћќ—№, Ћ®Ќя ѕќ„»Ќ»»»»»»»»»»» (если оставить p, то мен€тс€ только локальна€ перменна€ p, а не поле класса)
+		mTable[ind] = tmp;
 		mCurrentSize--;
 		return;
 	}
@@ -588,6 +581,6 @@ std::vector<std::pair< std::string, polynomial>> Aggregator::getPolynomials() {
 
 Aggregator::~Aggregator() {
 	for (auto table : tables) {
-		delete table; // i dont know if this calls tables' destructors
+		delete table;
 	}
 }

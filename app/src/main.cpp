@@ -43,13 +43,14 @@ void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::stri
 
 /// @return false if there was an error
 /// @return true otherwise
-bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField, QTableWidget* pTableWidget) // TODO: tell user the index of mistake
+bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField, QTableWidget* pTableWidget) 
 {
     std::variant<polynomial, syntax_error, std::string> result = PolynomialCalculator::calculate(inp, pAggregator);
+
     if (result.index() == 1)
     {
         qDebug() << "Syntax error in polynomial";
-        pInputErrorField->setText(QString::fromStdString( (std::string)"Syntax error in polynomial at index " + std::to_string(std::get<syntax_error>(result).pos) + (std::string)": " + std::get<syntax_error>(result).message) );
+        pInputErrorField->setText(QString::fromStdString( (std::string)"Error in polynomial at index " + std::to_string(std::get<syntax_error>(result).pos) + (std::string)" (counting from 0): " + std::get<syntax_error>(result).message) );
         return false;
     }
     else if (result.index() == 2)
@@ -92,7 +93,7 @@ void deleteAction(QTableWidget* pTableWidget, Aggregator* pAggregator, int row)
     }
     else {
         if (row != -1) // row == -1 if there is no selection
-            throw "something's off with deleting";
+            throw "Something went wrong during deleting a row";
     }
 }
 
@@ -104,7 +105,7 @@ void clearAction(QTableWidget* pTableWidget, Aggregator* pAggregator)
         pAggregator->delPolynomial(record.first);
     }
 
-    qDebug() << "Cleared";
+    qDebug() << "Cleared table";
     pTableWidget->setRowCount(0);
 }
 
@@ -190,7 +191,7 @@ int main(int argc, char* argv[])
 
                 qDebug() << "Input:" << inputText;
 
-                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField, pTableWidget)) { // TODO may be "else" is needed
+                if (inputHandle(s, pAggregator, pInputErrorField, pOutputField, pTableWidget)) {
                     pInputField->clear();
                     pInputErrorField->clear(); // clear error field if everything is fine
                 }
