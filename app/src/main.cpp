@@ -151,10 +151,23 @@ int main(int argc, char* argv[])
 
     Ui::MainWindow ui;
     Ui::infoWidget infoUi;
+    if (QIcon(":/img/mainWindowIcon.png").isNull()) {
+        qDebug() << "Couldn't load main window icon";
+    }
+    else {
+        window.setWindowIcon(QIcon(":/img/mainWindowIcon.png"));
+    }
+
+    if (QIcon(":/img/infoWindowIcon.png").isNull()) {
+        qDebug() << "Couldn't load main window icon";
+    }
+    else {
+        infoWindow.setWindowIcon(QIcon(":/img/infoWindowIcon.png"));
+    }
+
     ui.setupUi(&window);
     infoUi.setupUi(&infoWindow);
 
-    
     QPushButton* pDeleteButton = ui.deleteButton;
     QPushButton* pClearButton = ui.clearButton;
     QPushButton* pHelpButton = ui.helpButton;

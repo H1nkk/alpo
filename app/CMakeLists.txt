@@ -30,8 +30,9 @@ if (BUILD_APP_MODULE)
     qt6_wrap_ui(GENERATED_UI_HEADERS ${ui})
 
     qt_add_executable(${target} ${hdrs} ${srcs} ${GENERATED_UI_HEADERS})
+    qt_add_resources(RESOURCES resources.qrc)
     target_link_libraries(${target} PUBLIC ${MP2_LIBRARY} Qt6::Core Qt6::Gui Qt6::Widgets ${ZLIB_LIBRARIES})
-
+    target_sources(${target} PRIVATE ${RESOURCES})
 
     # Список нужных DLL
     set(QT_DLLS
