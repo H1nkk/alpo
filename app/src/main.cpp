@@ -43,10 +43,26 @@ void calculateAction(Aggregator* pAggregator, QTextEdit* pOutputField, std::stri
     pOutputField->setHtml(QString::fromStdString(outputLine) + '\n' + pOutputField->toHtml());
 }
 
+std::optional<SyntaxError> inputCheck(std::string input) {
+    for (int i = 0; i < input.length(); i++) {
+        char ch = input[i];
+        if (ch < -1 || ch > 255) return SyntaxError{ (unsigned long long)i, "Unsupported symbol" };
+    }
+    return std::nullopt;
+}
+
 /// @return false if there was an error
 /// @return true otherwise
 bool inputHandle(std::string inp, Aggregator* pAggregator, QLineEdit* pInputErrorField, QTextEdit* pOutputField, QTableWidget* pTableWidget)
 {
+    std::optional<SyntaxError> inputCheckValue = inputCheck(inp);
+
+    if (inputCheckValue != std::nullopt) {
+        qDebug() << "Syntax error in polynomial: unsupported symbol";
+        pInputErrorField->setText(QString::fromStdString((std::string)"Error in polynomial at index " + std::to_string(inputCheckValue.value().pos) + (std::string)" (counting from 0): " + inputCheckValue.value().message));
+        return false;
+    }
+
     std::variant<Polynomial, SyntaxError, std::string> result = PolynomialCalculator::calculate(inp, pAggregator);
 
     if (result.index() == 1)
