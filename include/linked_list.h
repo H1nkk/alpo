@@ -4,102 +4,102 @@
 #include <stdexcept>
 
 template<typename T>
-class linked_list
+class LinkedList
 {
 private:
-    struct node
+    struct Node
     {
         T data{};
-        node* next;
+        Node* next;
     };
 
-    node* mFirst;
-    node* mLast;
+    Node* mFirst;
+    Node* mLast;
     size_t mSize;
 
 public:
-    struct iterator
+    struct Iterator
     {
     private:
-        node* mCurrent;
-        node* mNext;
+        Node* mpCurrent;
+        Node* mpNext;
 
-        iterator() noexcept : mCurrent(nullptr), mNext(nullptr) {}
-        iterator(node* cur, node* next) noexcept : mCurrent(cur), mNext(next) {}
-        iterator(node* cur) noexcept : mCurrent(cur), mNext(cur != nullptr ? cur->next : nullptr) {}
+        Iterator() noexcept : mpCurrent(nullptr), mpNext(nullptr) {}
+        Iterator(Node* cur, Node* next) noexcept : mpCurrent(cur), mpNext(next) {}
+        Iterator(Node* cur) noexcept : mpCurrent(cur), mpNext(cur != nullptr ? cur->next : nullptr) {}
     public:
-        iterator& operator++()
+        Iterator& operator++()
         {
-            if (mCurrent == nullptr && mNext == nullptr)
+            if (mpCurrent == nullptr && mpNext == nullptr)
             {
                 throw std::out_of_range(__FUNCTION__ ": can't increment end() iterator.");
             }
 
-            mCurrent = mNext != nullptr ? mNext : mCurrent->next;
-            mNext = mCurrent != nullptr ? mCurrent->next : nullptr;
+            mpCurrent = mpNext != nullptr ? mpNext : mpCurrent->next;
+            mpNext = mpCurrent != nullptr ? mpCurrent->next : nullptr;
             return *this;
         }
 
-        iterator operator++(int)
+        Iterator operator++(int)
         {
-            iterator temp = *this;
+            Iterator temp = *this;
             ++(*this);
             return temp;
         }
 
-        bool operator==(const iterator& other) const noexcept
+        bool operator==(const Iterator& other) const noexcept
         {
-            return mCurrent == other.mCurrent;
+            return mpCurrent == other.mpCurrent;
         }
 
-        bool operator!=(const iterator& other) const noexcept
+        bool operator!=(const Iterator& other) const noexcept
         {
             return !(*this == other);
         }
 
         const T& operator*() const
         {
-            if (mCurrent == nullptr)
+            if (mpCurrent == nullptr)
             {
                 throw std::out_of_range(__FUNCTION__ ": can't dereference end() or before_begin() iterator.");
             }
 
-            return mCurrent->data;
+            return mpCurrent->data;
         }
 
-        friend class linked_list;
+        friend class LinkedList;
     };
 
-    linked_list() : mSize(0), mFirst(nullptr), mLast(nullptr) {}
-    linked_list(const std::initializer_list<T>& elems) : mSize(0), mFirst(nullptr), mLast(nullptr)
+    LinkedList() : mSize(0), mFirst(nullptr), mLast(nullptr) {}
+    LinkedList(const std::initializer_list<T>& elems) : mSize(0), mFirst(nullptr), mLast(nullptr)
     {
         for (const auto& elem : elems)
         {
-            push_back(elem);
+            pushBack(elem);
         }
     }
 
-    linked_list(const linked_list& other) : mSize(0), mFirst(nullptr), mLast(nullptr)
+    LinkedList(const LinkedList& other) : mSize(0), mFirst(nullptr), mLast(nullptr)
     {
         for (const auto& elem : other)
         {
-            push_back(elem);
+            pushBack(elem);
         }
     }
 
-    linked_list(linked_list&& other) noexcept : mSize(other.mSize), mFirst(other.mFirst), mLast(other.mLast)
+    LinkedList(LinkedList&& other) noexcept : mSize(other.mSize), mFirst(other.mFirst), mLast(other.mLast)
     {
         other.mSize = 0;
         other.mFirst = nullptr;
         other.mLast = nullptr;
     }
 
-    ~linked_list()
+    ~LinkedList()
     {
         clear();
     }
 
-    linked_list& operator=(const linked_list& other)
+    LinkedList& operator=(const LinkedList& other)
     {
         if (mFirst == other.mFirst)
         {
@@ -109,11 +109,11 @@ public:
         clear();
         for (const auto& elem : other)
         {
-            push_back(elem);
+            pushBack(elem);
         }
     }
 
-    linked_list& operator=(linked_list&& other)
+    LinkedList& operator=(LinkedList&& other)
     {
         if (mFirst == other.mFirst)
         {
@@ -130,11 +130,11 @@ public:
     }
 
     size_t size() const noexcept { return mSize; }
-    bool is_empty() const noexcept { return size() == 0; }
+    bool empty() const noexcept { return size() == 0; }
 
-    void push_front(const T& elem)
+    void pushFront(const T& elem)
     {
-        node* nw = new node{ elem, mFirst };
+        Node* nw = new Node{ elem, mFirst };
         mFirst = nw;
         if (mLast == nullptr)
         {
@@ -144,9 +144,9 @@ public:
         ++mSize;
     }
 
-    void push_back(const T& elem)
+    void pushBack(const T& elem)
     {
-        node* nw = new node{ elem, nullptr };
+        Node* nw = new Node{ elem, nullptr };
         if (mLast != nullptr)
         {
             mLast->next = nw;
@@ -160,9 +160,9 @@ public:
         ++mSize;
     }
 
-    void pop_front()
+    void popFront()
     {
-        if (is_empty())
+        if (empty())
         {
             throw std::out_of_range(__FUNCTION__ ": can't pop front element of empty list.");
         }
@@ -174,7 +174,7 @@ public:
             mLast = nullptr;
         } else
         {
-            node* tmp = mFirst;
+            Node* tmp = mFirst;
             mFirst = mFirst->next;
             delete tmp;
         }
@@ -182,9 +182,9 @@ public:
         --mSize;
     }
 
-    void pop_back()
+    void popBack()
     {
-        if (is_empty())
+        if (empty())
         {
             throw std::out_of_range(__FUNCTION__ ": can't pop back element from empty list.");
         }
@@ -196,10 +196,10 @@ public:
             mLast = nullptr;
         } else
         {
-            node* cur = mFirst;
+            Node* cur = mFirst;
             for (; cur->next != mLast; cur = cur->next) {}
             cur->next = nullptr;
-            node* tmp = mLast;
+            Node* tmp = mLast;
             mLast = cur;
             delete tmp;
         }
@@ -209,15 +209,15 @@ public:
 
     void clear()
     {
-        while (!is_empty())
+        while (!empty())
         {
-            pop_front();
+            popFront();
         }
     }
 
     const T& back()
     {
-        if (is_empty())
+        if (empty())
         {
             throw std::out_of_range(__FUNCTION__ ": can't get back from empty list.");
         }
@@ -227,7 +227,7 @@ public:
 
     const T& front()
     {
-        if (is_empty())
+        if (empty())
         {
             throw std::out_of_range(__FUNCTION__ ": can't get front from empty list.");
         }
@@ -235,59 +235,59 @@ public:
         return mFirst->data;
     }
 
-    iterator insert_after(const iterator& pos, const T& data)
+    Iterator insertAfter(const Iterator& pos, const T& data)
     {
-        if (pos.mNext == nullptr && pos.mCurrent == nullptr)
+        if (pos.mpNext == nullptr && pos.mpCurrent == nullptr)
         {
             throw std::out_of_range(__FUNCTION__": can't insert elements after end() iterator.");
         }
 
-        if (pos.mNext == nullptr)
+        if (pos.mpNext == nullptr)
         {
-            push_back(data);
-            return iterator(mLast);
+            pushBack(data);
+            return Iterator(mLast);
         }
 
-        if (pos.mCurrent == nullptr)
+        if (pos.mpCurrent == nullptr)
         {
-            push_front(data);
-            return iterator(mFirst);
+            pushFront(data);
+            return Iterator(mFirst);
         }
 
-        node* nw = new node{ data, pos.mNext };
-        pos.mCurrent->next = nw;
+        Node* nw = new Node{ data, pos.mpNext };
+        pos.mpCurrent->next = nw;
 
         ++mSize;
 
-        return iterator(nw);
+        return Iterator(nw);
     }
 
-    void erase_after(const iterator& pos)
+    void eraseAfter(const Iterator& pos)
     {
-        if (pos.mNext == nullptr)
+        if (pos.mpNext == nullptr)
         {
             throw std::out_of_range(__FUNCTION__ ": can't erase after end of list.");
         }
 
-        if (pos.mCurrent == nullptr)
+        if (pos.mpCurrent == nullptr)
         {
-            pop_front();
+            popFront();
             return;
         }
 
-        if (pos.mNext->next == nullptr)
+        if (pos.mpNext->next == nullptr)
         {
-            pop_back();
+            popBack();
             return;
         }
 
-        pos.mCurrent->next = pos.mNext->next;
-        delete pos.mNext;
+        pos.mpCurrent->next = pos.mpNext->next;
+        delete pos.mpNext;
         --mSize;
     }
 
-    iterator begin() const noexcept { return iterator(mFirst); }
-    iterator before_begin() const noexcept { return iterator(nullptr, mFirst); }
-    iterator before_end() const noexcept { return iterator(mLast, nullptr); }
-    iterator end() const noexcept { return iterator(); }
+    Iterator begin() const noexcept { return Iterator(mFirst); }
+    Iterator before_begin() const noexcept { return Iterator(nullptr, mFirst); }
+    Iterator before_end() const noexcept { return Iterator(mLast, nullptr); }
+    Iterator end() const noexcept { return Iterator(); }
 };

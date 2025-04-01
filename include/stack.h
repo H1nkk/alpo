@@ -12,176 +12,176 @@ template <typename T>
 class Stack
 {
 public:
-    Stack(size_t sizeToReserve = 0) : m_Capacity(0), m_Size(0), m_Memory(nullptr)
+    Stack(size_t sizeToReserve = 0) : mCapacity(0), mSize(0), mpMemory(nullptr)
     {
-        Reserve(sizeToReserve);
+        reserve(sizeToReserve);
     }
 
     Stack(const Stack& other)
     {
-        m_Capacity = other.m_Capacity;
-        m_Size = other.m_Size;
-        m_Memory = new T[m_Size];
-        std::copy(other.m_Memory, other.m_Memory + m_Size, m_Memory);
+        mCapacity = other.mCapacity;
+        mSize = other.mSize;
+        mpMemory = new T[mSize];
+        std::copy(other.mpMemory, other.mpMemory + mSize, mpMemory);
     }
 
     Stack(Stack&& other) noexcept
     {
-        m_Capacity = other.m_Capacity;
-        m_Size = other.m_Size;
-        m_Memory = other.m_Memory;
+        mCapacity = other.mCapacity;
+        mSize = other.mSize;
+        mpMemory = other.mpMemory;
 
-        other.m_Size = 0;
-        other.m_Capacity = 0;
-        other.m_Memory = nullptr;
+        other.mSize = 0;
+        other.mCapacity = 0;
+        other.mpMemory = nullptr;
     }
 
     ~Stack()
     {
-        delete[] m_Memory;
+        delete[] mpMemory;
     }
 
     Stack& operator=(const Stack& other)
     {
-        if (other.m_Capacity > m_Capacity)
+        if (other.mCapacity > mCapacity)
         {
-            T* tmp = new T[other.m_Capacity];
-            delete[] m_Memory;
-            m_Memory = tmp;
-            m_Capacity = other.m_Capacity;
+            T* tmp = new T[other.mCapacity];
+            delete[] mpMemory;
+            mpMemory = tmp;
+            mCapacity = other.mCapacity;
         }
 
-        m_Size = other.m_Size;
-        std::copy(other.m_Memory, other.m_Memory + m_Size, m_Memory);
+        mSize = other.mSize;
+        std::copy(other.mpMemory, other.mpMemory + mSize, mpMemory);
 
         return *this;
     }
 
     Stack& operator=(Stack&& other) noexcept
     {
-        if (m_Memory == other.m_Memory)
+        if (mpMemory == other.mpMemory)
         {
             return *this;
         }
 
-        m_Capacity = other.m_Capacity;
-        m_Size = other.m_Size;
-        m_Memory = other.m_Memory;
+        mCapacity = other.mCapacity;
+        mSize = other.mSize;
+        mpMemory = other.mpMemory;
 
-        other.m_Size = 0;
-        other.m_Capacity = 0;
-        other.m_Memory = nullptr;
+        other.mSize = 0;
+        other.mCapacity = 0;
+        other.mpMemory = nullptr;
 
 
         return *this;
     }
 
-    size_t Size() const noexcept
+    size_t size() const noexcept
     {
-        return m_Size;
+        return mSize;
     }
 
-    size_t Capacity() const noexcept
+    size_t capacity() const noexcept
     {
-        return m_Capacity;
+        return mCapacity;
     }
 
-    bool Empty() const noexcept
+    bool empty() const noexcept
     {
-        return Size() == 0;
+        return size() == 0;
     }
 
-    const T& Top() const
+    const T& top() const
     {
-        if (Empty())
+        if (empty())
         {
             throw std::logic_error("Stack is empty");
         }
 
-        return m_Memory[Size() - 1];
+        return mpMemory[size() - 1];
     }
 
-    void Pop()
+    void pop()
     {
-        if (Empty())
+        if (empty())
         {
             throw std::logic_error("Can't pop from empty stack");
         }
 
-        --m_Size;
+        --mSize;
     }
 
-    void Push(const T& elem)
+    void push(const T& elem)
     {
-        if (m_Size == m_Capacity)
+        if (mSize == mCapacity)
         {
-            Expand();
+            expand();
         }
 
-        m_Memory[m_Size++] = elem;
+        mpMemory[mSize++] = elem;
     }
 
-    void Push(T&& elem)
+    void push(T&& elem)
     {
-        if (m_Size == m_Capacity)
+        if (mSize == mCapacity)
         {
-            Expand();
+            expand();
         }
 
-        m_Memory[m_Size++] = std::move(elem);
+        mpMemory[mSize++] = std::move(elem);
     }
 
-    void Reserve(size_t newCapacity)
+    void reserve(size_t newCapacity)
     {
         if (newCapacity > MaxStackSize)
         {
             throw std::length_error("Maximum stack length is " STR(MaxStackSize));
         }
 
-        if (newCapacity <= Capacity())
+        if (newCapacity <= capacity())
         {
             return;
         }
 
         T* tmp = new T[newCapacity];
 
-        if (m_Memory != nullptr)
+        if (mpMemory != nullptr)
         {
-            std::copy(m_Memory, m_Memory + m_Size, tmp);
-            delete[] m_Memory;
+            std::copy(mpMemory, mpMemory + mSize, tmp);
+            delete[] mpMemory;
         }
 
-        m_Capacity = newCapacity;
-        m_Memory = tmp;
+        mCapacity = newCapacity;
+        mpMemory = tmp;
     }
 
     friend void swap(Stack& lhs, Stack& rhs) noexcept
     {
-        std::swap(lhs.m_Size, rhs.m_Size);
-        std::swap(lhs.m_Capacity, rhs.m_Capacity);
-        std::swap(lhs.m_Memory, rhs.m_Memory);
+        std::swap(lhs.mSize, rhs.mSize);
+        std::swap(lhs.mCapacity, rhs.mCapacity);
+        std::swap(lhs.mpMemory, rhs.mpMemory);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Stack& s)
     {
-        for (size_t i = 0; i < s.Size(); ++i)
+        for (size_t i = 0; i < s.size(); ++i)
         {
-            os << s.m_Memory[i] << ' ';
+            os << s.mpMemory[i] << ' ';
         }
 
         return os;
     }
 
 private:
-    T* m_Memory;
-    size_t m_Capacity;
-    size_t m_Size;
+    T* mpMemory;
+    size_t mCapacity;
+    size_t mSize;
 
-    void Expand()
+    void expand()
     {
         const size_t reallocationFactor = 2;
 
-        size_t newCapacity = std::max((size_t)1, m_Capacity * reallocationFactor);
-        Reserve(newCapacity);
+        size_t newCapacity = std::max((size_t)1, mCapacity * reallocationFactor);
+        reserve(newCapacity);
     }
 };

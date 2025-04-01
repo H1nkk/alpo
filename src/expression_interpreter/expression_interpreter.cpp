@@ -11,8 +11,8 @@ namespace Intr {
 
         double getDoubleOp()
         {
-            Op op = mOperands.Top();
-            mOperands.Pop();
+            Op op = mOperands.top();
+            mOperands.pop();
 
             if (std::holds_alternative<unsigned long>(op))
             {
@@ -26,90 +26,20 @@ namespace Intr {
             }
         }
 
-        polynomial getPolynomialOp()
+        Polynomial getPolynomialOp()
         {
-            Op op = mOperands.Top();
-            mOperands.Pop();
+            Op op = mOperands.top();
+            mOperands.pop();
 
-            if (std::holds_alternative<polynomial>(op))
+            if (std::holds_alternative<Polynomial>(op))
             {
-                return std::get<polynomial>(op);
-            }
-            else if (std::holds_alternative<unsigned long>(op))
-            {
-                return std::get<polynomial>(polynomial::from_string(std::to_string(std::get<unsigned long>(op))));
-            }
-            else if (std::holds_alternative<double>(op))
-            {
-                return std::get<polynomial>(polynomial::from_string(std::to_string(std::get<double>(op))));
-            }
-            else if (std::holds_alternative<std::string>(op))
-            {
-                auto p = pAggregator->findPolynomial(std::get<std::string>(op));
-                if (!p.has_value())
-                {
-                    throw "Polynomial with name \'" + std::get<std::string>(op) + "\' does not exist";
-                }
-
-                return p.value();
-            }
-            else
-            {
-                throw std::runtime_error(__FUNCTION__ ": unknown operand type.");
-            }
-        }
-
-        void add()
-        {
-            polynomial p1 = getPolynomialOp();
-            polynomial p2 = getPolynomialOp();
-            mOperands.Push(p2 + p1);
-        }
-
-        void subtract()
-        {
-            polynomial p1 = getPolynomialOp();
-            polynomial p2 = getPolynomialOp();
-            mOperands.Push(p2 - p1);
-        }
-
-        void multiply()
-        {
-            polynomial p1 = getPolynomialOp();
-            polynomial p2 = getPolynomialOp();
-            mOperands.Push(p2 * p1);
-        }
-
-        void assign()
-        {
-            polynomial p = getPolynomialOp();
-            
-            Op name = mOperands.Top();
-            mOperands.Pop();
-
-            if (!std::holds_alternative<std::string>(name))
-            {
-                throw std::runtime_error(__FUNCTION__ ": expected identifier.");
-            }
-
-            mOperands.Push(p);
-            pAggregator->addPolynomial(std::get<std::string>(name), p);
-        }
-
-        void negate()
-        {
-            Op op = mOperands.Top();
-            mOperands.Pop();
-
-            if (std::holds_alternative<polynomial>(op))
-            {
-                mOperands.Push(-std::get<polynomial>(op));
+                return std::get<Polynomial>(op);
             } else if (std::holds_alternative<unsigned long>(op))
             {
-                mOperands.Push(-(double)std::get<unsigned long>(op));
+                return std::get<Polynomial>(Polynomial::fromString(std::to_string(std::get<unsigned long>(op))));
             } else if (std::holds_alternative<double>(op))
             {
-                mOperands.Push(-std::get<double>(op));
+                return std::get<Polynomial>(Polynomial::fromString(std::to_string(std::get<double>(op))));
             } else if (std::holds_alternative<std::string>(op))
             {
                 auto p = pAggregator->findPolynomial(std::get<std::string>(op));
@@ -118,7 +48,73 @@ namespace Intr {
                     throw "Polynomial with name \'" + std::get<std::string>(op) + "\' does not exist";
                 }
 
-                mOperands.Push(-p.value());
+                return p.value();
+            } else
+            {
+                throw std::runtime_error(__FUNCTION__ ": unknown operand type.");
+            }
+        }
+
+        void add()
+        {
+            Polynomial p1 = getPolynomialOp();
+            Polynomial p2 = getPolynomialOp();
+            mOperands.push(p2 + p1);
+        }
+
+        void subtract()
+        {
+            Polynomial p1 = getPolynomialOp();
+            Polynomial p2 = getPolynomialOp();
+            mOperands.push(p2 - p1);
+        }
+
+        void multiply()
+        {
+            Polynomial p1 = getPolynomialOp();
+            Polynomial p2 = getPolynomialOp();
+            mOperands.push(p2 * p1);
+        }
+
+        void assign()
+        {
+            Polynomial p = getPolynomialOp();
+
+            Op name = mOperands.top();
+            mOperands.pop();
+
+            if (!std::holds_alternative<std::string>(name))
+            {
+                throw std::runtime_error(__FUNCTION__ ": expected identifier.");
+            }
+
+            mOperands.push(p);
+            pAggregator->addPolynomial(std::get<std::string>(name), p);
+        }
+
+        void negate()
+        {
+            Op op = mOperands.top();
+            mOperands.pop();
+
+            if (std::holds_alternative<Polynomial>(op))
+            {
+                mOperands.push(-std::get<Polynomial>(op));
+            } else if (std::holds_alternative<unsigned long>(op))
+            {
+                mOperands.push(-(double)std::get<unsigned long>(op));
+            } else if (std::holds_alternative<double>(op))
+            {
+                mOperands.push(-std::get<double>(op));
+            } else if (std::holds_alternative<std::string>(op))
+            {
+                auto p = pAggregator->findPolynomial(std::get<std::string>(op));
+                if (!p.has_value())
+                {
+                    throw "Polynomial with name \'" + std::get<std::string>(op) + "\' does not exist";
+                }
+
+                mOperands.push(-p.value());
             } else
             {
                 throw std::runtime_error(__FUNCTION__ ": unknown operand type.");
@@ -131,48 +127,48 @@ namespace Intr {
             double z = getDoubleOp();
             double y = getDoubleOp();
             double x = getDoubleOp();
-            polynomial p = getPolynomialOp();
-            mOperands.Push(p.evaluate(w, x, y, z));
+            Polynomial p = getPolynomialOp();
+            mOperands.push(p.evaluate(w, x, y, z));
         }
 
         void derx()
         {
-            mOperands.Push(getPolynomialOp().derivative_x());
+            mOperands.push(getPolynomialOp().derivativeX());
         }
 
         void dery()
         {
-            mOperands.Push(getPolynomialOp().derivative_y());
+            mOperands.push(getPolynomialOp().derivativeY());
         }
 
         void derz()
         {
-            mOperands.Push(getPolynomialOp().derivative_z());
+            mOperands.push(getPolynomialOp().derivativeZ());
         }
 
         void derw()
         {
-            mOperands.Push(getPolynomialOp().derivative_w());
+            mOperands.push(getPolynomialOp().derivativeW());
         }
 
         void intx()
         {
-            mOperands.Push(getPolynomialOp().integral_x());
+            mOperands.push(getPolynomialOp().integralX());
         }
 
         void inty()
         {
-            mOperands.Push(getPolynomialOp().integral_y());
+            mOperands.push(getPolynomialOp().integralY());
         }
 
         void intz()
         {
-            mOperands.Push(getPolynomialOp().integral_z());
+            mOperands.push(getPolynomialOp().integralZ());
         }
 
         void intw()
         {
-            mOperands.Push(getPolynomialOp().integral_w());
+            mOperands.push(getPolynomialOp().integralW());
         }
 
     public:
@@ -182,7 +178,7 @@ namespace Intr {
         {
             if (!std::holds_alternative<Opcode>(op))
             {
-                mOperands.Push(op);
+                mOperands.push(op);
                 return;
             }
 
@@ -207,15 +203,15 @@ namespace Intr {
             }
         }
 
-        polynomial getResult()
+        Polynomial getResult()
         {
             return getPolynomialOp();
         }
     };
 
-    std::variant<polynomial, std::string> ExpressionInterpreter::execute(const Program& program)
+    std::variant<Polynomial, std::string> ExpressionInterpreter::execute(const Program& program)
     {
-        VirtualMachine vm(mAggregator);
+        VirtualMachine vm(mpAggregator);
 
         for (size_t i = 0; i < program.size(); ++i)
         {

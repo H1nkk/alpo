@@ -41,21 +41,19 @@ namespace Lexer {
             // Пропустить все пробелы
             while (index < mText.size() && isspace(mText[index]))
                 ++index;
-            
+
             if (index >= mText.size())
             {
                 // Выражение закончилось
                 mTokens.push_back(Token(TokenType::ENDOFFILE, "", index, index));
-            }
-            else if (specialSymbols.find(mText[index]) != specialSymbols.end())
+            } else if (specialSymbols.find(mText[index]) != specialSymbols.end())
             {
                 // Найден оператор
                 TokenType type = specialSymbols.at(mText[index]);
                 Token tok = Token(type, std::string(1, mText[index]), index, index + 1);
                 mTokens.push_back(tok);
                 ++index;
-            }
-            else if (mText[index] == '_' || isalpha(mText[index]))
+            } else if (mText[index] == '_' || isalpha(mText[index]))
             {
                 // Найден идентикатор или переменные монома
                 std::string id;
@@ -76,37 +74,35 @@ namespace Lexer {
                         type = funcIter->second;
 
                     mTokens.push_back(Token(type, id, index - id.size(), index));
-                }
-                else
-                {
-                    // Добавляем переменные монома по отдельности
-                    size_t start = index - id.size();
-                    for (size_t i = 0; i < id.size(); i++)
+                } else
                     {
-                        char lc = tolower(id[i]);
-                        if (lc == 'x')
-                            mTokens.push_back(Token(TokenType::X, std::string(1, id[i]),
-                                start + i, start + i + 1));
-                        else if (lc == 'y')
-                            mTokens.push_back(Token(TokenType::Y, std::string(1, id[i]),
-                                start + i, start + i + 1));
-                        else if (lc == 'z')
-                            mTokens.push_back(Token(TokenType::Z, std::string(1, id[i]),
-                                start + i, start + i + 1));
-                        else if (lc == 'w')
-                            mTokens.push_back(Token(TokenType::W, std::string(1, id[i]),
-                                start + i, start + i + 1));
-                        else if (isdigit(lc))
+                        // Добавляем переменные монома по отдельности
+                        size_t start = index - id.size();
+                        for (size_t i = 0; i < id.size(); i++)
                         {
-                            size_t len = 0;
-                            for (; i + len < id.size() && isdigit(id[i + len]); ++len);
-                            mTokens.push_back(Token(TokenType::INT, id.substr(i, len), start + i, start + i + len));
-                            i += len - 1;
+                            char lc = tolower(id[i]);
+                            if (lc == 'x')
+                                mTokens.push_back(Token(TokenType::X, std::string(1, id[i]),
+                                    start + i, start + i + 1));
+                            else if (lc == 'y')
+                                mTokens.push_back(Token(TokenType::Y, std::string(1, id[i]),
+                                    start + i, start + i + 1));
+                            else if (lc == 'z')
+                                mTokens.push_back(Token(TokenType::Z, std::string(1, id[i]),
+                                    start + i, start + i + 1));
+                            else if (lc == 'w')
+                                mTokens.push_back(Token(TokenType::W, std::string(1, id[i]),
+                                    start + i, start + i + 1));
+                            else if (isdigit(lc))
+                            {
+                                size_t len = 0;
+                                for (; i + len < id.size() && isdigit(id[i + len]); ++len);
+                                mTokens.push_back(Token(TokenType::INT, id.substr(i, len), start + i, start + i + len));
+                                i += len - 1;
+                            }
                         }
                     }
-                }
-            }
-            else if (mText[index] == '.' || isdigit(mText[index]))
+            } else if (mText[index] == '.' || isdigit(mText[index]))
             {
                 // Найдено число
                 std::string val;
@@ -134,8 +130,7 @@ namespace Lexer {
                     // Лишняя точка
                     mTokens.push_back(Token(TokenType::INVALID, std::string(1, val.back()),
                         index - 1, index));
-            }
-            else
+            } else
             {
                 // Такой лексемы не существует
                 mTokens.push_back(Token(TokenType::INVALID, std::string(1, mText[index]), index, index + 1));

@@ -6,7 +6,8 @@
 using namespace Intr;
 using namespace Compiler;
 
-TEST(ExprInterpreterTest, can_execute_single_monomial) {
+TEST(ExprInterpreterTest, can_execute_single_monomial)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -15,13 +16,13 @@ TEST(ExprInterpreterTest, can_execute_single_monomial) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("123x54y12z12w")));
 }
 
 //TEST(ExprInterpreterTest, can_execute_polynomial_name) {
 //    Aggregator agg;
-//    polynomial p = std::get<polynomial>(polynomial::from_string("123x54y12z12w"));
+//    polynomial p = std::get<polynomial>(polynomial::fromString("123x54y12z12w"));
 //    agg.addPolynomial("mypol", p);
 //    ExpressionInterpreter intr(&agg);
 //    auto res = intr.execute(
@@ -34,7 +35,8 @@ TEST(ExprInterpreterTest, can_execute_single_monomial) {
 //    EXPECT_EQ(std::get<polynomial>(res), p);
 //}
 
-TEST(ExprInterpreterTest, can_execute_sum) {
+TEST(ExprInterpreterTest, can_execute_sum)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -43,11 +45,12 @@ TEST(ExprInterpreterTest, can_execute_sum) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w + 40x + 50")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("123x54y12z12w + 40x + 50")));
 }
 
-TEST(ExprInterpreterTest, can_execute_subtraction) {
+TEST(ExprInterpreterTest, can_execute_subtraction)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -56,11 +59,12 @@ TEST(ExprInterpreterTest, can_execute_subtraction) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w - 40x - 50")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("123x54y12z12w - 40x - 50")));
 }
 
-TEST(ExprInterpreterTest, can_execute_multiplication) {
+TEST(ExprInterpreterTest, can_execute_multiplication)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -69,8 +73,8 @@ TEST(ExprInterpreterTest, can_execute_multiplication) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("6150x54y12z12w + 4920x55y12z12w")));
 }
 
 //TEST(ExprInterpreterTest, can_execute_assignment) {
@@ -83,13 +87,14 @@ TEST(ExprInterpreterTest, can_execute_multiplication) {
 //    );
 //
 //    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-//    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
+//    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::fromString("6150x54y12z12w + 4920x55y12z12w")));
 //
 //    EXPECT_EQ(agg.size(), 1);
-//    EXPECT_EQ(agg.findPolynomial("mypol"), std::get<polynomial>(polynomial::from_string("6150x54y12z12w + 4920x55y12z12w")));
+//    EXPECT_EQ(agg.findPolynomial("mypol"), std::get<polynomial>(polynomial::fromString("6150x54y12z12w + 4920x55y12z12w")));
 //}
 
-TEST(ExprInterpreterTest, can_execute_calc) {
+TEST(ExprInterpreterTest, can_execute_calc)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -98,11 +103,12 @@ TEST(ExprInterpreterTest, can_execute_calc) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("123x54y12z12w + 2040")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("123x54y12z12w + 2040")));
 }
 
-TEST(ExprInterpreterTest, can_execute_der) {
+TEST(ExprInterpreterTest, can_execute_der)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -111,11 +117,12 @@ TEST(ExprInterpreterTest, can_execute_der) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("3 + 12y2 + 6w")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("3 + 12y2 + 6w")));
 }
 
-TEST(ExprInterpreterTest, can_execute_int) {
+TEST(ExprInterpreterTest, can_execute_int)
+{
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     auto res = intr.execute(
@@ -124,12 +131,13 @@ TEST(ExprInterpreterTest, can_execute_int) {
         ))
     );
 
-    EXPECT_TRUE(std::holds_alternative<polynomial>(res));
-    EXPECT_EQ(std::get<polynomial>(res), std::get<polynomial>(polynomial::from_string("3xw2+x2+3xz+4xy3 + 3yw2+2xy+yz+y4 + 3zw2+0.5z2+4zy3 + w3+2xw+wz+4wy3")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(res));
+    EXPECT_EQ(std::get<Polynomial>(res), std::get<Polynomial>(Polynomial::fromString("3xw2+x2+3xz+4xy3 + 3yw2+2xy+yz+y4 + 3zw2+0.5z2+4zy3 + w3+2xw+wz+4wy3")));
 }
 
-TEST(ExprInterpreterTest, throw_on_unknown_polynomial) {
-    
+TEST(ExprInterpreterTest, throw_on_unknown_polynomial)
+{
+
     Aggregator agg;
     ExpressionInterpreter intr(&agg);
     EXPECT_ANY_THROW(intr.execute(

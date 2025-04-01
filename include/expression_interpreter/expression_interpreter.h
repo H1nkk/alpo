@@ -8,12 +8,15 @@
 namespace Intr {
     using Program = std::vector<Op>;
 
-    class ExpressionInterpreter final {
+    class ExpressionInterpreter final
+    {
     private:
-        Aggregator* mAggregator;
+        Aggregator* mpAggregator;
     public:
-        ExpressionInterpreter(Aggregator* aggregator) : mAggregator(aggregator) {
-            if (aggregator == nullptr) {
+        ExpressionInterpreter(Aggregator* pAggregator) : mpAggregator(pAggregator)
+        {
+            if (pAggregator == nullptr)
+            {
                 throw std::runtime_error(__FUNCTION__ ": aggregator was null.");
             }
         }
@@ -21,6 +24,6 @@ namespace Intr {
         /// @brief Выполнить программу, сгенерированную парсером
         /// @param program программа для выполнения
         /// @return полином-результат или ошибка-строка
-        std::variant<polynomial, std::string> execute(const Program& program);
+        std::variant<Polynomial, std::string> execute(const Program& program);
     };
 }

@@ -4,9 +4,9 @@
 #include <map>
 #include <vector>
 
-polynomial polynomial::operator+(const polynomial& other) const
+Polynomial Polynomial::operator+(const Polynomial& other) const
 {
-    polynomial result;
+    Polynomial result;
 
     auto it1 = mMonomials.begin();
     auto it2 = other.mMonomials.begin();
@@ -18,18 +18,18 @@ polynomial polynomial::operator+(const polynomial& other) const
 
         if (deg1 > deg2)
         {
-            result.mMonomials.push_back(*it1);
+            result.mMonomials.pushBack(*it1);
             ++it1;
         } else if (deg2 > deg1)
         {
-            result.mMonomials.push_back(*it2);
+            result.mMonomials.pushBack(*it2);
             ++it2;
         } else
         {
             double coefficient = (*it1).coefficient() + (*it2).coefficient();
             if (coefficient != 0.0)
             {
-                result.mMonomials.push_back(monomial(coefficient, (*it1).w(), (*it1).x(), (*it1).y(), (*it1).z()));
+                result.mMonomials.pushBack(Monomial(coefficient, (*it1).w(), (*it1).x(), (*it1).y(), (*it1).z()));
             }
             ++it1;
             ++it2;
@@ -38,26 +38,26 @@ polynomial polynomial::operator+(const polynomial& other) const
 
     while (it1 != mMonomials.end())
     {
-        result.mMonomials.push_back(*it1);
+        result.mMonomials.pushBack(*it1);
         ++it1;
     }
 
     while (it2 != other.mMonomials.end())
     {
-        result.mMonomials.push_back(*it2);
+        result.mMonomials.pushBack(*it2);
         ++it2;
     }
 
     return result;
 }
 
-polynomial polynomial::operator*(const polynomial& other) const
+Polynomial Polynomial::operator*(const Polynomial& other) const
 {
-    polynomial res{};
+    Polynomial res{};
 
     for (const auto& ms : mMonomials)
     {
-        polynomial tmp{};
+        Polynomial tmp{};
 
         for (const auto& mo : other.mMonomials)
         {
@@ -72,7 +72,7 @@ polynomial polynomial::operator*(const polynomial& other) const
                 throw "Overflow in multiplication occurred";
             }
 
-            tmp.mMonomials.push_back(monomial(coef, wDeg, xDeg, yDeg, zDeg));
+            tmp.mMonomials.pushBack(Monomial(coef, wDeg, xDeg, yDeg, zDeg));
         }
 
         res += tmp;
@@ -81,26 +81,26 @@ polynomial polynomial::operator*(const polynomial& other) const
     return res;
 }
 
-polynomial polynomial::operator*(double coefficient) const
+Polynomial Polynomial::operator*(double coefficient) const
 {
-    polynomial result;
+    Polynomial result;
 
     if (coefficient == 0.0) return result;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
-        result.mMonomials.push_back(monomial(coefficient * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y(), (*it).z()));
+        result.mMonomials.pushBack(Monomial(coefficient * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y(), (*it).z()));
     }
 
     return result;
 }
 
-polynomial operator*(double coefficient, const polynomial& p)
+Polynomial operator*(double coefficient, const Polynomial& p)
 {
     return p * coefficient;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const polynomial& p)
+std::ostream& operator<<(std::ostream& ostr, const Polynomial& p)
 {
     if (p.mMonomials.size() == 0)
     {
@@ -140,35 +140,35 @@ std::ostream& operator<<(std::ostream& ostr, const polynomial& p)
     return ostr;
 }
 
-polynomial polynomial::operator-() const
+Polynomial Polynomial::operator-() const
 {
     return (*this) * -1.0;
 }
 
-polynomial polynomial::operator-(const polynomial& other) const
+Polynomial Polynomial::operator-(const Polynomial& other) const
 {
     return (*this) + (-other);
 }
 
-polynomial& polynomial::operator+=(const polynomial& other)
+Polynomial& Polynomial::operator+=(const Polynomial& other)
 {
     *this = *this + other;
     return *this;
 }
 
-polynomial& polynomial::operator-=(const polynomial& other)
+Polynomial& Polynomial::operator-=(const Polynomial& other)
 {
     *this = *this - other;
     return *this;
 }
 
-polynomial& polynomial::operator*=(double coefficient)
+Polynomial& Polynomial::operator*=(double coefficient)
 {
     *this = *this * coefficient;
     return *this;
 }
 
-bool polynomial::operator==(const polynomial& other) const
+bool Polynomial::operator==(const Polynomial& other) const
 {
     if (mMonomials.size() != other.mMonomials.size())
     {
@@ -186,12 +186,12 @@ bool polynomial::operator==(const polynomial& other) const
     return true;
 }
 
-bool polynomial::operator!=(const polynomial& other) const
+bool Polynomial::operator!=(const Polynomial& other) const
 {
     return !operator==(other);
 }
 
-double polynomial::evaluate(double w, double x, double y, double z) const
+double Polynomial::evaluate(double w, double x, double y, double z) const
 {
     double res = 0.0;
 
@@ -207,17 +207,17 @@ double polynomial::evaluate(double w, double x, double y, double z) const
     return res;
 }
 
-polynomial polynomial::derivative_w() const
+Polynomial Polynomial::derivativeW() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).w();
         if (degree > 0)
         {
-            res.mMonomials.push_back(
-                monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w() - 1, (*it).x(), (*it).y(), (*it).z())
+            res.mMonomials.pushBack(
+                Monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w() - 1, (*it).x(), (*it).y(), (*it).z())
             );
         }
     }
@@ -225,17 +225,17 @@ polynomial polynomial::derivative_w() const
     return res;
 }
 
-polynomial polynomial::derivative_x() const
+Polynomial Polynomial::derivativeX() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).x();
         if (degree > 0)
         {
-            res.mMonomials.push_back(
-                monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x() - 1, (*it).y(), (*it).z())
+            res.mMonomials.pushBack(
+                Monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x() - 1, (*it).y(), (*it).z())
             );
         }
     }
@@ -243,17 +243,17 @@ polynomial polynomial::derivative_x() const
     return res;
 }
 
-polynomial polynomial::derivative_y() const
+Polynomial Polynomial::derivativeY() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).y();
         if (degree > 0)
         {
-            res.mMonomials.push_back(
-                monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y() - 1, (*it).z())
+            res.mMonomials.pushBack(
+                Monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y() - 1, (*it).z())
             );
         }
     }
@@ -261,17 +261,17 @@ polynomial polynomial::derivative_y() const
     return res;
 }
 
-polynomial polynomial::derivative_z() const
+Polynomial Polynomial::derivativeZ() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).z();
         if (degree > 0)
         {
-            res.mMonomials.push_back(
-                monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y(), (*it).z() - 1)
+            res.mMonomials.pushBack(
+                Monomial(static_cast<double>(degree) * (*it).coefficient(), (*it).w(), (*it).x(), (*it).y(), (*it).z() - 1)
             );
         }
     }
@@ -279,20 +279,19 @@ polynomial polynomial::derivative_z() const
     return res;
 }
 
-polynomial polynomial::integral_x() const
+Polynomial Polynomial::integralX() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).x();
         if (degree < UINT16_MAX)
         {
-            res.mMonomials.push_back(
-                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x() + 1, (*it).y(), (*it).z())
+            res.mMonomials.pushBack(
+                Monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x() + 1, (*it).y(), (*it).z())
             );
-        }
-        else
+        } else
         {
             throw "Overflow in integration occurred";
         }
@@ -301,20 +300,19 @@ polynomial polynomial::integral_x() const
     return res;
 }
 
-polynomial polynomial::integral_y() const
+Polynomial Polynomial::integralY() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).y();
         if (degree < UINT16_MAX)
         {
-            res.mMonomials.push_back(
-                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y() + 1, (*it).z())
+            res.mMonomials.pushBack(
+                Monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y() + 1, (*it).z())
             );
-        }
-        else
+        } else
         {
             throw "Overflow in integration occurred";
         }
@@ -323,20 +321,19 @@ polynomial polynomial::integral_y() const
     return res;
 }
 
-polynomial polynomial::integral_z() const
+Polynomial Polynomial::integralZ() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).z();
         if (degree < UINT16_MAX)
         {
-            res.mMonomials.push_back(
-                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y(), (*it).z() + 1)
+            res.mMonomials.pushBack(
+                Monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w(), (*it).x(), (*it).y(), (*it).z() + 1)
             );
-        }
-        else
+        } else
         {
             throw "Overflow in integration occurred";
         }
@@ -345,20 +342,19 @@ polynomial polynomial::integral_z() const
     return res;
 }
 
-polynomial polynomial::integral_w() const
+Polynomial Polynomial::integralW() const
 {
-    polynomial res;
+    Polynomial res;
 
     for (auto it = mMonomials.begin(); it != mMonomials.end(); ++it)
     {
         uint16_t degree = (*it).w();
         if (degree < UINT16_MAX)
         {
-            res.mMonomials.push_back(
-                monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w() + 1, (*it).x(), (*it).y(), (*it).z())
+            res.mMonomials.pushBack(
+                Monomial((*it).coefficient() / static_cast<double>(degree + 1), (*it).w() + 1, (*it).x(), (*it).y(), (*it).z())
             );
-        }
-        else
+        } else
         {
             throw "Overflow in integration occurred";
         }
@@ -367,12 +363,12 @@ polynomial polynomial::integral_w() const
     return res;
 }
 
-std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(const std::string& str, size_t& offset)
+std::variant<Polynomial::Monomial, SyntaxError> Polynomial::parseMonomial(const std::string& str, size_t& offset)
 {
     std::string valid = "+-.1234567890wxyz";
     if (valid.find(str[offset]) == std::string::npos)
     {
-        return syntax_error{ offset, "Unexpected symbol" };
+        return SyntaxError{ offset, "Unexpected symbol" };
     }
 
     std::string coefficient;
@@ -393,10 +389,11 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
         {
             coefd = std::stod(coefficient, &coefl);
         }
-        catch(...) {
-            return syntax_error{ offset, "Invalid coefficient!" };
+        catch (...)
+        {
+            return SyntaxError{ offset, "Invalid coefficient!" };
         }
-        if (coefl != coefficient.size()) return syntax_error{ offset, "Invalid coefficient!" };
+        if (coefl != coefficient.size()) return SyntaxError{ offset, "Invalid coefficient!" };
     }
 
     uint16_t powers[4]{};
@@ -406,7 +403,7 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
         uint16_t& p = powers[str[offset] - 'w'];
         if (p != 0)
         {
-            return syntax_error{ offset,"Variables in monomes should be mentioned no more than once." };
+            return SyntaxError{ offset,"Variables in monomes should be mentioned no more than once." };
         }
 
         p = 1;
@@ -435,22 +432,22 @@ std::variant<polynomial::monomial, syntax_error> polynomial::parse_monomial(cons
             }
             catch (...)
             {
-                return syntax_error{ offset, "Too big power! Maximum supported power is 65535" };
+                return SyntaxError{ offset, "Too big power! Maximum supported power is 65535" };
             }
 
-            if (poweri > UINT16_MAX) return syntax_error{ offset, "Too big power! Maximum supported power is 65535" };
+            if (poweri > UINT16_MAX) return SyntaxError{ offset, "Too big power! Maximum supported power is 65535" };
             p = poweri;
         }
     }
 
-    return monomial(coefd, powers[0], powers[1], powers[2], powers[3]);
+    return Monomial(coefd, powers[0], powers[1], powers[2], powers[3]);
 }
 
-std::variant<polynomial, syntax_error> polynomial::parse_polynomial(const std::string& str)
+std::variant<Polynomial, SyntaxError> Polynomial::parsePolynomial(const std::string& str)
 {
     std::string nospaces;
     std::vector<size_t> originalIndices;
-    
+
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (!isspace(str[i]))
@@ -461,33 +458,33 @@ std::variant<polynomial, syntax_error> polynomial::parse_polynomial(const std::s
     }
     originalIndices.push_back(str.size());
 
-    std::map<uint64_t, monomial> monomials;
+    std::map<uint64_t, Monomial> monomials;
     size_t offset = 0;
     while (offset < nospaces.size())
     {
-        auto res = parse_monomial(nospaces, offset);
+        auto res = parseMonomial(nospaces, offset);
         if (res.index())
         {
-            syntax_error err = std::get<syntax_error>(res);
+            SyntaxError err = std::get<SyntaxError>(res);
             err.pos = originalIndices[err.pos];
             return err;
         }
-        monomial m = std::get<monomial>(res);
+        Monomial m = std::get<Monomial>(res);
 
         if (m.coefficient() == 0.0) continue;
 
         if (monomials.count(m.degree()))
         {
-            return syntax_error{ originalIndices[offset], "A polynomial must contain no more than one monomial of each degree." };
+            return SyntaxError{ originalIndices[offset], "A polynomial must contain no more than one monomial of each degree." };
         }
 
         monomials[m.degree()] = m;
     }
 
-    polynomial p;
+    Polynomial p;
     for (auto it = monomials.rbegin(); it != monomials.rend(); ++it)
     {
-        p.mMonomials.push_back(it->second);
+        p.mMonomials.pushBack(it->second);
     }
 
     return p;

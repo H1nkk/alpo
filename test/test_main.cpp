@@ -7,10 +7,10 @@
 //int main()
 //{
 //	polynomial a, b, c, d;
-//	a.from_string("12x2-4y");
-//	b.from_string("12x3-4y");
-//	c.from_string("12y2-4z");
-//	d.from_string("12x3-4z5");
+//	a.fromString("12x2-4y");
+//	b.fromString("12x3-4y");
+//	c.fromString("12y2-4z");
+//	d.fromString("12x3-4z5");
 //	OrderedTable t;
 //	t.addPolynomial("Pol1", a);
 //	t.addPolynomial("Pol2", b);

@@ -13,7 +13,7 @@ namespace Lexer {
         size_t mPos;
 
         void generateTokens();
-        
+
     public:
         /// <param name="str">Выражение для разбиения на лексемы</param>
         Lexer(const std::string& str) : mText(str), mPos(0)

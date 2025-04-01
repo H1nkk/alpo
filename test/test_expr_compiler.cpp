@@ -22,7 +22,7 @@ TEST(ExprCompilerTest, error_on_big_integer)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("123313249873429874329213").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
 }
 
 TEST(ExprCompilerTest, can_compile_single_float)
@@ -43,7 +43,7 @@ TEST(ExprCompilerTest, error_on_big_float)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer(std::string(400, '1') + ".2133213").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
 }
 
 TEST(ExprCompilerTest, can_compile_identifier) 
@@ -68,8 +68,8 @@ TEST(ExprCompilerTest, can_compile_single_monomial)
 
     Intr::Program p = std::get<Intr::Program>(res);
     EXPECT_EQ(p.size(), 1);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[0]));
-    EXPECT_EQ(std::get<polynomial>(p[0]), std::get<polynomial>(polynomial::from_string("12.12x^39yz12w1")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[0]));
+    EXPECT_EQ(std::get<Polynomial>(p[0]), std::get<Polynomial>(Polynomial::fromString("12.12x^39yz12w1")));
 }
 
 TEST(ExprCompilerTest, can_compile_sum)
@@ -81,8 +81,8 @@ TEST(ExprCompilerTest, can_compile_sum)
 
     Intr::Program p = std::get<Intr::Program>(res);
     EXPECT_EQ(p.size(), 5);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[0]));
-    EXPECT_EQ(std::get<polynomial>(p[0]), std::get<polynomial>(polynomial::from_string("12.12x^39yz12")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[0]));
+    EXPECT_EQ(std::get<Polynomial>(p[0]), std::get<Polynomial>(Polynomial::fromString("12.12x^39yz12")));
     EXPECT_TRUE(std::holds_alternative<unsigned long>(p[1]));
     EXPECT_EQ(std::get<unsigned long>(p[1]), 120);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[2]));
@@ -102,10 +102,10 @@ TEST(ExprCompilerTest, can_compile_subtraction)
 
     Intr::Program p = std::get<Intr::Program>(res);
     EXPECT_EQ(p.size(), 5);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[0]));
-    EXPECT_EQ(std::get<polynomial>(p[0]), std::get<polynomial>(polynomial::from_string("y")));
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[1]));
-    EXPECT_EQ(std::get<polynomial>(p[1]), std::get<polynomial>(polynomial::from_string("12.12x^39")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[0]));
+    EXPECT_EQ(std::get<Polynomial>(p[0]), std::get<Polynomial>(Polynomial::fromString("y")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[1]));
+    EXPECT_EQ(std::get<Polynomial>(p[1]), std::get<Polynomial>(Polynomial::fromString("12.12x^39")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[2]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[2]), Intr::Opcode::SUBTRACT);
     EXPECT_TRUE(std::holds_alternative<unsigned long>(p[3]));
@@ -127,8 +127,8 @@ TEST(ExprCompilerTest, can_compile_unary_minus)
     EXPECT_EQ(std::get<unsigned long>(p[0]), 120);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[1]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[1]), Intr::Opcode::UMINUS);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[2]));
-    EXPECT_EQ(std::get<polynomial>(p[2]), std::get<polynomial>(polynomial::from_string("y")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[2]));
+    EXPECT_EQ(std::get<Polynomial>(p[2]), std::get<Polynomial>(Polynomial::fromString("y")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[3]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[3]), Intr::Opcode::ADD);
 }
@@ -142,8 +142,8 @@ TEST(ExprCompilerTest, can_compile_multiplication)
 
     Intr::Program p = std::get<Intr::Program>(res);
     EXPECT_EQ(p.size(), 3);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[0]));
-    EXPECT_EQ(std::get<polynomial>(p[0]), std::get<polynomial>(polynomial::from_string("y")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[0]));
+    EXPECT_EQ(std::get<Polynomial>(p[0]), std::get<Polynomial>(Polynomial::fromString("y")));
     EXPECT_TRUE(std::holds_alternative<std::string>(p[1]));
     EXPECT_EQ(std::get<std::string>(p[1]), "pol");
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[2]));
@@ -159,8 +159,8 @@ TEST(ExprCompilerTest, can_compile_calc)
 
     Intr::Program p = std::get<Intr::Program>(res);
     EXPECT_EQ(p.size(), 7);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[0]));
-    EXPECT_EQ(std::get<polynomial>(p[0]), std::get<polynomial>(polynomial::from_string("2xyzw")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[0]));
+    EXPECT_EQ(std::get<Polynomial>(p[0]), std::get<Polynomial>(Polynomial::fromString("2xyzw")));
     EXPECT_TRUE(std::holds_alternative<double>(p[1]));
     EXPECT_EQ(std::get<double>(p[1]), 10.3);
     EXPECT_TRUE(std::holds_alternative<unsigned long>(p[2]));
@@ -188,14 +188,14 @@ TEST(ExprCompilerTest, can_compile_derivative)
     EXPECT_EQ(std::get<unsigned long>(p[0]), 120);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[1]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[1]), Intr::Opcode::DERX);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[2]));
-    EXPECT_EQ(std::get<polynomial>(p[2]), std::get<polynomial>(polynomial::from_string("x")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[2]));
+    EXPECT_EQ(std::get<Polynomial>(p[2]), std::get<Polynomial>(Polynomial::fromString("x")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[3]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[3]), Intr::Opcode::DERY);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[4]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[4]), Intr::Opcode::ADD);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[5]));
-    EXPECT_EQ(std::get<polynomial>(p[5]), std::get<polynomial>(polynomial::from_string("xzw")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[5]));
+    EXPECT_EQ(std::get<Polynomial>(p[5]), std::get<Polynomial>(Polynomial::fromString("xzw")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[6]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[6]), Intr::Opcode::DERZ);
     EXPECT_TRUE(std::holds_alternative<std::string>(p[7]));
@@ -221,14 +221,14 @@ TEST(ExprCompilerTest, can_compile_integral)
     EXPECT_EQ(std::get<unsigned long>(p[0]), 120);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[1]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[1]), Intr::Opcode::INTX);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[2]));
-    EXPECT_EQ(std::get<polynomial>(p[2]), std::get<polynomial>(polynomial::from_string("x")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[2]));
+    EXPECT_EQ(std::get<Polynomial>(p[2]), std::get<Polynomial>(Polynomial::fromString("x")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[3]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[3]), Intr::Opcode::INTY);
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[4]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[4]), Intr::Opcode::ADD);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[5]));
-    EXPECT_EQ(std::get<polynomial>(p[5]), std::get<polynomial>(polynomial::from_string("xzw")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[5]));
+    EXPECT_EQ(std::get<Polynomial>(p[5]), std::get<Polynomial>(Polynomial::fromString("xzw")));
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[6]));
     EXPECT_EQ(std::get<Intr::Opcode>(p[6]), Intr::Opcode::INTZ);
     EXPECT_TRUE(std::holds_alternative<std::string>(p[7]));
@@ -258,8 +258,8 @@ TEST(ExprCompilerTest, can_compile_assignment)
     EXPECT_EQ(std::get<unsigned long>(p[2]), 2);
     EXPECT_TRUE(std::holds_alternative<std::string>(p[3]));
     EXPECT_EQ(std::get<std::string>(p[3]), "pol2");
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[4]));
-    EXPECT_EQ(std::get<polynomial>(p[4]), std::get<polynomial>(polynomial::from_string("xy2")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[4]));
+    EXPECT_EQ(std::get<Polynomial>(p[4]), std::get<Polynomial>(Polynomial::fromString("xy2")));
     EXPECT_TRUE(std::holds_alternative<std::string>(p[5]));
     EXPECT_EQ(std::get<std::string>(p[5]), "pol3");
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[6]));
@@ -293,8 +293,8 @@ TEST(ExprCompilerTest, can_compile_expression_with_parenthesis)
     EXPECT_EQ(std::get<double>(p[3]), 2.31);
     EXPECT_TRUE(std::holds_alternative<std::string>(p[4]));
     EXPECT_EQ(std::get<std::string>(p[4]), "pol2");
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[5]));
-    EXPECT_EQ(std::get<polynomial>(p[5]), std::get<polynomial>(polynomial::from_string("xy2")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[5]));
+    EXPECT_EQ(std::get<Polynomial>(p[5]), std::get<Polynomial>(Polynomial::fromString("xy2")));
     EXPECT_TRUE(std::holds_alternative<std::string>(p[6]));
     EXPECT_EQ(std::get<std::string>(p[6]), "pol3");
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[7]));
@@ -318,8 +318,8 @@ TEST(ExprCompilerTest, can_handle_operator_precedence)
     EXPECT_EQ(p.size(), 5);
     EXPECT_TRUE(std::holds_alternative<unsigned long>(p[0]));
     EXPECT_EQ(std::get<unsigned long>(p[0]), 12);
-    EXPECT_TRUE(std::holds_alternative<polynomial>(p[1]));
-    EXPECT_EQ(std::get<polynomial>(p[1]), std::get<polynomial>(polynomial::from_string("y")));
+    EXPECT_TRUE(std::holds_alternative<Polynomial>(p[1]));
+    EXPECT_EQ(std::get<Polynomial>(p[1]), std::get<Polynomial>(Polynomial::fromString("y")));
     EXPECT_TRUE(std::holds_alternative<std::string>(p[2]));
     EXPECT_EQ(std::get<std::string>(p[2]), "pol");
     EXPECT_TRUE(std::holds_alternative<Intr::Opcode>(p[3]));
@@ -333,8 +333,8 @@ TEST(ExprCompilerTest, error_on_unclosed_parenthesis)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 43);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 43);
 }
 
 TEST(ExprCompilerTest, error_on_too_many_parentheses)
@@ -342,8 +342,8 @@ TEST(ExprCompilerTest, error_on_too_many_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4)) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 13);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 13);
 }
 
 TEST(ExprCompilerTest, error_on_empty_parentheses)
@@ -351,8 +351,8 @@ TEST(ExprCompilerTest, error_on_empty_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + pol4) + () + * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 17);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 17);
 }
 
 TEST(ExprCompilerTest, error_on_two_operators_in_a_row)
@@ -360,8 +360,8 @@ TEST(ExprCompilerTest, error_on_two_operators_in_a_row)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("(pol1 + = pol4) * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 8);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 8);
 }
 
 TEST(ExprCompilerTest, error_on_binary_operator_without_left_argument)
@@ -369,8 +369,8 @@ TEST(ExprCompilerTest, error_on_binary_operator_without_left_argument)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer(" * (2.31 + (pol2 = xy2 * pol3)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 1);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 1);
 }
 
 TEST(ExprCompilerTest, error_on_binary_operator_without_right_argument)
@@ -378,8 +378,8 @@ TEST(ExprCompilerTest, error_on_binary_operator_without_right_argument)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("2 * (2.31 + (pol2 = xy2 * )").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 26);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 26);
 }
 
 TEST(ExprCompilerTest, error_on_function_use_without_parentheses)
@@ -387,8 +387,8 @@ TEST(ExprCompilerTest, error_on_function_use_without_parentheses)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("2 * derx 2.31 + (pol2 = xy2 * 20)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 9);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 9);
 }
 
 TEST(ExprCompilerTest, error_on_function_too_many_params)
@@ -396,8 +396,8 @@ TEST(ExprCompilerTest, error_on_function_too_many_params)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("intx(x, y)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 6);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 6);
 }
 
 TEST(ExprCompilerTest, error_on_function_not_enough_params)
@@ -405,6 +405,6 @@ TEST(ExprCompilerTest, error_on_function_not_enough_params)
     Compiler::ExpressionCompiler c;
     auto res = c.compileExpression(Lexer::Lexer("calc(x, 10)").getAllTokens());
 
-    EXPECT_TRUE(std::holds_alternative<syntax_error>(res));
-    EXPECT_EQ(std::get<syntax_error>(res).pos, 10);
+    EXPECT_TRUE(std::holds_alternative<SyntaxError>(res));
+    EXPECT_EQ(std::get<SyntaxError>(res).pos, 10);
 }

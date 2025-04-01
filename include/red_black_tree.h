@@ -34,7 +34,7 @@ private:
         }
     };
 
-    Node* pRoot;
+    Node* mpRoot;
     size_t mSize;
 
     bool isRightChild(const Node* pNode)
@@ -101,9 +101,8 @@ private:
 
         if (pChild->pParent == nullptr)
         {
-            pRoot = pChild;
-        }
-        else
+            mpRoot = pChild;
+        } else
         {
             if (isLeftChild(pNode))
             {
@@ -131,7 +130,7 @@ private:
             }
         } else
         {
-            pRoot = newp;
+            mpRoot = newp;
         }
 
         pNode->pRight = newp->pLeft;
@@ -160,7 +159,7 @@ private:
             }
         } else
         {
-            pRoot = newp;
+            mpRoot = newp;
         }
 
         pNode->pLeft = newp->pRight;
@@ -181,7 +180,7 @@ private:
             pNode->color = Node::BLACK;
             return;
         }
-        
+
         while (pNode->pParent != nullptr && pNode->pParent->color == Node::RED)
         {
             if (isLeftChild(pNode->pParent))
@@ -194,8 +193,7 @@ private:
                     pUncle->color = Node::BLACK;
                     pGrand->color = Node::RED;
                     pNode = pGrand;
-                }
-                else
+                } else
                 {
                     if (isRightChild(pNode))
                     {
@@ -207,8 +205,7 @@ private:
                     pGrand->color = Node::RED;
                     rotateRight(pGrand);
                 }
-            }
-            else
+            } else
             {
                 Node* pUncle = getUncle(pNode);
                 Node* pGrand = getGrandparent(pNode);
@@ -218,8 +215,7 @@ private:
                     pUncle->color = Node::BLACK;
                     pGrand->color = Node::RED;
                     pNode = pGrand;
-                }
-                else
+                } else
                 {
                     if (isLeftChild(pNode))
                     {
@@ -233,7 +229,7 @@ private:
             }
         }
 
-        pRoot->color = Node::BLACK;
+        mpRoot->color = Node::BLACK;
     }
 
     void fixDelete(Node* pNode)
@@ -252,8 +248,7 @@ private:
             if (isLeftChild(pNode))
             {
                 rotateLeft(pNode->pParent);
-            }
-            else
+            } else
             {
                 rotateRight(pNode->pParent);
             }
@@ -291,8 +286,7 @@ private:
             pSibling->color = Node::RED;
             pSibling->pLeft->color = Node::BLACK;
             rotateRight(pSibling);
-        }
-        else if (isRightChild(pNode) &&
+        } else if (isRightChild(pNode) &&
             pSibling->pLeft->color == Node::BLACK &&
             pSibling->pRight->color == Node::RED)
         {
@@ -310,14 +304,13 @@ private:
         {
             pSibling->pRight->color = Node::BLACK;
             rotateLeft(pNode->pParent);
-        }
-        else
+        } else
         {
             pSibling->pLeft->color = Node::BLACK;
             rotateRight(pNode->pParent);
         }
 
-        pRoot->color = Node::BLACK;
+        mpRoot->color = Node::BLACK;
     }
 
     void deleteZeroOneChild(Node* pNode)
@@ -341,9 +334,9 @@ private:
         delete pOtherChild;
         delete pNode;
 
-        if (pChild->isLeaf && pChild == pRoot)
+        if (pChild->isLeaf && pChild == mpRoot)
         {
-            pRoot = nullptr;
+            mpRoot = nullptr;
             delete pChild;
         }
     }
@@ -408,27 +401,26 @@ private:
     }
 
 public:
-    RedBlackTree() : pRoot(nullptr), mSize(0) {}
+    RedBlackTree() : mpRoot(nullptr), mSize(0) {}
 
     size_t size() const noexcept { return mSize; }
     bool empty() const noexcept { return mSize == 0; }
 
     std::optional<V> find(const K& key) const
     {
-        if (pRoot == nullptr)
+        if (mpRoot == nullptr)
         {
             return std::nullopt;
         }
 
-        Node* pCur = pRoot;
+        Node* pCur = mpRoot;
 
         while (!pCur->isLeaf && pCur->key != key)
         {
             if (pCur->key < key)
             {
                 pCur = pCur->pRight;
-            }
-            else
+            } else
             {
                 pCur = pCur->pLeft;
             }
@@ -437,8 +429,7 @@ public:
         if (pCur->isLeaf)
         {
             return std::nullopt;
-        }
-        else
+        } else
         {
             return pCur->value;
         }
@@ -446,15 +437,15 @@ public:
 
     void insert(const K& key, const V& value)
     {
-        if (pRoot == nullptr)
+        if (mpRoot == nullptr)
         {
-            pRoot = new Node(nullptr, Node::createLeave(), Node::createLeave(), Node::RED, key, value, false);
-            fixInsert(pRoot);
+            mpRoot = new Node(nullptr, Node::createLeave(), Node::createLeave(), Node::RED, key, value, false);
+            fixInsert(mpRoot);
             mSize++;
             return;
         }
 
-        Node* pCur = pRoot;
+        Node* pCur = mpRoot;
 
         while (!pCur->isLeaf && pCur->key != key)
         {
@@ -474,16 +465,14 @@ public:
             {
                 pNew = new Node(pCur->pParent, pCur, Node::createLeave(), Node::RED, key, value, false);
                 pNew->pParent->pLeft = pNew;
-            }
-            else
+            } else
             {
                 pNew = new Node(pCur->pParent, pCur, Node::createLeave(), Node::RED, key, value, false);
                 pNew->pParent->pRight = pNew;
             }
             fixInsert(pNew);
             mSize++;
-        }
-        else
+        } else
         {
             pCur->value = value;
         }
@@ -491,12 +480,12 @@ public:
 
     bool erase(const K& key)
     {
-        if (pRoot == nullptr)
+        if (mpRoot == nullptr)
         {
             return false;
         }
 
-        Node* pCur = pRoot;
+        Node* pCur = mpRoot;
 
         while (!pCur->isLeaf && pCur->key != key)
         {
@@ -537,21 +526,21 @@ public:
 
     bool isValidTree()
     {
-        if (pRoot == nullptr)
+        if (mpRoot == nullptr)
         {
             return true;
         }
 
-        return checkNode(pRoot).first;
+        return checkNode(mpRoot).first;
     }
 
     std::vector<std::pair<K, V>> toVector()
     {
         std::vector<std::pair<K, V>> ans;
 
-        if (pRoot != nullptr)
+        if (mpRoot != nullptr)
         {
-            traverse(pRoot, ans);
+            traverse(mpRoot, ans);
         }
 
         return ans;

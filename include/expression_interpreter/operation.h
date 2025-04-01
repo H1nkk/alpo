@@ -4,7 +4,8 @@
 #include "polynomial.h"
 
 namespace Intr {
-    enum class Opcode {
+    enum class Opcode
+    {
         ASSIGN,
         ADD, SUBTRACT, MULT, POWER, UMINUS,
         CALC, DERX, DERY, DERZ, DERW,
@@ -12,7 +13,7 @@ namespace Intr {
     };
 
     // Код операции/полином/идентификатор/число
-    using Op = std::variant<Opcode, polynomial, std::string, double, unsigned long>;
+    using Op = std::variant<Opcode, Polynomial, std::string, double, unsigned long>;
 
     std::string toString(Opcode opcode);
 }
