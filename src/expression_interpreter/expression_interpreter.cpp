@@ -133,10 +133,10 @@ namespace Intr {
 
         void calc()
         {
-            double w = getDoubleOp();
             double z = getDoubleOp();
             double y = getDoubleOp();
             double x = getDoubleOp();
+            double w = getDoubleOp();
             Polynomial p = getPolynomialOp();
             mOperands.push(p.evaluate(w, x, y, z));
         }
