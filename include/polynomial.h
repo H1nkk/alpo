@@ -45,6 +45,7 @@ private:
     explicit Polynomial(const std::string& strRepr) {}
 public:
     Polynomial() {}
+    Polynomial(double num);
 
     static std::variant<Polynomial, SyntaxError> fromString(const std::string& str)
     {

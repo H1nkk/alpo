@@ -489,3 +489,9 @@ std::variant<Polynomial, SyntaxError> Polynomial::parsePolynomial(const std::str
 
     return p;
 }
+
+Polynomial::Polynomial(double num)
+{
+    Monomial m(num, 0, 0, 0, 0);
+    mMonomials.pushBack(m);
+}

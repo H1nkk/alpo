@@ -19,7 +19,12 @@ namespace Intr {
                 return std::get<unsigned long>(op);
             } else if (std::holds_alternative<double>(op))
             {
-                return std::get<double>(op);
+                double res = std::get<double>(op);
+
+                if (!isfinite(res))
+                    throw "Overflow error occurred";
+
+                return res;
             } else
             {
                 throw std::runtime_error(__FUNCTION__ ": unknown operand type.");
@@ -36,10 +41,15 @@ namespace Intr {
                 return std::get<Polynomial>(op);
             } else if (std::holds_alternative<unsigned long>(op))
             {
-                return std::get<Polynomial>(Polynomial::fromString(std::to_string(std::get<unsigned long>(op))));
+                return Polynomial(std::get<unsigned long>(op));
             } else if (std::holds_alternative<double>(op))
             {
-                return std::get<Polynomial>(Polynomial::fromString(std::to_string(std::get<double>(op))));
+                double res = std::get<double>(op);
+
+                if (!isfinite(res))
+                    throw "Overflow error occurred";
+
+                return Polynomial(res);
             } else if (std::holds_alternative<std::string>(op))
             {
                 auto p = pAggregator->findPolynomial(std::get<std::string>(op));
